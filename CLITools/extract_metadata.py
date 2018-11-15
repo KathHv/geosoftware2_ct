@@ -1,10 +1,12 @@
 import sys, os, platform, datetime, math, shapefile
 from six.moves import configparser
-from netCDF4 import Dataset
-import netCDF4
+##from netCDF4 import Dataset
+##import netCDF4
 import getopt
+import geojson
 from os import walk
 from pycsw.core import admin, config
+from osgeo import ogr
 
 COMMAND = None
 XML_DIRPATH = None
@@ -137,10 +139,42 @@ def extractMetadataFromGeoJSON(fileFormat, filePath, whatMetadata):
 
 #gets called when the argument of the command request is a ISOxxx
 def extractMetadataFromISO(fileFormat, filePath, whatMetadata):
-    metadata = []
-
-    # TO DO
     
+    
+    # TO DO
+
+    if fileFormat == 'geojson':
+        myjson = open(filePath, "rb")
+        if exists(filePath): ##validate path and geojson?
+            myjson= open(dbfPath, "rb")
+            ##ourFile = shape file.Reader(shp=myshp, dbf=mydbf)
+        else:
+            print("\nError: There searched .geojson file was not found under " + dbfPath + "\n")
+   
+
+   
+    
+    metadata = {}
+
+    ##extract filename and fileformat
+    if whatMetadata != 's':
+        metadata["filename"] = filePath[filePath.rfind("/")+1:]
+        metadata["fileformat"] = fileFormat
+
+    ## create bbox
+    ## extract geometry
+        ##geojson = """{"type":"Point","coordinates":[108420.33,753808.59]}"""
+    geomJson = ogr.CreateGeometryFromJson(myjson)
+        ##print "%d,%d" % (point.GetX(), point.GetY())
+    # Get Envelope returns a tuple (minX, maxX, minY, maxY)
+    bbox = geomJson.GetEnvelope()
+        ##print "minX: %d, minY: %d, maxX: %d, maxY: %d" %(bbox[0],bbox[2],bbox[1],bbox[3])
+    metadata["bbox"] = bbox
+    
+    if whatMetadata != 's':
+        metadata["shapetype"] =  ourFile.shapeTypeName
+        metadata["shape_elements"] = len(ourFile)
+
     return metadata
 
 #gets called when the argument of the command request is a GeoTIFF
