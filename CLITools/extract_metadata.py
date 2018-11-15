@@ -243,10 +243,13 @@ def extractCommonMetaDataOfMultiple(metadataElements, whatMetadata):
         if "shape_elements" in metadataObject:
             shapeElements += float(metadataObject["shape_elements"])
             numberHavingAttribute[2] += 1
+    numberHavingAttribute[0] = 0
     output = {}
+
     if whatMetadata != 's' and whatMetadata != 't':
         # only taken into accound when ALL metadata is required
         output["number_files"] =  len(metadataElements)
+
         if not numberHavingAttribute[2] == 0:
             # shape elemnts
             output["average_number_shape_elements"] = str(shapeElements/float(numberHavingAttribute[2]))
@@ -256,6 +259,7 @@ def extractCommonMetaDataOfMultiple(metadataElements, whatMetadata):
         output["occurancy_shape_elements"] = str(countElements(shapetypes))
         if numberHavingAttribute[1] != len(metadataElements):
             output["occurancy_shape_elements"] += " WARNING: Only " + str(numberHavingAttribute[1]) + " Element(s) have this attribute"
+    
     # bounding box
     if numberHavingAttribute[0] == 0:
         if whatMetadata == "s": raise Exception("The system could not compute spatial metadata of files")
