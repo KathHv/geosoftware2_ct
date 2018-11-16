@@ -1,10 +1,9 @@
-import sys, os, platform, datetime, math, shapefile
+import sys, os, platform, datetime, math, shapefile, nio
 from six.moves import configparser
 from netCDF4 import Dataset
 import netCDF4
 import getopt
 from os import walk
-from pycsw.core import admin, config
 
 COMMAND = None
 XML_DIRPATH = None
@@ -104,7 +103,12 @@ if len(OPTS) == 0:
 
 #gets called when the argument of the command request is a csv-file
 def extractMetadataFromCSV(filePath, whatMetadata):
-    metadata = []
+    metadata = {}
+    # Example how to use object:
+    #metadata["bbox"] = [coor0, coor1, coor2, coor3]
+    metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
+    file = Dataset(filePath)
+    print(file.variables["latitude"][:])
 
     # TO DO
 
@@ -113,15 +117,23 @@ def extractMetadataFromCSV(filePath, whatMetadata):
 #gets called when the argument of the command request is a NetCDF
 def extractMetadataFromNetCDF(fileFormat, filePath, whatMetadata):
     # file format can be either .nc or .cdf
-    metadata = []
+    metadata = {}
+    # Example how to use object:
+    #metadata["bbox"] = [coor0, coor1, coor2, coor3]
+    metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
     
+
     # TO DO
 
     return metadata
 
 #gets called when the argument of the command request is a geopackage
 def extractMetadataFromGeopackage(filePath, whatMetadata):
-    metadata = []
+    metadata = {}
+    # Example how to use object:
+    #metadata["bbox"] = [coor0, coor1, coor2, coor3]
+    metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
+
 
     # TO DO
     
@@ -129,7 +141,10 @@ def extractMetadataFromGeopackage(filePath, whatMetadata):
 
 #gets called when the argument of the command request is a geojson
 def extractMetadataFromGeoJSON(fileFormat, filePath, whatMetadata):
-    metadata = []
+    metadata = {}
+    # Example how to use object:
+    #metadata["bbox"] = [coor0, coor1, coor2, coor3]
+    metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
 
     # TO DO
 
@@ -137,7 +152,10 @@ def extractMetadataFromGeoJSON(fileFormat, filePath, whatMetadata):
 
 #gets called when the argument of the command request is a ISOxxx
 def extractMetadataFromISO(fileFormat, filePath, whatMetadata):
-    metadata = []
+    metadata = {}
+    # Example how to use object:
+    #metadata["bbox"] = [coor0, coor1, coor2, coor3]
+    metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
 
     # TO DO
     
@@ -145,7 +163,10 @@ def extractMetadataFromISO(fileFormat, filePath, whatMetadata):
 
 #gets called when the argument of the command request is a GeoTIFF
 def extractMetadataFromGeoTIFF(fileFormat, filePath, whatMetadata):
-    metadata = []
+    metadata = {}
+    # Example how to use object:
+    #metadata["bbox"] = [coor0, coor1, coor2, coor3]
+    metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
 
     # TO DO
 
@@ -243,7 +264,6 @@ def extractCommonMetaDataOfMultiple(metadataElements, whatMetadata):
         if "shape_elements" in metadataObject:
             shapeElements += float(metadataObject["shape_elements"])
             numberHavingAttribute[2] += 1
-    numberHavingAttribute[0] = 0
     output = {}
 
     if whatMetadata != 's' and whatMetadata != 't':
