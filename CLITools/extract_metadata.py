@@ -64,7 +64,6 @@ def usage():
             Available spatial metadata:
 
                 bbox
-
 '''
 
 def errorFunction():
