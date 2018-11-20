@@ -1,4 +1,4 @@
-import sys, os, platform, datetime, math, shapefile, nio, gdal, fiona
+import sys, os, platform, datetime, math, shapefile, fiona, gdal, nio
 from datetime import datetime as dtime
 from six.moves import configparser
 from netCDF4 import Dataset as NCDataset
@@ -84,3 +84,20 @@ def countElements(array):
         if numberHavingAttribute[0] != len(metadataElements):
             output["bbox"] += " WARNING: Only " + str(numberHavingAttribute[0]) + " Element(s) have this attribute"
     return output
+
+#help-function to get all row elements for a specific string
+def getAllRowElements(rowname,elements):
+    for idx, val in enumerate(elements[0]):
+        if  rowname in val:
+            indexOf = idx
+            values = []
+            for x in elements:
+                if x[indexOf] != rowname:
+                    values.append(x[indexOf])
+            return values
+
+def searchForParameters(elements, paramArray):
+    for x in paramArray:
+        for row in elements[0]:
+            if x in row:
+                return getAllRowElements(x,elements)
