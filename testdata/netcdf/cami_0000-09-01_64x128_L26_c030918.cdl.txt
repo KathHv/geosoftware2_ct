@@ -23,7 +23,7 @@ variables:
 		lev:formula_terms = "a: hyam b: hybm p0: P0 ps: PS" ;
 		lev:_FillValue = 9.99999961690316e+35 ;
 	double ilev(ilev) ;
-		ilev:long_name = "hybrid level at interfaces (1000*(A+B))" ;
+		ilev:long_name = „p  level at interfaces (1000*(A+B))" ;
 		ilev:units = "level" ;
 		ilev:positive = "down" ;
 		ilev:standard_name = "atmosphere_hybrid_sigma_pressure_coordinate" ;
