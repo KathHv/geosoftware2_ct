@@ -136,7 +136,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         elif fileFormat == 'geotiff' or fileFormat == 'tif': #here both because it is either geotiff OR tif
             metadataElements.append(handleGeotiff.extractMetadata(fileFormat, x, whatMetadata))
         elif fileFormat == 'gml':
-            metadataElements.append(handleISO.extractMetadata(fileFormat, x, whatMetadata))
+            metadataElements.append(handleISO.extractMetadata(x, whatMetadata))
         elif not (fileFormat == 'shp' or fileFormat == 'dbf'): 
             filesSkiped += 1
     if filesSkiped != 0: 
@@ -161,6 +161,13 @@ for o, a in OPTS:
     elif o == '-t':
         print("\n")
         print("Extract Temporal metadata only:\n")
+        COMMAND = a
+        if hf.exists(a):
+            extractMetadataFromFile(a, 't')
+        elif os.path.isdir(a):
+            #the input is a valid folder 
+            extractMetadataFromFolder(a, 't')
+        else: print("\nFile or folder does not exist\n")
     elif o == '-s':
         print("\n")
         print("Extract Spatial metadata only:\n")
