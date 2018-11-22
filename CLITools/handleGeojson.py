@@ -32,7 +32,7 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
     ##extract filename and fileformatGeo
     if whatMetadata != 's':
         metadata["filename"] = filePath[filePath.rfind("/")+1:]
-        metadata["fileformat"] = fileFormat
+        metadata["format"] = fileFormat
         #metadata["type"] = gjson["type"]
 
 

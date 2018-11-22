@@ -33,7 +33,7 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
             raise Exception("The searched .shp file was not found under " + shpPath + "\n")
     if whatMetadata != 's':
         metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
-        metadata["fileformat"] = fileFormat
+        metadata["format"] = fileFormat
     metadata["bbox"] = ourFile.bbox
     if whatMetadata != 's':
         metadata["shapetype"] =  ourFile.shapeTypeName
