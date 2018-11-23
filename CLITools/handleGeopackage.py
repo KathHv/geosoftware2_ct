@@ -8,7 +8,7 @@ def extractMetadata(filePath, whatMetadata):
     with fiona.open(filePath) as datasetFiona:
         if whatMetadata == "e":
             metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
-            metadata["fileformat"] = datasetFiona._driver
+            metadata["format"] = datasetFiona._driver
             metadata["shape_elements"] = len(datasetFiona)
             metadata["projection"] = datasetFiona.meta["crs"]["proj"]
             metadata["encoding"] = datasetFiona.encoding

@@ -19,7 +19,7 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
             if 'NC_GLOBAL' in key:
                 metadata[key[key.rfind("#")+1:]] = metadataGDAL[key]
         metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
-        metadata["fileformat"] = datasetGDAL.GetDriver().ShortName
+        metadata["format"] = datasetGDAL.GetDriver().ShortName
         metadata["size"] = [datasetGDAL.RasterXSize, datasetGDAL.RasterYSize, datasetGDAL.RasterCount] # [raster width in pixels, raster height in pixels, number raster bands]
         metadata["pixel_size"] = [geotransformGDAL[1], geotransformGDAL[5]]
         metadata["origin"] = [geotransformGDAL[0], geotransformGDAL[3]]
