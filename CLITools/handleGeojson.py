@@ -1,60 +1,130 @@
 import helpfunctions as hf
+import json, gdal
+from osgeo import ogr
+import sys
+
+
+#extract geometry
+def extractGeometry (json, metadata): 
+    try:
+        jsonGeometry = None
+        jsonGeometry = ogr.CreateGeometryFromJson(json)
+        metadata["geometry"] = jsonGeometry
+        return jsonGeometry
+        
+    except AttributeError, e:
+        print('Warning: missing metadata. Could not extract geometry')
+        print e
+        return jsonGeometry
+
+    except TypeError, e:
+        print('Warning: missing metadata. Could not extract geometry')
+        print e
+        return jsonGeometry
+
+        
+
+
+# extract bounding box
+def extractBbox (properties, geometry, metadata):
+    try:
+        bbox = None
+        if not geometry:
+            if not properties["bboxes"]:
+                raise AttributeError("geometry is empty.")
+            else: bbox = properties["bbox"]
+        else:
+            #Get Envelope returns a tuple (minX, maxX, minY, maxY)
+            bbox = geometry.GetEnvelope()
+        metadata["bbox"] = bbox
+        return bbox
+        
+    except AttributeError, e:
+        print('Warning: missing metadata. Could not extract bounding box')
+        print e
+        return bbox
+
+    
+
+
+#extract timeextend from json string
+def extractTimeExtend (properties, metadata):
+    try:
+        metadata["start"] = properties["created_at"]
+        metadata["end"] =  properties["closed_at"]
+        
+
+    except AttributeError, e:
+        print('Warning: missing metadata. Could not extract timestamps')
+        print e
+      
+
 
 
 #gets called when the argument of the command request is a geojson
 def extractMetadata(fileFormat, filePath, whatMetadata):
     metadata = {}
+    #emptyContentError = Error
+    #ValidityError = Error
+
+    #reading file content and validate (geo)json
+    try :    
+        gjson = open(filePath, "rb")
+        gjsonContent = json.load(gjson)
+        #gjsonContentString = json.loads(gjson) #throws ValueError if content is invalid json
+        gjson.close()
+
+    except ValueError(json), e:
+        print ('The geojson file from ' + filePath + ' is not valid.') 
+        print e
+        sys.exit(1)
+
+    except RuntimeError, e:
+        print ('Error: (geo)json file cannot be opened or read.')
+        print e
+        sys.exit(1)
     
-    # Example how to use object:
-    #metadata["bbox"] = [coor0, coor1, coor2, coor3]
-    metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
 
-    if fileFormat == 'geojson' or fileFormat == 'json': 
-            gjson = open(filePath, "rb")
-            #print ("gjson open filePath: " + str(gjson))            
-            gjsonContent = json.load(gjson)
-            gjson.close()
-            ##print ('gjson: ' + str(gjsonContent))
 
-            ##validate geojson
-            ##gjsonContent.is_valid
-            ##gjsonContent.errors()
-            gjsonContent = json.dumps(gjsonContent, sort_keys=False, indent=4)
-    else:
-        print("\nError: The searched .geojson file was not found under " + str(gjson) + "\n")
-    
-    gjson1=str(gjsonContent)
-    ##print ('gjson as a string' + str(gjson1))
+    try: 
+        if not gjsonContent:
+            raise RuntimeError('The geojson file from ' + filePath + ' is empty')
+    except RuntimeError, e:
+        print ('Error')
+        print e
+        raise
 
-    gjson1=str(gjsonContent)
-    ##print ('gjson as a string' + str(gjson1))
 
-    ##extract filename and fileformatGeo
-    if whatMetadata != 's':
-        metadata["filename"] = filePath[filePath.rfind("/")+1:]
+
+
+
+    #metadata extraction    
+    try:
+        #gjsonContentString = json.dumps(gjsonContent, sort_keys=False, indent=4)
+        features = gjsonContent["features"]
+        properties = features[0]["properties"]
+
+        #extracting bbox and geometry
+        if whatMetadata != 't':
+            bboxes = extractBbox(properties, extractGeometry(properties, metadata), metadata)
+            if bboxes:
+                hf.computeBboxOfMultiple(bboxes)
+           
+        
+        # time extraction
+        if whatMetadata != 's':
+            extractTimeExtend(properties, metadata)
+
+
+        # extract other metadata
         metadata["fileformat"] = fileFormat
+        metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
         #metadata["type"] = gjson["type"]
 
-
-    ## create bbox
-    ## extract geometry
-    print ('before createGeometry')
-    geomJson = ogr.CreateGeometryFromJson(gjson1)
-    metadata["geometry"] = geomJson
-    print ('after createGeometry: ' + str(geomJson))
-    print ("%d,%d" % (geomJson.GetX(), geomJson.GetY()))
-    # Get Envelope returns a tuple (minX, maxX, minY, maxY)
-    print ('before GetEnvelope')
-    bbox = geomJson.GetEnvelope()
-    print ("after GetEnvelope: %r" %(bbox))
-    print ("minX: %d, minY: %d, maxX: %d, maxY: %d" (bbox[0],bbox[2],bbox[1],bbox[3]))
-    metadata["bbox"] = bbox
-    
-    #if whatMetadata != 's':
-     #   metadata["shapetype"] =  ourFile.shapeTypeName
-      #  metadata["shape_elements"] = len(ourFile)
-
-    # time extraction
+    except AttributeError, e:
+        print('Warning: missing metadata. Could not extract all metadata')
+        print e
 
 
     return metadata
+
