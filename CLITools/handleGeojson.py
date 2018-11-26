@@ -10,18 +10,18 @@ def extractGeometry (json, metadata):
         jsonGeometry = None
         jsonGeometry = ogr.CreateGeometryFromJson(json)
         metadata["geometry"] = jsonGeometry
+        raise Exception("abc")
         return jsonGeometry
         
     except AttributeError, e:
         print('Warning: missing metadata. Could not extract geometry')
         print e
-        return jsonGeometry
+        return jsonGeometry 
 
     except TypeError, e:
         print('Warning: missing metadata. Could not extract geometry')
         print e
-        return jsonGeometry
-
+        return jsonGeometry 
         
 
 

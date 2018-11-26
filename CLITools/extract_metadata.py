@@ -2,6 +2,8 @@ import sys, os, getopt # important
 from os import walk
 import helpfunctions as hf
 import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO, handleGeotiff
+import dicttoxml, xml, subprocess
+
 
 COMMAND = None
 XML_DIRPATH = None
@@ -104,7 +106,18 @@ def extractMetadataFromFile(filePath, whatMetadata):
     elif fileFormat == 'gml':
         metadata = handleISO.extractMetadata(fileFormat, filePath, whatMetadata)
     else: return False
+
+    ident = dicttoxml.make_id("id")
+    metadata["dc:identifier"] = "urn:uuid:"+ ident
     hf.printObject(metadata)
+    xmlMetadata = dicttoxml.dicttoxml(metadata,  custom_root="csw:Record xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:ows=\"http://www.opengis.net/ows\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dct=\"http://purl.org/dc/terms/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"")
+    xmlMetadata = unicode(xmlMetadata)
+    fileContent = open(ident + '.xml', 'w')
+    fileContent.write(xmlMetadata)
+    fileContent.close()
+
+    subprocess.call(["pycsw-admin.py", "-c", "load_records", "-f", "/home/kathy/Documents/Geosoftware2/pycswDocker1/pycsw/pycsw/default.cfg", "-p", "./" + ident +".xml"])
+
     return True
 
 
@@ -123,7 +136,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
     filesSkiped = 0
     for x in fullPaths:
         fileFormat = x[x.rfind('.')+1:]
-        if fileFormat == 'shp': #here not 'dbf' so that it doesn take the object twice into account
+        if fileFormat == 'shp': #here not 'dbf' so that it does not take the object twice into account
             metadataElements.append(handleShapefile.extractMetadata("shp", x, whatMetadata))
         elif fileFormat == 'csv':
             metadataElements.append(handleCSV.extractMetadata(x, whatMetadata))
@@ -143,11 +156,17 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         print(str(filesSkiped) + ' file(s) has been skipped as its format is not suppoted; to see the suppoted formats look at -help')
     if len(metadataElements):
         hf.printObject(hf.extractCommonMetaDataOfMultiple(metadataElements, whatMetadata))
+        
+        xmlMetadata = dicttoxml.dicttoxml(metadataElements)
+        fileContent = open('123.xml', 'w')
+        fileContent.write(xmlMetadata)
+        fileContent.close()
     else: print("No file in directory with metadata")
 
 # tells the program what to do with certain tags and their attributes that are
 # inserted over the command line
 for o, a in OPTS:
+
     if o == '-e':
         COMMAND = a
         print("Extract all metadata:\n")
@@ -182,3 +201,7 @@ for o, a in OPTS:
         print("\n")
         print(usage())
         print("\n")
+    
+
+
+
