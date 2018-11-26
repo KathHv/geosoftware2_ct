@@ -1,4 +1,4 @@
-import igraph as ig
+import jgraph as ig
 import helpfunctions as hf
 
 #gets called when the argument of the command request is a ISOxxx
