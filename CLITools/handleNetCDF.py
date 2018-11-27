@@ -1,4 +1,4 @@
-import gdal, datetime
+import gdal, datetime, xarray
 from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
@@ -19,7 +19,7 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
             if 'NC_GLOBAL' in key:
                 metadata[key[key.rfind("#")+1:]] = metadataGDAL[key]
         metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
-        metadata["fileformat"] = datasetGDAL.GetDriver().ShortName
+        metadata["format"] = "application/" + str(datasetGDAL.GetDriver().ShortName)
         metadata["size"] = [datasetGDAL.RasterXSize, datasetGDAL.RasterYSize, datasetGDAL.RasterCount] # [raster width in pixels, raster height in pixels, number raster bands]
         metadata["pixel_size"] = [geotransformGDAL[1], geotransformGDAL[5]]
         metadata["origin"] = [geotransformGDAL[0], geotransformGDAL[3]]
@@ -79,10 +79,36 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         for a,b in metadataGDAL.items():
         print(str(a) + ": " + b)    '''
 
+    file = xarray.open_dataset(filePath)
+    if file is not None:
+        if file.to_dict()["coords"]["lat"] is not None and file.to_dict()["coords"]["lon"] is not None:
+            lats = file.to_dict()["coords"]["lat"]
+            dataLats = lats["data"]
+            metadata[lats["dims"]] = lats["attrs"]
+
+            lons = file.to_dict()["coords"]["lon"]
+            dataLons = lons["data"]
+            metadata[lons["dims"]] = lons["attrs"]
+            if 'bbox' not in metadata:
+                if len(dataLats) > 0 and len(dataLons) > 0:
+                    metadata["bbox"] = [min(dataLons), min(dataLats), max(dataLons), max(dataLats)]
+        '''time = file.to_dict()["coords"]["time"]
+        hf.findOut(file.to_dict()["coords"]["time"])'''
+        if 'data_vars' in file.to_dict():
+            if 'date_written' in file.to_dict()["data_vars"]:
+                if 'data' in file.to_dict()["data_vars"]["date_written"]:
+                    if file.to_dict()["data_vars"]["date_written"]["data"] is not None:
+                        metadataField = str(file.to_dict()["data_vars"]["date_written"]["data"])
+                        metadataField = metadataField[metadataField.find("'")+1 : metadataField.rfind("'")]
+                        print(metadataField)
+                        originDate = str(dtime.strptime(metadataField, '%d/%m/%y'))[:10]
+                        metadata["date_creation"] = originDate
+
     # get survey 
     for a,b in metadata.items():
-        if len(b) > 150:
-            metadata[a] = " { ... } "
+        if len(b) > 150 and a not in ['source']:
+            #metadata[a] = " { ... } "
+            print("")
 
     # filename, format, size, pixel_size, origin, subject, original_units, units, dimensions
     # NC_GLOBAL: title, source, dimensions, references, realization, project_id, institution, history, experiment_id, Conventions(of metadata!), contact, comment, cmor_version
