@@ -338,7 +338,7 @@ for o, a in OPTS:
 
 
             dirOfThisFile = os.path.dirname(os.path.abspath(__file__))
-            pycswpath = os.path.join(Path(dirOfThisFile).parents[0], 'pycsw/pycsw')
+            pycswpath = os.path.join("", '/home/niklas/Dokumente/pycsw/pycsw/pycsw')
             pathOfConfic = os.path.join(pycswpath, 'default.cfg')
             configfilePath = r'' + str(pathOfConfic)
             cp.read(configfilePath)

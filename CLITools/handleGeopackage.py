@@ -1,4 +1,4 @@
-import fiona, gdal, xarray, sqlite3
+import fiona, xarray, sqlite3
 import helpfunctions as hf
 
 
