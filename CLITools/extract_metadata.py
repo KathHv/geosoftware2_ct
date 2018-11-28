@@ -111,7 +111,6 @@ def extractMetadataFromFile(filePath, whatMetadata):
     metadata["dc:identifier"] = "urn:uuid:"+ ident
     hf.printObject(metadata)
     xmlMetadata = dicttoxml.dicttoxml(metadata,  custom_root="csw:Record xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" xmlns:ows=\"http://www.opengis.net/ows\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dct=\"http://purl.org/dc/terms/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"")
-    xmlMetadata = unicode(xmlMetadata)
     fileContent = open(ident + '.xml', 'w')
     fileContent.write(xmlMetadata)
     fileContent.close()
@@ -143,7 +142,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         elif fileFormat == 'nc':
             metadataElements.append(handleNetCDF.extractMetadata(fileFormat, x, whatMetadata))
         elif fileFormat == 'geojson' or fileFormat == 'json': #here both because it is either geojson OR json
-            metadataElements.append(handleGeojson.extractMetadata(fileFormat, x, whatMetadata))
+                metadataElements.append(handleGeojson.extractMetadata(fileFormat, x, whatMetadata))
         elif fileFormat == 'gpkg':
             metadataElements.append(handleGeopackage.extractMetadata(x, whatMetadata))
         elif fileFormat == 'geotiff' or fileFormat == 'tif': #here both because it is either geotiff OR tif
