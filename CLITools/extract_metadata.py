@@ -3,9 +3,10 @@ from six.moves import configparser
 from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO
+import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO, handleGeotiff
+import dicttoxml, xml, subprocess
 from lxml import etree
-#handleGeotiff
+
 
 COMMAND = None
 XML_DIRPATH = None
@@ -236,8 +237,9 @@ def extractMetadataFromFile(filePath, whatMetadata):
         metadata = handleGeotiff.extractMetadata(fileFormat, filePath, whatMetadata)
     elif fileFormat == 'gml':
         metadata = handleISO.extractMetadata(fileFormat, filePath, whatMetadata)
-    else: raise Exception("This file format is not supported")
-    return metadata
+    else: return False
+
+    return True
 
 
 def insertIntoDatabase(dictionary, dbpath, table):
@@ -273,7 +275,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
     filesSkiped = 0
     for x in fullPaths:
         fileFormat = x[x.rfind('.')+1:]
-        if fileFormat == 'shp': #here not 'dbf' so that it doesn take the object twice into account
+        if fileFormat == 'shp': #here not 'dbf' so that it does not take the object twice into account
             metadataElements.append(handleShapefile.extractMetadata("shp", x, whatMetadata))
         elif fileFormat == 'csv':
             metadataElements.append(handleCSV.extractMetadata(x, whatMetadata))
@@ -291,13 +293,12 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
             filesSkiped += 1
     if filesSkiped != 0: 
         print(str(filesSkiped) + ' file(s) has been skipped as its format is not suppoted; to see the suppoted formats look at -help')
-    if len(metadataElements):
-        hf.printObject(hf.extractCommonMetaDataOfMultiple(metadataElements, whatMetadata))
     else: print("No file in directory with metadata")
 
 # tells the program what to do with certain tags and their attributes that are
 # inserted over the command line
 for o, a in OPTS:
+
     if o == '-e':
         COMMAND = a
         print("Extract all metadata:\n")
