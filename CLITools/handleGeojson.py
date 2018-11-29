@@ -2,6 +2,11 @@ import helpfunctions as hf
 import json, gdal
 from osgeo import ogr
 import sys
+from datetime import datetime
+import datetime
+from django.utils.dateparse import parse_datetime
+import django, pytz
+import unicodedata
 
 
 #extract geometry
@@ -25,16 +30,55 @@ def extractGeometry (json, metadata):
         
 
 
+
+
+
+
+foundCoordsX = []
+foundCoordsY = []
+# extract Coordinates from coordinate Arrays
+def extractCoordinates(coordinateArray):
+    #further arrays with coordinates
+    print(coordinateArray)
+    if type(coordinateArray) == list and len(coordinateArray) == 2 and type(coordinateArray[0]) == float and type(coordinateArray[1]):
+        global foundCoordsX
+        global foundCoordsY
+        foundCoordsX.append(format(float(coordinateArray[1]), '.2f'))
+        foundCoordsY.append(format(float(coordinateArray[0]), '.2f'))
+    else :
+        if coordinateArray == list and len(coordinateArray) != 0:
+            for value in coordinateArray:
+                extractCoordinates(value)
+                        
+#search in Json File for Coordinate Lists or Dicts
+def searchForCoordinates (gjsonContent):
+    if type(gjsonContent) == dict:
+        for key, value in gjsonContent.items():           
+            if key == "coordinates":
+                extractCoordinates(value)
+                if type(value) == dict or type(value) == list:
+                    searchForCoordinates(value)
+            else:
+                searchForCoordinates(value)
+    if type(gjsonContent) == list:
+        for element in gjsonContent:
+            searchForCoordinates(element)
+
+
 # extract bounding box
-def extractBbox (properties, geometry, metadata):
+def extractBbox (contentString, content, geometry, metadata):
     try:
         bbox = None
         if not geometry:
-            if not properties["bboxes"]:
-                raise AttributeError("geometry is empty.")
-            else: bbox = properties["bbox"]
+      
+            searchForCoordinates(content)
+            global foundCoordsX 
+            global foundCoordsY
+            foundCoordsX= sorted(foundCoordsX)
+            foundCoordsY = sorted(foundCoordsY)
+            print(foundCoordsX)
+            bbox=[foundCoordsY[0], foundCoordsX[0], foundCoordsY[len(foundCoordsY)-1], foundCoordsX[len(foundCoordsX)-1]]
         else:
-            #Get Envelope returns a tuple (minX, maxX, minY, maxY)
             bbox = geometry.GetEnvelope()
         metadata["bbox"] = bbox
         return bbox
@@ -45,13 +89,39 @@ def extractBbox (properties, geometry, metadata):
         return bbox
 
     
+ignore = ["created_at", "closed_at", "created", "closed", "initilize", "init", "last_viewed", "last_change", "change", "last_Change", "lastChange"]    
+#ignore = []
+
+def searchForTimeElements(gjsonContent, dateArray):
+    if type(gjsonContent) == dict:
+        for key, value in gjsonContent.items():     
+            if key not in ignore:
+                   searchForTimeElements(value, dateArray)    
+    else: 
+        if type(gjsonContent) == list:
+            for element in gjsonContent:
+                searchForTimeElements(element, dateArray)
+        else:
+            if type(gjsonContent) == unicode :
+                datetime_object = parse_datetime(unicodedata.normalize('NFKD', gjsonContent).encode('ascii', 'ignore') )
+                if type(datetime_object) ==datetime.datetime: #date
+                    dateArray.append(gjsonContent)
+
 
 
 #extract timeextend from json string
-def extractTimeExtend (properties, metadata):
+def extractTimeExtend (gjsonContent, metadata):
     try:
-        metadata["start"] = properties["created_at"]
-        metadata["end"] =  properties["closed_at"]
+        dateArray = []
+        searchForTimeElements(gjsonContent,dateArray)
+        if len(dateArray)!= 0:
+            dateArray = sorted(dateArray)
+            timeExtent = []
+            timeExtent.append(dateArray[0])
+            timeExtent.append(dateArray[len(dateArray)-1])
+            metadata["time_extent"] = timeExtent
+        else:
+            raise AttributeError
         
 
     except AttributeError, e:
@@ -64,9 +134,6 @@ def extractTimeExtend (properties, metadata):
 #gets called when the argument of the command request is a geojson
 def extractMetadata(fileFormat, filePath, whatMetadata):
     metadata = {}
-    #emptyContentError = Error
-    #ValidityError = Error
-
     #reading file content and validate (geo)json
     try :    
         gjson = open(filePath, "rb")
@@ -100,27 +167,56 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
 
     #metadata extraction    
     try:
-        #gjsonContentString = json.dumps(gjsonContent, sort_keys=False, indent=4)
-        features = gjsonContent["features"]
-        properties = features[0]["properties"]
+        gjsonContentString = json.dumps(gjsonContent, sort_keys=False, indent=4)
 
         #extracting bbox and geometry
-        if whatMetadata != 't':
-            bboxes = extractBbox(properties, extractGeometry(properties, metadata), metadata)
-            if bboxes:
-                hf.computeBboxOfMultiple(bboxes)
+        if whatMetadata == 's':
+            bbox = extractBbox(gjsonContentString, gjsonContent, extractGeometry(gjsonContentString, metadata), metadata)  
+        
            
         
         # time extraction
-        if whatMetadata != 's':
-            extractTimeExtend(properties, metadata)
+        if whatMetadata == 't':
+            extractTimeExtend(gjsonContent, metadata)
+        #extracting bbox, time and other metadata
+        if whatMetadata == 'e':
+            #extracting bbox and geometry
+            bbox = extractBbox(gjsonContentString, gjsonContent, extractGeometry(gjsonContentString, metadata), metadata)
+            # time extraction
+            extractTimeExtend(gjsonContent, metadata)
 
-
-        # extract other metadata
-        metadata["fileformat"] = fileFormat
-        metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
-        #metadata["type"] = gjson["type"]
-
+            
+            # extract other metadata
+            searchParams = ['format', 'source', 'crs', 'language', 'publisher', 'creator', 'resourcelanguage', 'contributor',
+            'organization', 'securityconstraints', 'servicetype', 'servicetypeversion', 'links', 'degree', 'conditionapplyingtoaccessanduse',
+            'title_alternate', 'abstract', 'keywords', 'keywordstype', 'relation', 'wkt_geometry', 'date_revision', 'date_creation', 'date_publication',
+            'date_modified', 'specificationtitle', 'specificationdate', 'specificationdatetype' , 'otherconstraints', 'type', 'comments', 'tags', 'comment', 'created_by', 'description']
+            
+            def fillIfAvailable(searchParam, gjsonContent):
+                if type(gjsonContent) == dict:
+                    for key, value in gjsonContent.items():
+                        for x in searchParams:
+                            if key == x:
+                                if not x in metadata:
+                                    metadata[x] = value 
+                                else:
+                                    if type(metadata[x]) == list:
+                                        metadata[x].append(value)
+                                    else:
+                                        arrayContent = metadata[x]
+                                        metadata[x] = []
+                                        metadata[x].append(arrayContent)
+                                        metadata[x].append(value)
+                        if type(value) == dict or type(value) == list:
+                            fillIfAvailable(searchParam, value)
+                if type(gjsonContent) == list:
+                    for element in gjsonContent:
+                        fillIfAvailable(searchParam, element)
+      
+            metadata["fileformat"] = "text/" + fileFormat
+            metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
+           
+            fillIfAvailable(searchParams, gjsonContent)
     except AttributeError, e:
         print('Warning: missing metadata. Could not extract all metadata')
         print e
