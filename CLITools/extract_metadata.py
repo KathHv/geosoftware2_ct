@@ -238,7 +238,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
     elif fileFormat == 'gml':
         metadata = handleISO.extractMetadata(fileFormat, filePath, whatMetadata)
     else: return False
-
+    hf.printObject(metadata)
     return True
 
 
