@@ -26,3 +26,6 @@ pip install nio
 pip install gdal
 pip install netCDF4
 pip install 
+
+pip install subprocess32
+pip install fiona

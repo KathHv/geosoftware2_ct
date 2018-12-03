@@ -1,10 +1,11 @@
 import helpfunctions as hf
+import gdal
 
 #gets called when the argument of the command request is a GeoTIFF
 def extractMetadata(fileFormat, filePath, whatMetadata):
     metadata = {}
     
-     gdal.UseExceptions()
+    gdal.UseExceptions()
     
     #zip https://rasterio.readthedocs.io/en/latest/quickstart.html
     #GDAL error handler
@@ -19,8 +20,8 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         #print(gtiff.GeoTIFF.GetEnvelope)
         #print(gtiff.GetEnvelope)
         #print(gtiff.getRasterBand(1))
-        #rasterBand = gtiff.getRasterBand(1)
-        print ( rasterBand.GetMaximum())
+        rasterBand = gtiff.getRasterBand(1)
+        print (rasterBand.GetMaximum())
         print (rasterBand.GetScale())
         #metadata["name"] = gtiff.name
         #metadata["NumberOfBands"] = gtiff.count
@@ -40,7 +41,8 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
     except RuntimeError, e:
         print ('Unable to open: ' + filePath)
         print e
-        sys.exit(1)
+        
+     
     
 
 

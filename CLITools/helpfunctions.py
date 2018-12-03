@@ -1,4 +1,4 @@
-import sys, os, platform, datetime, math, shapefile, fiona, nio
+import sys, os, platform, datetime, math, shapefile, fiona, gdal, nio
 from datetime import datetime as dtime
 from six.moves import configparser
 from netCDF4 import Dataset as NCDataset
@@ -101,3 +101,4 @@ def searchForParameters(elements, paramArray):
         for row in elements[0]:
             if x in row:
                 return getAllRowElements(x,elements)
+
