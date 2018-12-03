@@ -1,4 +1,4 @@
-import gdal, datetime, xarray
+import datetime, xarray
 from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf

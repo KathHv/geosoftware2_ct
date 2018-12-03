@@ -101,3 +101,4 @@ def searchForParameters(elements, paramArray):
         for row in elements[0]:
             if x in row:
                 return getAllRowElements(x,elements)
+
