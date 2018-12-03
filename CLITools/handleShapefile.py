@@ -1,4 +1,4 @@
-import shapefile, fiona, gdal
+import shapefile, fiona
 import helpfunctions as hf
 
 #gets called when the argument of the command request is a shape-file
