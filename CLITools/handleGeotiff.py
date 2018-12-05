@@ -20,6 +20,12 @@ def getBoundingBox(gtiffContent):
 
     return boundingBox
 
+def getCRS(gtiffContent):
+    crsId = None
+    crsId = format(gtiffContent.GetProjection())
+    return crsId
+
+
 
 #returns vector representation of submitted geotiff
 def getVectorRepresentation(gtiffContent):
@@ -50,7 +56,7 @@ def getAdditionalMetadata(gtiffContent, fileFormat, filePath):
         
     #additionalMetadata["crs"] = gtiffContent.GetAttrValue("AUTHORITY", 1)
     additionalMetadata["driver"] =  format(gtiffContent.GetDriver().LongName)
-    additionalMetadata["projection"] = format(gtiffContent.GetProjection())
+    
     additionalMetadata["description"] = gtiffContent.GetDescription()
 
     additionalMetadata["fileformat"] = "text/" + fileFormat
@@ -80,6 +86,8 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         #extract bbox and geometry
         if whatMetadata == 's':
             metadata["bbox"] = getBoundingBox(gtiffContent)   
+            metadata["crs"] = getCRS(gtiffContent)
+            metadata["coordinates"] = metadata["bbox"]
         #extract temporal extend
         if whatMetadata == 't':
             metadata["temporal_extent"] = getTemporalExtent(gtiffContent)
@@ -87,6 +95,7 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         if whatMetadata == 'e':
             #extract bbox and geometry
             metadata["bbox"] = getBoundingBox(gtiffContent)
+            metadata["crs"] = getCRS(gtiffContent)
             #extract time extent
             metadata["temporal_extent"] = getTemporalExtent(gtiffContent)
             #extract other metadata
