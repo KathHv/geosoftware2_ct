@@ -1,3 +1,4 @@
+import gdal
 import datetime, xarray
 from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
