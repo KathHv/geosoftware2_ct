@@ -5,6 +5,7 @@ from netCDF4 import Dataset as NCDataset
 import netCDF4
 import getopt
 from os import walk
+from pyproj import Proj, transform
 
 #output of metadata object
 def printObject(object):
@@ -102,3 +103,12 @@ def searchForParameters(elements, paramArray):
             if x in row:
                 return getAllRowElements(x,elements)
 
+#transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system)
+def transformingIntoWGS84 (crs, point):
+    inProj = Proj(init = crs)
+    outProj = Proj(init='epsg:4978')
+    x1, y1 = point
+    x2, y2 = transform(inProj,outProj,x1,y1)
+    print (x2,y2)
+    retPoint = x2, y2
+    return retPoint

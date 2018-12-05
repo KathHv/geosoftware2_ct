@@ -1,5 +1,8 @@
 import shapefile, fiona
 import helpfunctions as hf
+import gdal
+from osgeo import ogr
+import sys
 
 #gets called when the argument of the command request is a shape-file
 def extractMetadata(fileFormat, filePath, whatMetadata):
@@ -48,4 +51,4 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         metadata["shape_elements"] = len(ourFile)
     return metadata
 
-            
+extractMetadata("hallo", "/home/ilka/Desktop/shape.shp", "e")
