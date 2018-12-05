@@ -27,12 +27,12 @@ def extractGeometry (json):
         
     except AttributeError, e:
         print('Warning: missing metadata. Could not extract geometry')
-        print e
+        print(e)
         return jsonGeometry 
 
     except TypeError, e:
         print('Warning: missing metadata. Could not extract geometry')
-        print e
+        print(e)
         return jsonGeometry 
         
 
