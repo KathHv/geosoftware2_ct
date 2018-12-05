@@ -1,4 +1,4 @@
-import datetime, xarray
+import datetime, xarray, gdal
 from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
@@ -8,108 +8,142 @@ import helpfunctions as hf
 def extractMetadata(fileFormat, filePath, whatMetadata):
     # file format can be either .nc or .cdf
     metadata = {}
-    datasetGDAL = gdal.Open(filePath)
+
+    if whatMetadata == "e":
+        addictionalMetadata = getAddictionalMetadata(filePath)
+        for x in addictionalMetadata:
+            metadata[x] = addictionalMetadata[x]
+
+    if whatMetadata == "s" or whatMetadata == "e":
+        metadata["bbox"] = getBoundingBox(filePath)
+        metadata["vector_representation"] = getVectorRepresentation(filePath)
+
+        # not yet complete (does not found correct CRS -> always WGS 84?)
+        metadata["crs"] = getCRS(filePath)
+    
+    if whatMetadata == "t" or whatMetadata == "e":
+        metadata["temporal_extent"] = getTemporalExtent(filePath)
+    
+    return metadata
+        
+
+def getAddictionalMetadata(path):
+    ncDataset = NCDataset(path)
+    datasetGDAL = gdal.Open(path)
     geotransformGDAL = datasetGDAL.GetGeoTransform()
     metadataGDAL = datasetGDAL.GetMetadata()
     dimensions = []
-    if whatMetadata == "e":
-        for key in metadataGDAL:
-            if 'axis' in key:
-                dimensions.append(key[:key.rfind("#")])
-            if 'NC_GLOBAL' in key:
-                metadata[key[key.rfind("#")+1:]] = metadataGDAL[key]
-        metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
-        metadata["format"] = "application/" + str(datasetGDAL.GetDriver().ShortName)
-        metadata["size"] = [datasetGDAL.RasterXSize, datasetGDAL.RasterYSize, datasetGDAL.RasterCount] # [raster width in pixels, raster height in pixels, number raster bands]
-        metadata["pixel_size"] = [geotransformGDAL[1], geotransformGDAL[5]]
-        metadata["origin"] = [geotransformGDAL[0], geotransformGDAL[3]]
+    metadataGDAL = datasetGDAL.GetMetadata()
+    metadata = {}
+    for key in metadataGDAL:
+        if 'axis' in key:
+            dimensions.append(key[:key.rfind("#")])
+        if 'NC_GLOBAL' in key:
+            metadata[key[key.rfind("#")+1:]] = metadataGDAL[key]
+    metadata["filename"] = path[path.rfind("/")+1:path.rfind(".")]
+    metadata["format"] = "application/" + str(datasetGDAL.GetDriver().ShortName)
+    metadata["size"] = [datasetGDAL.RasterXSize, datasetGDAL.RasterYSize, datasetGDAL.RasterCount] # [raster width in pixels, raster height in pixels, number raster bands]
+    metadata["pixel_size"] = [geotransformGDAL[1], geotransformGDAL[5]]
+    metadata["origin"] = [geotransformGDAL[0], geotransformGDAL[3]]
+    return metadata
 
-        # get metadata beginning with "tos" if they are available
-        for key in metadataGDAL:
-            if 'tos' == key[:3]:
-                metadata["subject"] = metadataGDAL["tos#long_name"]
-                metadata["original_units"] = metadataGDAL["tos#original_units"]
-                metadata["units"] = metadataGDAL["tos#units"]
+def getVectorRepresentation(path):
+    file = xarray.open_dataset(path)
+    if file is not None:
+        if 'coords' in file.to_dict():
+            if all (x in file.to_dict()["coords"] for x in ['lat', 'lon']):
+                if 'data' in file.to_dict()["coords"]["lat"] and 'data' in file.to_dict()["coords"]["lon"]:
+                    lats = file.to_dict()["coords"]["lat"]["data"]
+                    lons = file.to_dict()["coords"]["lon"]["data"]
+    if not ('lats' in locals() and 'lons' in locals()):
+        ncDataset = NCDataset(path)
+        if 'latitude' in ncDataset.variables:
+            latitudes = ncDataset.variables["latitude"][:]
+            lats = []
+            for x in latitudes:
+                lats.append(x)
+        if 'longitude' in ncDataset.variables:
+            longitudes = ncDataset.variables["longitude"][:]
+            lons = []
+            for x in longitudes:
+                lons.append(x)
+    if 'lats' in locals()  and 'lons' in locals():
+        return { 'lat': lats,
+                    'lon': lons }
+    else: return []
 
-        # get standard_name for each dimension of available
-        if dimensions:
-            counter = 0
-            for dim in dimensions:
-                mdataOfDimension = []
-                for key in metadataGDAL:
-                    if key[:len(dim)] == dim:
-                        mdataOfDimension.append([key[len(dim)+1:], metadataGDAL[key]])
-                if str(dim) + "#standard_name" in metadataGDAL:
-                    dimensions[counter] = metadataGDAL[str(dim) + "#standard_name"]
-                metadata[dim] = mdataOfDimension
-                counter += 1
-            metadata["dimensions"] = dimensions
-
-    ncDataset = NCDataset(filePath)
+def getBoundingBox(path):
+    ncDataset = NCDataset(path)
     if 'latitude' in ncDataset.variables:
         lats = ncDataset.variables["latitude"][:]
         if 'longitude' in ncDataset.variables:
             lngs = ncDataset.variables["longitude"][:]
-            metadata["bbox"] =  [min(lngs), min(lats), max(lngs), max(lats)]
-        elif whatMetadata == "s": raise Exception("No spatial data found")
-    elif whatMetadata == "s": raise Exception("No spatial data found")
-    if not whatMetadata == "s":
-        if 'time' in ncDataset.variables:
-            times = ncDataset.variables["time"][:]
-            metadata["temporalExtent"] = str([min(times), max(times)]) + " Warning: Unit not absolute"
-            if "time#units" in metadataGDAL:
-                    unit = metadataGDAL["time#units"]
-                    steps = unit[:unit.rfind(" since")]
-                    origin = unit[unit.rfind("since ")+6:]
-                    originDate = dtime.strptime(origin ,'%Y-%m-%d')
-                    def getAbsoulteTimestamp(timeValue):
-                        if "days" in steps:
-                            return originDate + datetime.timedelta(days=timeValue)
-                        elif "hours" in steps:
-                            return originDate + datetime.timedelta(hours=timeValue)
-                        elif "minutes" in steps:
-                            return originDate + datetime.timedelta(minutes=timeValue)
-                        elif "seconds" in steps:
-                            return originDate + datetime.timedelta(seconds=timeValue)
-                    #metadata["temporalExtent"] = [getAbsoulteTimestamp(min(times)) , getAbsoulteTimestamp(max(times))]
-                    metadata["temporalExtent"] = [str(getAbsoulteTimestamp(min(times))) , str(getAbsoulteTimestamp(max(times)))]
+            bbox =  [min(lngs), min(lats), max(lngs), max(lats)]
+            return bbox
+    if 'bbox' not in locals():
+        # bbox not yet extracted
+        xarrayForNetCDF = xarray.open_dataset(path)
+        if xarrayForNetCDF is not None:
+                if 'coords' in xarrayForNetCDF.to_dict():
+                    if all (x in xarrayForNetCDF.to_dict()["coords"] for x in ['lat', 'lon']):
+                        if xarrayForNetCDF.to_dict()["coords"]["lat"] is not None and xarrayForNetCDF.to_dict()["coords"]["lon"] is not None:
+                            lats = xarrayForNetCDF.to_dict()["coords"]["lat"]
+                            dataLats = lats["data"]
+                            lons = xarrayForNetCDF.to_dict()["coords"]["lon"]
+                            dataLons = lons["data"]
+                            if len(dataLats) > 0 and len(dataLons) > 0:
+                                bbox = [min(dataLons), min(dataLats), max(dataLons), max(dataLats)]
+                            return bbox
+    return []
 
-    '''
-        # shows what metadata is available
-        for a,b in metadataGDAL.items():
-        print(str(a) + ": " + b)    '''
+def getCRS(path):
+    xarrayForNetCDF = xarray.open_dataset(path)
+    if xarrayForNetCDF is not None:
+            if 'coords' in xarrayForNetCDF.to_dict():
+                if all (x in xarrayForNetCDF.to_dict()["coords"] for x in ['lat', 'lon']):
+                    if xarrayForNetCDF.to_dict()["coords"]["lat"] is not None and xarrayForNetCDF.to_dict()["coords"]["lon"] is not None:
+                        lats = xarrayForNetCDF.to_dict()["coords"]["lat"]
+                        lons = xarrayForNetCDF.to_dict()["coords"]["lon"]
+                        crs = [ lats["attrs"], lons["attrs"] ]
+                        return crs
+    return "No CRS found"
 
-    file = xarray.open_dataset(filePath)
-    if file is not None:
-        if file.to_dict()["coords"]["lat"] is not None and file.to_dict()["coords"]["lon"] is not None:
-            lats = file.to_dict()["coords"]["lat"]
-            dataLats = lats["data"]
-            metadata[lats["dims"]] = lats["attrs"]
+def getTemporalExtent(path):
+    ncDataset = NCDataset(path)
+    datasetGDAL = gdal.Open(path)
+    metadataGDAL = datasetGDAL.GetMetadata()
+    if 'time' in ncDataset.variables:
+        times = ncDataset.variables["time"][:]
+        temporal_extent =  str([min(times), max(times)]) + " Warning: Unit not absolute" 
+        def getAbsoulteTimestamp(plusdays, steps, origin):
+            origin = dtime.strptime(origin ,'%Y-%m-%d %H:%M:%S')
+            if "days" in steps:
+                return origin + datetime.timedelta(days=plusdays)
+            elif "hours" in steps:
+                return origin + datetime.timedelta(hours=plusdays)
+            elif "minutes" in steps:
+                return origin + datetime.timedelta(minutes=plusdays)
+            elif "seconds" in steps:
+                return origin + datetime.timedelta(seconds=plusdays)       
+        if hasattr(ncDataset.variables["time"], 'units'):
+            unit = ncDataset.variables["time"].units
+            steps = unit[:unit.rfind(" since")]
+            origin = unit[unit.rfind("since ")+6:]
+            if origin[:4] == "0000":
+                origin = "2000" + origin[4:]
+            if len(origin) < 11:
+                origin += " 00:00:00"
 
-            lons = file.to_dict()["coords"]["lon"]
-            dataLons = lons["data"]
-            metadata[lons["dims"]] = lons["attrs"]
-            if 'bbox' not in metadata:
-                if len(dataLats) > 0 and len(dataLons) > 0:
-                    metadata["bbox"] = [min(dataLons), min(dataLats), max(dataLons), max(dataLats)]
-        '''time = file.to_dict()["coords"]["time"]
-        hf.findOut(file.to_dict()["coords"]["time"])'''
-        if 'data_vars' in file.to_dict():
-            if 'date_written' in file.to_dict()["data_vars"]:
-                if 'data' in file.to_dict()["data_vars"]["date_written"]:
-                    if file.to_dict()["data_vars"]["date_written"]["data"] is not None:
-                        metadataField = str(file.to_dict()["data_vars"]["date_written"]["data"])
-                        metadataField = metadataField[metadataField.find("'")+1 : metadataField.rfind("'")]
-                        print(metadataField)
-                        originDate = str(dtime.strptime(metadataField, '%d/%m/%y'))[:10]
-                        metadata["date_creation"] = originDate
+        elif "time#units" in metadataGDAL:
+                unit = metadataGDAL["time#units"]
+                steps = unit[:unit.rfind(" since")]
+                origin = unit[unit.rfind("since ")+6:]
+        if times is not None:
+            if len(times) > 0:
+                if 'steps' in locals():
+                    temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
+                    if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
+                        return "temporal extent is not valid! (" + str(temporal_extent) + ")"
+                    else:
+                        return temporal_extent
 
-    # get survey 
-    for a,b in metadata.items():
-        if len(b) > 150 and a not in ['source']:
-            #metadata[a] = " { ... } "
-            print("")
-
-    # filename, format, size, pixel_size, origin, subject, original_units, units, dimensions
-    # NC_GLOBAL: title, source, dimensions, references, realization, project_id, institution, history, experiment_id, Conventions(of metadata!), contact, comment, cmor_version
-    return metadata

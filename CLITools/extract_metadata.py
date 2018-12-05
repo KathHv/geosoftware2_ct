@@ -5,6 +5,7 @@ from os import walk
 import helpfunctions as hf
 import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleISO
 import xml, subprocess
+import dicttoxml, xml, subprocess
 from lxml import etree
 
 
