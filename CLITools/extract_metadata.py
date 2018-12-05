@@ -4,6 +4,7 @@ from pathlib import Path
 from os import walk
 import helpfunctions as hf
 import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleISO
+import xml, subprocess
 import dicttoxml, xml, subprocess
 from lxml import etree
 
@@ -235,12 +236,10 @@ def extractMetadataFromFile(filePath, whatMetadata):
         metadata = handleGeopackage.extractMetadata(filePath, whatMetadata)
     elif fileFormat == 'geotiff' or fileFormat == 'tif':
         metadata = handleGeotiff.extractMetadata(fileFormat, filePath, whatMetadata)
-    elif fileFormat == 'gml':
+    elif fileFormat == 'gml' or fileFormat =='xml':
         metadata = handleISO.extractMetadata(fileFormat, filePath, whatMetadata)
     else: return False
-    hf.printObject(metadata)
-    return True
-
+    return metadata
 
 def insertIntoDatabase(dictionary, dbpath, table):
     if hf.exists(dbpath):
