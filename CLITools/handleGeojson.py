@@ -226,7 +226,7 @@ def getAdditionalMetadata(gjsonContent, fileFormat, filePath):
             metadataDict = {}
 
             # extract other metadata
-            searchParams = ['format', 'source', 'crs', 'language', 'publisher', 'creator', 'resourcelanguage', 'contributor',
+            searchParams = ['format', 'source', 'crs', 'srs', 'language', 'publisher', 'creator', 'resourcelanguage', 'contributor',
             'organization', 'securityconstraints', 'servicetype', 'servicetypeversion', 'links', 'degree', 'conditionapplyingtoaccessanduse',
             'title_alternate', 'abstract', 'keywords', 'keywordstype', 'relation', 'wkt_geometry', 'date_revision', 'date_creation', 'date_publication',
             'date_modified', 'specificationtitle', 'specificationdate', 'specificationdatetype' , 'otherconstraints', 'type', 'comments', 'tags', 'comment', 'created_by', 'description']
