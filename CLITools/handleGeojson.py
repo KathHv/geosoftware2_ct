@@ -90,6 +90,15 @@ def getBoundingBox (contentString, content, geometry):
 
 
 
+def getCRS(gjsonContent):
+    crs= {}
+    
+    searchParam = ["crs", "coordinate_system", "coordinate_reference_system", "coordinateSystem", "CRS", "coordianteReferenceSystem"]    
+    fillIfAvailable(searchParam, gjsonContent, crs)
+
+
+    return crs
+
 
 ignore = ["created_at", "closed_at", "created", "closed", "initilize", "init", "last_viewed", "last_change", "change", "last_Change", "lastChange"]    
 #ignore = []
@@ -272,16 +281,19 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
 
     #metadata extraction    
     try:
-        #extracting bbox 
+        #extracting bbox and crs
         if whatMetadata == 's':
+            metadata["crs"] = getCRS(gjsonContent)
             metadata["bbox"] = getBoundingBox(gjsonContentString, gjsonContent, extractGeometry(gjsonContentString))   
+            metadata["coordinates"] = getVectorRepresentation(gjsonContent)      
         # time extraction
         if whatMetadata == 't':
             metadata["temporal_extent"] = getTemporalExtent(gjsonContent)
         #extract bbox, time and other metadata
         if whatMetadata == 'e':
-            #extract bbox
+            #extract bbox and crs
             metadata["bbox"] = getBoundingBox(gjsonContentString, gjsonContent, extractGeometry(gjsonContentString))
+            metadata["crs"] = getCRS(gjsonContent)
             #extract time extent
             metadata["temporal_extent"] = getTemporalExtent(gjsonContent)
             #extract other metadata
