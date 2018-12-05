@@ -238,7 +238,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
     elif fileFormat == 'gml':
         metadata = handleISO.extractMetadata(fileFormat, filePath, whatMetadata)
     else: return False
-
+    hf.printObject(metadata)
     return True
 
 
@@ -308,7 +308,7 @@ for o, a in OPTS:
         elif os.path.isdir(a):
             #the input is a valid folder 
             extractMetadataFromFolder(a, 'e')
-        else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
     elif o == '-t':
         print("\n")
         print("Extract Temporal metadata only:\n")
@@ -318,7 +318,7 @@ for o, a in OPTS:
         elif os.path.isdir(a):
             #the input is a valid folder 
             extractMetadataFromFolder(a, 't')
-        else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
     elif o == '-s':
         print("\n")
         print("Extract Spatial metadata only:\n")
@@ -328,7 +328,7 @@ for o, a in OPTS:
         elif os.path.isdir(a):
             #the input is a valid folder 
             extractMetadataFromFolder(a, 's')
-        else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
     elif o == '-l':
         print("\n")
         print("Load metadata of file on pycsw ...\n")
@@ -348,12 +348,12 @@ for o, a in OPTS:
             sqlitepath = os.path.join(os.path.join("", pycswpath), sqlitepath[1:])
             if insertIntoDatabase(output, sqlitepath, 'records'):
                print("Metadata was successfully saved in the pycsw database")
-            else: raise FileNotFoundError()
+            #else: raise FileNotFoundError()
             
         elif os.path.isdir(a):
             #the input is a valid folder 
             raise Exception("Only single dictionaries can be uploaded into pycsw")
-        else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
     elif o == '-help':
         print("\n")
         print(usage())
