@@ -3,7 +3,7 @@ from six.moves import configparser
 from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO, handleGeotiff
+import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO
 import dicttoxml, xml, subprocess
 from lxml import etree
 
@@ -363,4 +363,4 @@ for o, a in OPTS:
             hf.printObject(output)
         else: print(output)
 
-#subprocess.call(["pycsw-admin.py", "-c", "load_records", "-f", "/home/kathy/Documents/Geosoftware2/pycswDocker1/pycsw/pycsw/default.cfg", "-p", "./" + ident +".xml"])]
+#subprocess.call(["/home/ilka/Desktop/geosoftware2_ct/CLITools/extract_metadata.py", "-e", "filePath"])

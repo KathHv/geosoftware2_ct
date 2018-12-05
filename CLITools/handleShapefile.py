@@ -51,4 +51,4 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         metadata["shape_elements"] = len(ourFile)
     return metadata
 
-extractMetadata("hallo", "/home/ilka/Desktop/shape.shp", "e")
+extractMetadata("shp", "/home/ilka/Desktop/shape.shp", "e")
