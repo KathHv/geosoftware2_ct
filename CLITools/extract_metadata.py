@@ -3,8 +3,7 @@ from six.moves import configparser
 from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleISO
-import xml, subprocess
+import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO
 import dicttoxml, xml, subprocess
 from lxml import etree
 
@@ -426,3 +425,5 @@ for o, a in OPTS:
         if type(output) == list or type(output) == dict:
             hf.printObject(output)
         else: print(output)
+
+#subprocess.call(["/home/ilka/Desktop/geosoftware2_ct/CLITools/extract_metadata.py", "-e", "filePath"])

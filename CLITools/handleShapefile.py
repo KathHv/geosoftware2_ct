@@ -1,5 +1,8 @@
 import shapefile, fiona
 import helpfunctions as hf
+import gdal
+from osgeo import ogr
+import sys
 
 #gets called when the argument of the command request is a shape-file
 def extractMetadata(fileFormat, filePath, whatMetadata):
@@ -113,3 +116,4 @@ def getBoundingBox(path):
             return r.bbox
 
             
+extractMetadata("shp", "/home/ilka/Desktop/shape.shp", "e")

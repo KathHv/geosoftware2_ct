@@ -25,12 +25,12 @@ def extractGeometry (json):
         #metadata["geometry"] = jsonGeometry
         return jsonGeometry
         
-    except AttributeError, e:
+    except AttributeError as e:
         print('Warning: missing metadata. Could not extract geometry')
         print(e)
         return jsonGeometry 
 
-    except TypeError, e:
+    except TypeError as e:
         print('Warning: missing metadata. Could not extract geometry')
         print(e)
         return jsonGeometry 
@@ -83,9 +83,9 @@ def getBoundingBox (contentString, content, geometry):
             bbox = geometry.GetEnvelope()
         return bbox
         
-    except AttributeError, e:
+    except AttributeError as e:
         print('Warning: missing metadata. Could not extract bounding box')
-        print e
+        print (e)
         return bbox
 
 
@@ -114,7 +114,7 @@ def searchForTimeElements(gjsonContent, dateArray):
             for element in gjsonContent:
                 searchForTimeElements(element, dateArray)
         else:
-            if type(gjsonContent) == unicode :
+            if type(gjsonContent) == bytes:
                 datetime_object = parse_datetime(unicodedata.normalize('NFKD', gjsonContent).encode('ascii', 'ignore') )
                 if type(datetime_object) ==datetime.datetime: #date
                     dateArray.append(gjsonContent)
@@ -137,9 +137,9 @@ def getTemporalExtent (gjsonContent):
         return timeExtent
         
 
-    except AttributeError, e:
+    except AttributeError as e:
         print('Warning: missing metadata. Could not extract timestamps')
-        print e
+        print (e)
       
 
 
@@ -226,7 +226,7 @@ def getAdditionalMetadata(gjsonContent, fileFormat, filePath):
             metadataDict = {}
 
             # extract other metadata
-            searchParams = ['format', 'source', 'crs', 'language', 'publisher', 'creator', 'resourcelanguage', 'contributor',
+            searchParams = ['format', 'source', 'crs', 'srs', 'language', 'publisher', 'creator', 'resourcelanguage', 'contributor',
             'organization', 'securityconstraints', 'servicetype', 'servicetypeversion', 'links', 'degree', 'conditionapplyingtoaccessanduse',
             'title_alternate', 'abstract', 'keywords', 'keywordstype', 'relation', 'wkt_geometry', 'date_revision', 'date_creation', 'date_publication',
             'date_modified', 'specificationtitle', 'specificationdate', 'specificationdatetype' , 'otherconstraints', 'type', 'comments', 'tags', 'comment', 'created_by', 'description']
@@ -261,21 +261,23 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         gjsonContentString = json.dumps(gjsonContent, sort_keys=False, indent=4)
         #gjsonContentString = json.loads(gjson) #throws ValueError if content is invalid json
         gjson.close()
-    except ValueError(json), e:
+
+    except ValueError(json) as e:
         print ('The geojson file from ' + filePath + ' is not valid.') 
-        print e
+        print (e)
         sys.exit(1)
-    except RuntimeError, e:
+
+    except RuntimeError as e:
         print ('Error: (geo)json file cannot be opened or read.')
-        print e
+        print (e)
         sys.exit(1)
 
     try: 
         if not gjsonContent:
             raise RuntimeError('The geojson file from ' + filePath + ' is empty')
-    except RuntimeError, e:
+    except RuntimeError as e:
         print ('Error')
-        print e
+        print (e)
         raise
 
 
@@ -304,10 +306,12 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
             metadata["coordinates"] = getVectorRepresentation(gjsonContent)       
             
             
-    except AttributeError, e:
+    except AttributeError as e:
         print('Warning: missing metadata. Could not extract all metadata')
-        print e
+        print (e)
 
-
+    print (metadata)
     return metadata
 
+
+extractMetadata("Hallo", "/home/ilka/Desktop/Geosoftware2_old/MetadatenExtrahieren/Geojson/testdata1.geojson", "e")
