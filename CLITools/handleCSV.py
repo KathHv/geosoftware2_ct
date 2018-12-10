@@ -9,6 +9,7 @@ def extractMetadata(filePath, whatMetadata):
         return metadata
     if whatMetadata=="t":
         metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
+        #gehört hier Start- oder Endzeit rein? Weil Temporal gibt es ja nicht mehr?
         return metadata
     if whatMetadata=="e":
         metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
