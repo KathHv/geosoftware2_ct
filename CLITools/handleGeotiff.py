@@ -108,12 +108,10 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
     #    print("Could not open " + filePath)
     #    print e
 
-    except RuntimeError, e:
+    except Exception as e:
         print ('RuntimeError')
-        print e
-        
-     
-    
-
-
+        print (e)
+    print (metadata)
     return metadata
+
+extractMetadata("tif", "/home/ilka/Desktop/TC_NG_Baghdad_IQ_Geo.tif", "e")

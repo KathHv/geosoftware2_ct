@@ -1,4 +1,4 @@
-import jgraph as ig
+import igraph as ig
 import helpfunctions as hf
 
 #gets called when the argument of the command request is a ISOxxx
@@ -26,6 +26,7 @@ def extractSpatialExtentFromGML(filePath):
         g = {}
         Graph = ig.Graph.Read_GML(gml_file)
         g["Graph"] = Graph
+        print(g)
         return g
 
 def extractTemporalExtentFromGML(filePath):
@@ -35,3 +36,5 @@ def extractTemporalExtentFromGML(filePath):
 def extractShapeTypeFromGML(filePath):
     #todo
     return ""
+
+extractMetadata("/home/ilka/Desktop/testi.gml", "e")

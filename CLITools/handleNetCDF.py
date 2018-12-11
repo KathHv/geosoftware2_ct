@@ -113,4 +113,7 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
 
     # filename, format, size, pixel_size, origin, subject, original_units, units, dimensions
     # NC_GLOBAL: title, source, dimensions, references, realization, project_id, institution, history, experiment_id, Conventions(of metadata!), contact, comment, cmor_version
+    print (metadata)
     return metadata
+
+extractMetadata("nc", "/home/ilka/Desktop/netcdfTest.nc", "e")

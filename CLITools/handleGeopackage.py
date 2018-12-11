@@ -60,6 +60,8 @@ def extractMetadata(filePath, whatMetadata):
         
     
     # TO DO: bbox in wgs84 + temporal extent
-    
+    print (metadata)
     return metadata
+
+extractMetadata("/home/ilka/Desktop/postcode_polygonsempty.gpkg", "e")
 

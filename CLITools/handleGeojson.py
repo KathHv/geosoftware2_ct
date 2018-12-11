@@ -314,4 +314,4 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
     return metadata
 
 
-extractMetadata("Hallo", "/home/ilka/Desktop/Geosoftware2_old/MetadatenExtrahieren/Geojson/testdata1.geojson", "e")
+extractMetadata("geojson", "/home/ilka/Desktop/Geosoftware2_old/MetadatenExtrahieren/Geojson/testdata1.geojson", "e")
