@@ -1,0 +1,2 @@
+[submodule "pycsw_ct/pycswVirtEnv/pycsw"]
+	url = https://github.com/KathHv/pycsw.git
