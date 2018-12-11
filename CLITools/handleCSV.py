@@ -5,18 +5,21 @@ import helpfunctions as hf
 def extractMetadata(filePath, whatMetadata): 
     metadata = {}
     if whatMetadata=="s":
-        metadata["Spatial Extent"] = extractSpatialExtentFromCSV(filePath)
+        metadata["spatial_extent"] = extractSpatialExtentFromCSV(filePath)
         return metadata
     if whatMetadata=="t":
-        metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
+<<<<<<< HEAD
+        #metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
         #gehört hier Start- oder Endzeit rein? Weil Temporal gibt es ja nicht mehr?
+=======
+        metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
+>>>>>>> master
         return metadata
     if whatMetadata=="e":
         metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
         metadata["keywords"] = extractKeywordsFromCSV(filePath)
         metadata["bbox"] = extractSpatialExtentFromCSV(filePath)
-        metadata["time_end"] = extractEndTimeFromCSV(filePath)
-        metadata["time_begin"] = extractStartTimeFromCSV(filePath)
+        metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
         metadata["Shapetypes"] = extractShapeTypeFromCSV(filePath)
         return metadata
     else:
@@ -64,15 +67,25 @@ def extractSpatialExtentFromCSV(filePath):
         SpatialLatExtent= {}
         SpatialLonExtent= {}
         SpatialLatExtent["lat"] = hf.searchForParameters(elements, ["lat", "latitude"])
-        minlat= (min(SpatialLatExtent["lat"]))
-        maxlat= (max(SpatialLatExtent["lat"]))
+        minlat= None
+        maxlat= None
+        if hf.searchForParameters(elements, ["lat", "latitude"]) is None:
+            pass
+        else:
+            minlat= (min(SpatialLatExtent["lat"]))
+            maxlat= (max(SpatialLatExtent["lat"]))
         SpatialLonExtent["lon"] = hf.searchForParameters(elements, ["lon", "longitude"])
-        minlon= (min(SpatialLonExtent["lon"]))
-        maxlon= (max(SpatialLonExtent["lon"]))
+        minlon= None
+        maxlon= None
+        if hf.searchForParameters(elements, ["lon", "longitude"]) is None:
+            pass
+        else:
+            minlon= (min(SpatialLonExtent["lon"]))
+            maxlon= (max(SpatialLonExtent["lon"]))
         SpatialExtent= [minlon,minlat,maxlon,maxlat]
         return SpatialExtent
 
-def extractStartTimeFromCSV(filePath):
+def extractTemporalExtentFromCSV(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
@@ -80,16 +93,14 @@ def extractStartTimeFromCSV(filePath):
             elements.append(x)
         AllSpatialExtent= {}
         AllSpatialExtent["Time"] = hf.searchForParameters(elements, ["time", "timestamp"])
-        minTime= (min(AllSpatialExtent["Time"]))
-        return minTime
-
-def extractEndTimeFromCSV(filePath):
-    with open(filePath) as csv_file:
-        daten = csv.reader(csv_file.readlines())
-        elements = []
-        for x in daten:
-            elements.append(x)
-        AllSpatialExtent= {}
-        AllSpatialExtent["Time"] = hf.searchForParameters(elements, ["time", "timestamp"])
-        maxTime= (max(AllSpatialExtent["Time"]))
-        return maxTime
+        minTime=None
+        maxTime=None
+        if hf.searchForParameters(elements, ["time", "timestamp"] ) is None:
+            pass
+        else:
+            minTime= (min(AllSpatialExtent["Time"]))
+            maxTime= (max(AllSpatialExtent["Time"]))
+        time=[]
+        time.append(minTime)
+        time.append(maxTime)
+        return time
