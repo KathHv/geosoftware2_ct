@@ -191,6 +191,9 @@ def getCenterTempSim(entryA, entryB):
 
 def getInterGeoSim(entryA,entryB):
     
+    
+def getInterTempSim(entryA,entryB):
+    startA= datetime.strptime(entryA["time"][0]
 
 
 
