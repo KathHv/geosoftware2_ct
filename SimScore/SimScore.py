@@ -72,9 +72,9 @@ def getInterv(entry):
 
 #Calculates center of bbox
 def getCenter(entry):
-    minLon=entry["wky_geometry"][2]
+    minLon=entry["wkt_geometry"][2]
     maxLon=entry["wkt_geometry"][3]
-    minLat=entry["wky_geometry"][0]
+    minLat=entry["wkt_geometry"][0]
     maxLat=entry["wkt_geometry"][1]
     lon = (minLon+maxLon)/2
     lat = (minLat+maxLat)/2
@@ -84,6 +84,8 @@ def getCenter(entry):
 def ConvertToRadian(input):
     return input * Math.PI / 180
 
+
+#output in m²
 def getArea(coordinates):
     area = 0
 
@@ -102,11 +104,30 @@ def getArea(coordinates):
 }
 
 
-def getAr(entry):
-    if (entry["wkt_geometry"][0]==entry["wkt_geometry"][1]) or (entry["wkt_geometry"][2]==entry["wkt_geometry"][3]):
-        return 0
-    return getArea(entry["wkt_geometry"])
+def getAr(points):
+    if (points[0]==points[1]) or (points[2]==points[3]):
+        return 0.1
+    return getArea(points)
 
+
+#checks whether corner points of rectangle B are in rectangle A
+def pointsInBbox(pointsA, pointsB):
+    points = [[pointsB[1],pointsB[2]], [pointsB[1],pointsB[3]], [pointsB[0],pointsB[2]], [pointsB[0],pointsB[3]]]
+
+    minLat=pointsA[0]
+    maxLat=pointsA[1]
+    minLon=pointsA[2]
+    maxLon=pointsA[3]
+
+    i=0
+    res = [0,0,0,0]
+
+    for x in points:
+        if (minLon<=x[1] and x[1]<=maxLon and minLat<=x[0] and x[0]<=maxLat):
+            res[i]=1
+        i=i+1
+
+    return res    
 
 
 '''
@@ -168,8 +189,11 @@ Location Similarity
 
 '''
 
+#####################################################################
+####### Relation of absolute positions in coordinate systems ########
+#####################################################################
 
-#Get similarity of location of center
+
 def getCenterGeoSim(entryA, entryB):
     centerA= getCenter(entryA)
     centerB= getCenter(entryB)
@@ -196,6 +220,12 @@ def getCenterTempSim(entryA, entryB):
 
     return tdelta/max
 
+
+#########################################################################
+########### Intersections ###############################################
+#########################################################################
+
+
 '''
 Rectangle: (simplified, in reality and also in function the rectangle is on the earth surface and therefor (simplified) on a sphere)
 ________________
@@ -210,20 +240,58 @@ ________________
 
 '''
 
-
+# Calculate intersection area of both bounding boxes
 def getInterGeoSim(entryA,entryB):
-    minLatA=entryA["bbox"][0]
-    minLatA=entryA["bbox"][1]
-    minLonA=entryA["bbox"][2]
-    maxLonA=entryA["bbox"][3]
-    minLatB=entryB["bbox"][0]
-    minLatB=entryB["bbox"][1]
-    minLonB=entryB["bbox"][2]
-    maxLonB=entryB["bbox"][3]
+    minLatA=entryA["wkt_geometry"][0]
+    maxLatA=entryA["wkt_geometry"][1]
+    minLonA=entryA["wkt_geometry"][2]
+    maxLonA=entryA["wkt_geometry"][3]
+    minLatB=entryB["wkt_geometry"][0]
+    maxLatB=entryB["wkt_geometry"][1]
+    minLonB=entryB["wkt_geometry"][2]
+    maxLonB=entryB["wkt_geometry"][3]
     
+    #disjunct?
+    if minLonA > maxLonB or maxLonA < minLonB or maxLatA < minLatB or minLatA > maxLonB:
+        return 0
+    
+    #A in B 
+    if minLonA > minLonB and maxLonA < maxLonB and minLonA > minLonB and maxLonA < maxLonB:
+        return 1
 
-    if ((minLonA<minLonB and maxLonA>minLonB) and not ()
+    areaA = getAr(entryA["wkt_geometry"])
+
+    #how many points of B in A?
+    points = pointsInBbox(entryA["wkt_geometry"], entryB["wkt_geometry"])
+
+    minLat=minLatA
+    minLon=minLonA
+    maxLat=maxLatA
+    maxLon=maxLonA
+
+    if points[0]==1:
+        minLon=minLonB
+        maxLat=maxLatB
     
+    if points[1]==1:
+        maxLat=maxLatB
+        maxLon=maxLonB
+    
+    if points[2]==1:
+        minLat=minLatB
+        minLon=minLonB
+
+    if points[3]==1:
+        minLat=minLatB
+        maxLon=maxLonB
+
+    intersecarea=getAr([minLat,maxLat,minLon,maxLon])
+
+    return float(intersecarea/areaA)
+
+
+
+
 def getInterTempSim(entryA,entryB):
     startA= datetime.strptime(entryA["time"][0]
 
