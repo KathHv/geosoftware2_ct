@@ -12,14 +12,12 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
                 return metadata
             if whatMetadata=="t":
                 metadata = {}
-                metadata["time_end"] = extractEndTimeFromXML(filePath)
-                metadata["time_begin"] = extractStartTimeFromXML(filePath)
+                metadata["temporal_extent"] = extractTemporalExtentFromXML(filePath)
                 return metadata
             if whatMetadata=="e":
                 metadata = {}
                 metadata["bbox"] = extractSpatialExtentFromXML(filePath)
-                metadata["time_end"] = extractEndTimeFromXML(filePath)
-                metadata["time_begin"] = extractStartTimeFromXML(filePath)
+                metadata["temporal_extent"] = extractTemporalExtentFromXML(filePath)
                 metadata["Shapetypes"] = extractShapeTypeFromXML(filePath)
                 return metadata
         if fileFormat== "gml":
@@ -29,14 +27,12 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
                 return metadata
             if whatMetadata=="t":
                 metadata = {}
-                metadata["time_end"] = extractEndTimeFromGML(filePath)
-                metadata["time_begin"] = extractStartTimeFromGML(filePath)
+                metadata["temporal_extent"] = extractTemporalExtentFromGML(filePath)
                 return metadata
             if whatMetadata=="e":
                 metadata = {}
                 metadata["bbox"] = extractSpatialExtentFromGML(filePath)
-                metadata["time_end"] = extractEndTimeFromGML(filePath)
-                metadata["time_begin"] = extractStartTimeFromGML(filePath)
+                metadata["temporal_extent"] = extractTemporalExtentFromGML(filePath)
                 metadata["Shapetypes"] = extractShapeTypeFromGML(filePath)
                 return metadata
 
@@ -75,7 +71,7 @@ def extractSpatialExtentFromXML(filePath):
         else:
             return None
 
-def extractStartTimeFromXML(filePath):
+def extractTemporalExtentFromXML(filePath):
     with open(filePath) as XML_File:
         tree = ET.parse(XML_File)
         root = tree.getroot()
@@ -85,23 +81,14 @@ def extractStartTimeFromXML(filePath):
                 time = x.find('time').text
                 alltime.append(time)
         minTime= None
-        if alltime is not None:
-            minTime=min(alltime)
-        return minTime
-
-def extractEndTimeFromXML(filePath):
-    with open(filePath) as XML_File:
-        tree = ET.parse(XML_File)
-        root = tree.getroot()
-        alltime = []
-        for x in root:
-            if x.find('time') is not None:  
-                time = x.find('time').text
-                alltime.append(time)
         maxTime= None
         if alltime is not None:
+            minTime=min(alltime)
             maxTime=max(alltime)
-        return maxTime
+        time=[]
+        time.append(minTime)
+        time.append(maxTime)
+        return time
 
 def extractShapeTypeFromXML(filePath):
     with open(filePath) as XML_File:
@@ -129,11 +116,7 @@ def extractShapeTypeFromGML(filePath):
             GML.append(gml_single)
             print(GML.index("base:Identifier"))
 
-def extractEndTimeFromGML(filePath):
-    with open(filePath) as GML_File:
-        return None
-
-def extractStartTimeFromGML(filePath):
+def extractTemporalExtentFromGML(filePath):
     with open(filePath) as GML_File:
         return None
 
