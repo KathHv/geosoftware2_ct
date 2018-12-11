@@ -42,17 +42,25 @@ def checkValidity(entries, cmp, n, e, d, l, g, t){
 
 # Checken, ob floats etc richtig
 def getDiagonal(entry):
-    r = 6371.0
-    dLon = entry["wkt_geometry"][1]-entry["wkt_geometry"][0]
-    dLat = entry["wkt_geometry"][3]-entry["wkt_geometry"][2]
+    lon1 = entry["wkt_geometry"][2]
+    lon2 = entry["wkt_geometry"][3]
+    lat2 = entry["wkt_geometry"][1]
+    lat1 = entry["wkt_geometry"][0]
 
+    # convert decimal degrees to radians 
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    c = 2 * math.asin(math.sqrt(a)) 
+    r = 6371.0 
+    d = c * r
     if dLon == 0 and dLat == 0:
         return 0.01
-
-    a = float((math.sin(float(dLat/2)))**2 + math.cos(entry[2][2]) * math.cos(entry[2][3]) * math.sin(float(dLon/2))**2)
-    c = 2*(math.asin(min(1, math.sqrt(a))))
-    d = r * c
     return d
+
 
 #Get length of temporal interval
 def getInterv(entry):
@@ -64,10 +72,10 @@ def getInterv(entry):
 
 #Calculates center of bbox
 def getCenter(entry):
-    minLon=entry["wky_geometry"][0]
-    maxLon=entry["wkt_geometry"][1]
-    minLat=entry["wky_geometry"][2]
-    maxLat=entry["wkt_geometry"][3]
+    minLon=entry["wky_geometry"][2]
+    maxLon=entry["wkt_geometry"][3]
+    minLat=entry["wky_geometry"][0]
+    maxLat=entry["wkt_geometry"][1]
     lon = (minLon+maxLon)/2
     lat = (minLat+maxLat)/2
     center = [lon,lat]
@@ -81,10 +89,10 @@ def getArea(coordinates):
 
     if (len(coordinates)>2):
         i=0
-        p1Lon = coordinates[i]
-        p1Lat = coordinates[i+2]
-        p2Lon = coordinates[i+1]
-        p2Lat = coordinates[i+3]
+        p1Lon = coordinates[i+2]
+        p1Lat = coordinates[i]
+        p2Lon = coordinates[i+3]
+        p2Lat = coordinates[i+1]
         area += ConvertToRadian(p2Lon - p1Lon) * (2 + math.sin(ConvertToRadian(p1Lat)) + math.sin(ConvertToRadian(p2Lat)))
 
         area = area * 6378137 * 6378137 / 2
@@ -95,9 +103,9 @@ def getArea(coordinates):
 
 
 def getAr(entry):
-    if (entry["bbox"][0]==entry["bbox"][1]) or (entry["bbox"][2]==entry["bbox"][3]):
+    if (entry["wkt_geometry"][0]==entry["wkt_geometry"][1]) or (entry["wkt_geometry"][2]==entry["wkt_geometry"][3]):
         return 0
-    return getArea(entry["bbox"])
+    return getArea(entry["wkt_geometry"])
 
 
 
@@ -188,9 +196,33 @@ def getCenterTempSim(entryA, entryB):
 
     return tdelta/max
 
+'''
+Rectangle: (simplified, in reality and also in function the rectangle is on the earth surface and therefor (simplified) on a sphere)
+________________
+|A            B| A (MinLon,MaxLat)
+|              | B (MaxLon,MaxLat)
+|              | C (MinLon,MinLat)
+|              | D (MaxLon,MaxLat)
+|C            D|
+|______________|
+
+
+
+'''
+
 
 def getInterGeoSim(entryA,entryB):
+    minLatA=entryA["bbox"][0]
+    minLatA=entryA["bbox"][1]
+    minLonA=entryA["bbox"][2]
+    maxLonA=entryA["bbox"][3]
+    minLatB=entryB["bbox"][0]
+    minLatB=entryB["bbox"][1]
+    minLonB=entryB["bbox"][2]
+    maxLonB=entryB["bbox"][3]
     
+
+    if ((minLonA<minLonB and maxLonA>minLonB) and not ()
     
 def getInterTempSim(entryA,entryB):
     startA= datetime.strptime(entryA["time"][0]
@@ -278,7 +310,7 @@ getSimilarityScore: Berechnet den SimilarityScore
 
                 entry:      {
                                 "id" : idOfTheEntry,
-                                "wkt_geometry" : [[minLon],[maxLon],[minLat],[maxLat]],
+                                "wkt_geometry" : [[minLat],[maxLat],[minLon],[maxLon]],
                                 "vector" : [[x,y],[x,y]...],
                                 "time" : [start, end],
                                 "raster"  : bool
