@@ -114,6 +114,3 @@ def getBoundingBox(path):
         if 'mydbf' in locals():
             r = shapefile.Reader(shp=myshp, dbf=mydbf)
             return r.bbox
-
-            
-extractMetadata("shp", "/home/ilka/Desktop/shape.shp", "e")

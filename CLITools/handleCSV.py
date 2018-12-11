@@ -8,6 +8,10 @@ def extractMetadata(filePath, whatMetadata):
         metadata["spatial_extent"] = extractSpatialExtentFromCSV(filePath)
         return metadata
     if whatMetadata=="t":
+<<<<<<< HEAD
+        #metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
+        #gehört hier Start- oder Endzeit rein? Weil Temporal gibt es ja nicht mehr?
+=======
         metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
         return metadata
     if whatMetadata=="e":
