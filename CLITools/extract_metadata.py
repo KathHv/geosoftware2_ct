@@ -79,14 +79,13 @@ def errorFunction():
 
 if len(sys.argv) == 1:
     print(usage())
-    sys.exit(1)
 
 try:
     OPTS, ARGS = getopt.getopt(sys.argv[1:], 'e:s:t:l:')
 except getopt.GetoptError as err:
     print('\nERROR: %s' % err)
     print(usage())
-    sys.exit(2)
+    #sys.exit(2)
 
 if len(OPTS) == 0:
     errorFunction()
@@ -260,67 +259,68 @@ def insertIntoDatabase(dictionary, dbpath, table):
 
 # function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
 def extractMetadataFromFolder(folderPath, whatMetadata):
-    metadata = {}
-    f = []
-    for (dirpath, dirnames, filenames) in walk(folderPath):
-        #fullPath = os.path.join(folderPath, filenames)
-        f.extend(filenames)
-        break
-    metadataElements = []
-    fullPaths = []
-    for x in f:
-        fullPaths.append(str(os.path.join(folderPath, x)))
-    #handle each of the files in the folder seperate
-    filesSkiped = 0
-    bboxes = []
-    temporal_extents = []
-    vector_representations = []
-    for x in fullPaths:
-        metadataOfFile = extractMetadataFromFile(x, "e")
-        if metadataOfFile is not None:
-            metadataElements.append(metadataOfFile)
-            if 'bbox' in metadataOfFile:
-                if metadataOfFile["bbox"] is not None:
-                    bboxes.append(metadataOfFile["bbox"])
-            if 'vector_representation' in metadataOfFile:
-                if metadataOfFile["vector_representation"] is not None:
-                    vector_representations.append(len(metadataOfFile["vector_representation"])) # TO DO: here all the coors should be appended later
-            if 'temporal_extent' in metadataOfFile:
-                if metadataOfFile["temporal_extent"] is not None:
-                    temporal_extents.append(metadataOfFile["temporal_extent"]) 
-        else:
-            # fileformat is not supported
-            filesSkiped += 1
-    
-    # computes temporal extent from parameter 'array'
-    # uses helpfunction
-    def getTemporalExtentFromFolder(array):
-        print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a temporal extent.")
 
-        if len(array) > 0 and hf.computeTempExtentOfMultiple(array) is not None:
-            return hf.computeTempExtentOfMultiple(array)
+    if not os.path.isdir(folderPath):
+        raise FileNotFoundError()
+    else:
+        metadata = {}
+        f = []
+        for (dirpath, dirnames, filenames) in walk(folderPath):
+            #fullPath = os.path.join(folderPath, filenames)
+            f.extend(filenames)
+        metadataElements = []
+        fullPaths = []
+        for x in f:
+            fullPaths.append(str(os.path.join(folderPath, x)))
+        #handle each of the files in the folder seperate
+        filesSkiped = 0
+        bboxes = []
+        temporal_extents = []
+        vector_representations = []
+        for x in fullPaths:
+            metadataOfFile = extractMetadataFromFile(x, "e")
+            if metadataOfFile is not None:
+                metadataElements.append(metadataOfFile)
+                if 'bbox' in metadataOfFile:
+                    if metadataOfFile["bbox"] is not None:
+                        bboxes.append(metadataOfFile["bbox"])
+                if 'vector_representation' in metadataOfFile:
+                    if metadataOfFile["vector_representation"] is not None:
+                        vector_representations.append(len(metadataOfFile["vector_representation"])) # TO DO: here all the coors should be appended later
+                if 'temporal_extent' in metadataOfFile:
+                    if metadataOfFile["temporal_extent"] is not None:
+                        temporal_extents.append(metadataOfFile["temporal_extent"]) 
+            else:
+                # fileformat is not supported
+                filesSkiped += 1
+        # computes temporal extent from parameter 'array'
+        # uses helpfunction
+        def getTemporalExtentFromFolder(array):
+            print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a temporal extent.")
 
-        else: return None
+            if len(array) > 0 and hf.computeTempExtentOfMultiple(array) is not None:
+                return hf.computeTempExtentOfMultiple(array)
 
-    # computes boundingbox from parameter 'array'
-    # uses helpfunction
-    def getBboxFromFolder(array):
-        print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a bbox.")
-        
-        if len(array) > 0 and hf.computeBboxOfMultiple(array) is not None:
-            return hf.computeBboxOfMultiple(array)
+            else: return None
 
-        else: return None
+        # computes boundingbox from parameter 'array'
+        # uses helpfunction
+        def getBboxFromFolder(array):
+            print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a bbox.")
+            
+            if len(array) > 0 and hf.computeBboxOfMultiple(array) is not None:
+                return hf.computeBboxOfMultiple(array)
 
-    # computes vector representation from parameter 'array'
-    # uses helpfunction
-    def getVectorRepFromFile(array):
-        print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
-        
-        if len(array) > 0: # TO DO: helpfunction and here catch is if result is None (Handle union of multiple vector representations)
-            return array
+            else: return None
 
-        else: return None
+        # computes vector representation from parameter 'array'
+        # uses helpfunction
+        def getVectorRepFromFile(array):
+            print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
+            if len(array) > 0: # TO DO: helpfunction and here catch is if result is None (Handle union of multiple vector representations)
+                return array
+
+            return None
 
     bbox = getBboxFromFolder(bboxes)
     vector_rep = getVectorRepFromFile(vector_representations)
@@ -363,37 +363,41 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 # tells the program what to do with certain tags and their attributes that are
 # inserted over the command line
 for o, a in OPTS:
-
+    ending = a
+    if "/" in a:
+        ending = a[a.rfind("/")+1:]
     if o == '-e':
         COMMAND = a
         print("Extract all metadata:\n")
-        if hf.exists(a):
-            print("File exists")
+        if '.' in ending:
+            # handle it as a file
             output = extractMetadataFromFile(a, 'e')
-        elif os.path.isdir(a):
-            #the input is a valid folder 
+        else:
+            # handle it as a folder
             output = extractMetadataFromFolder(a, 'e')
-        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+
     elif o == '-t':
         print("\n")
         print("Extract Temporal metadata only:\n")
         COMMAND = a
-        if hf.exists(a):
+        if '.' in ending:
+            # handle it as a file
             output = extractMetadataFromFile(a, 't')
-        elif os.path.isdir(a):
-            #the input is a valid folder 
+        else:
+            # handle it as a folder
             output = extractMetadataFromFolder(a, 't')
-        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+        
     elif o == '-s':
         print("\n")
         print("Extract Spatial metadata only:\n")
         COMMAND = a
-        if hf.exists(a):
+        if '.' in ending:
+            # handle it as a file
             output = extractMetadataFromFile(a, 's')
-        elif os.path.isdir(a):
-            #the input is a valid folder 
+        else:
+            # handle it as a folder
             output = extractMetadataFromFolder(a, 's')
-        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+
     elif o == '-l':
         print("\n")
         print("Load metadata of file on pycsw ...\n")
@@ -425,5 +429,3 @@ for o, a in OPTS:
         if type(output) == list or type(output) == dict:
             hf.printObject(output)
         else: print(output)
-
-#subprocess.call(["/home/ilka/Desktop/geosoftware2_ct/CLITools/extract_metadata.py", "-e", "filePath"])

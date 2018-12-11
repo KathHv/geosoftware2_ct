@@ -4,8 +4,9 @@ from osgeo import ogr
 import sys
 from datetime import datetime
 import datetime
-from django.utils.dateparse import parse_datetime
-import django, pytz
+
+#from django.utils.dateparse import parse_datetime
+#import django, pytz
 import unicodedata
 
 # all extracted metadata are saved to the dict metadata
@@ -312,6 +313,3 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
 
     print (metadata)
     return metadata
-
-
-extractMetadata("Hallo", "/home/ilka/Desktop/Geosoftware2_old/MetadatenExtrahieren/Geojson/testdata1.geojson", "e")
