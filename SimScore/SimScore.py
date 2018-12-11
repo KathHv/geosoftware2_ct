@@ -171,16 +171,28 @@ def getCenterGeoSim(entryA, entryB):
     return sim
 
 def getCenterTempSim(entryA, entryB):
+    frmt = "%Y-%m-%dT%H:%M:%S%Z" 
     if entryA["time"][0]==entryA["time"][1]:
         centerA=entryA["time"][0]
     else 
-        centerA=entryA["time"][0]+(getInterv(entryA)/2)
+        centerA=datetime.strptime(entryA["time"][0],frmt)+(getInterv(entryA)/2)
     if entryB["time"][0]==entryB["time"][1]:
         centerB=entryB["time"][0]
     else 
-        centerB=entryB["time"][0]+(getInterv(entryB)/2)
+        centerB=datetime.strptime(entryB["time"][0],frmt)+(getInterv(entryB)/2)
 
-    max = timedelta(days=365000)
+    tdelta = centerA-centerB
+    tdelta = tdelta.total_seconds
+
+    max = timedelta(days=365000).total_seconds
+
+    return tdelta/max
+
+
+def getInterGeoSim(entryA,entryB):
+    
+
+
 
     ####################################################
     ####################################################
