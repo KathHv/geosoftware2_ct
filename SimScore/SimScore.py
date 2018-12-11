@@ -64,8 +64,8 @@ def getDiagonal(entry):
 
 #Get length of temporal interval
 def getInterv(entry):
-    t1 = entry["time"][0]
-    t2 = entry["time"][1]
+    t1 = entry[0]
+    t2 = entry[1]
     frmt = "%Y-%m-%dT%H:%M:%S%Z" 
     tdelta = datetime.strptime(t2, frmt) - datetime.strptime(t1, frmt)
     return tdelta
@@ -155,8 +155,8 @@ def getGeoExtSim(entryA, entryB):
 
 #Similarity of temporal extent
 def getTempExtSim(entryA,entryB):
-    extA = getInterv(entryA).total_seconds()
-    extB = getInterv(entryB).total_seconds()
+    extA = getInterv(entryA["time"]).total_seconds()
+    extB = getInterv(entryB["time"]).total_seconds()
 
     if extA=0:
         extA=1
@@ -207,11 +207,11 @@ def getCenterTempSim(entryA, entryB):
     if entryA["time"][0]==entryA["time"][1]:
         centerA=entryA["time"][0]
     else 
-        centerA=datetime.strptime(entryA["time"][0],frmt)+(getInterv(entryA)/2)
+        centerA=datetime.strptime(entryA["time"][0],frmt)+(getInterv(entryA["time"])/2)
     if entryB["time"][0]==entryB["time"][1]:
         centerB=entryB["time"][0]
     else 
-        centerB=datetime.strptime(entryB["time"][0],frmt)+(getInterv(entryB)/2)
+        centerB=datetime.strptime(entryB["time"][0],frmt)+(getInterv(entryB["time"])/2)
 
     tdelta = centerA-centerB
     tdelta = tdelta.total_seconds
@@ -235,8 +235,6 @@ ________________
 |              | D (MaxLon,MaxLat)
 |C            D|
 |______________|
-
-
 
 '''
 
@@ -294,6 +292,27 @@ def getInterGeoSim(entryA,entryB):
 
 def getInterTempSim(entryA,entryB):
     startA= datetime.strptime(entryA["time"][0]
+    endA= datetime.strptime(entryA["time"][1]
+    startB= datetime.strptime(entryB["time"][0]
+    endB= datetime.strptime(entryB["time"][1]
+
+    lengthA=getInterv(entryA["time"]).total_seconds
+
+    if startA>endB or startB>endA:
+        return 0
+    elif startA>startB:
+        if endA<endB:
+            return 1
+        else:
+            interv = getInterv([startA,endB])
+    elif startB>startA:
+        if endB<endA:
+            interv = getInterv(entryB["time"]).total_seconds
+        else:
+            interv = getInterv([startB,endA]).total_seconds
+    
+    res = interv/lengthA
+    return res
 
 
 
