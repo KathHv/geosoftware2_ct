@@ -16,6 +16,8 @@ Help functions:
 
     getCenter:          calculates center of bounding box
 
+    getAr/getAres:      calculates area of bouunding box on earth surface
+
 '''
 
 def checkValidity(entries, cmp, n, e, d, l, g, t){
@@ -60,10 +62,42 @@ def getInterv(entry):
     tdelta = datetime.strptime(t2, frmt) - datetime.strptime(t1, frmt)
     return tdelta
 
-
+#Calculates center of bbox
 def getCenter(entry):
+    minLon=entry["wky_geometry"][0]
+    maxLon=entry["wkt_geometry"][1]
+    minLat=entry["wky_geometry"][2]
+    maxLat=entry["wkt_geometry"][3]
+    lon = (minLon+maxLon)/2
+    lat = (minLat+maxLat)/2
+    center = [lon,lat]
+    return center
+
+def ConvertToRadian(input):
+    return input * Math.PI / 180
+
+def getArea(coordinates):
+    area = 0
+
+    if (len(coordinates)>2):
+        i=0
+        p1Lon = coordinates[i]
+        p1Lat = coordinates[i+2]
+        p2Lon = coordinates[i+1]
+        p2Lat = coordinates[i+3]
+        area += ConvertToRadian(p2Lon - p1Lon) * (2 + math.sin(ConvertToRadian(p1Lat)) + math.sin(ConvertToRadian(p2Lat)))
+
+        area = area * 6378137 * 6378137 / 2
+    }
+
+    return math.abs(area)
+}
 
 
+def getAr(entry):
+    if (entry["bbox"][0]==entry["bbox"][1]) or (entry["bbox"][2]==entry["bbox"][3]):
+        return 0
+    return getArea(entry["bbox"])
 
 
 
@@ -128,7 +162,7 @@ Location Similarity
 
 
 #Get similarity of location of center
-def getGeoLocSim(entryA, entryB):
+def getCenterGeoSim(entryA, entryB):
     centerA= getCenter(entryA)
     centerB= getCenter(entryB)
     diagonal = float(getDiagonal([[],[],[entryA[1], entryB[1]]]))
@@ -136,6 +170,21 @@ def getGeoLocSim(entryA, entryB):
     sim = diagonal/circumf
     return sim
 
+def getCenterTempSim(entryA, entryB):
+    if entryA["time"][0]==entryA["time"][1]:
+        centerA=entryA["time"][0]
+    else 
+        centerA=entryA["time"][0]+(getInterv(entryA)/2)
+    if entryB["time"][0]==entryB["time"][1]:
+        centerB=entryB["time"][0]
+    else 
+        centerB=entryB["time"][0]+(getInterv(entryB)/2)
+
+    max = timedelta(days=365000)
+
+    ####################################################
+    ####################################################
+    ####################################################
 
 '''
 Datatype Similarity 
