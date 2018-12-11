@@ -1,37 +1,125 @@
-import jgraph as ig
+import xml.etree.ElementTree as ET  
+import networkx as nx
 import helpfunctions as hf
 
+
 #gets called when the argument of the command request is a ISOxxx
-def extractMetadata(filePath, whatMetadata):
-        if whatMetadata=="s":
-            metadaten = {}
-            metadaten["Spatial Extent"] = extractSpatialExtentFromGML(filePath)
-            return metadaten
-        if whatMetadata=="t":
-            metadaten = {}
-            metadaten["Temporal Extent"] = extractTemporalExtentFromGML(filePath)
-            return metadaten
-        if whatMetadata=="e":
-            metadaten = {}
-            metadaten["BoundingBox"] = extractSpatialExtentFromGML(filePath)
-            metadaten["StartTime-EndTime"] = extractTemporalExtentFromGML(filePath)
-            metadaten["Shapetypes"] = extractShapeTypeFromGML(filePath)
-            return metadaten
+def extractMetadata(fileFormat, filePath, whatMetadata):
+        if fileFormat== "xml":
+            if whatMetadata=="s":
+                metadata = {}
+                metadata["bbox"] = extractSpatialExtentFromXML(filePath)
+                return metadata
+            if whatMetadata=="t":
+                metadata = {}
+                metadata["temporal_extent"] = extractTemporalExtentFromXML(filePath)
+                return metadata
+            if whatMetadata=="e":
+                metadata = {}
+                metadata["bbox"] = extractSpatialExtentFromXML(filePath)
+                metadata["temporal_extent"] = extractTemporalExtentFromXML(filePath)
+                metadata["Shapetypes"] = extractShapeTypeFromXML(filePath)
+                return metadata
+        if fileFormat== "gml":
+            if whatMetadata=="s":
+                metadata = {}
+                metadata["bbox"] = extractSpatialExtentFromGML(filePath)
+                return metadata
+            if whatMetadata=="t":
+                metadata = {}
+                metadata["temporal_extent"] = extractTemporalExtentFromGML(filePath)
+                return metadata
+            if whatMetadata=="e":
+                metadata = {}
+                metadata["bbox"] = extractSpatialExtentFromGML(filePath)
+                metadata["temporal_extent"] = extractTemporalExtentFromGML(filePath)
+                metadata["Shapetypes"] = extractShapeTypeFromGML(filePath)
+                return metadata
+
+def extractSpatialExtentFromXML(filePath):
+    with open(filePath) as XML_file:
+        lat = []
+        lon = []
+        tree = ET.parse(XML_file)
+        root = tree.getroot()
+        for x in root:
+            if x.find('lat') is not None:  
+                latitute = x.find('lat').text
+                lat.append(latitute)
+            else:
+                if x.find('latitude') is not None:
+                    latitute = x.find('latitude').text
+                    lat.append(latitute)
+            if x.find('lon') is not None:  
+                longitude = x.find('lon').text
+                lon.append(longitude)
+            else:
+                if x.find('longitude') is not None:
+                    longitude = x.find('longitude').text
+                    lon.append(longitude)
+        SpatialExtent={}
+        if lat is not None:
+            minlat=min(lat)
+            maxlat=max(lat)
+            if lon is not None:
+                minlon=min(lon)
+                maxlon=max(lon)
+                SpatialExtent= [minlon,minlat,maxlon,maxlat]
+                return SpatialExtent
+            else:
+                return None
         else:
-            metadaten = {}
-            return metadaten
+            return None
 
-def extractSpatialExtentFromGML(filePath):
-    with open(filePath) as gml_file:
-        g = {}
-        Graph = ig.Graph.Read_GML(gml_file)
-        g["Graph"] = Graph
-        return g
+def extractTemporalExtentFromXML(filePath):
+    with open(filePath) as XML_File:
+        tree = ET.parse(XML_File)
+        root = tree.getroot()
+        alltime = []
+        for x in root:
+            if x.find('time') is not None:  
+                time = x.find('time').text
+                alltime.append(time)
+        minTime= None
+        maxTime= None
+        if alltime is not None:
+            minTime=min(alltime)
+            maxTime=max(alltime)
+        time=[]
+        time.append(minTime)
+        time.append(maxTime)
+        return time
 
-def extractTemporalExtentFromGML(filePath):
-    #todo
-    return ""
+def extractShapeTypeFromXML(filePath):
+    with open(filePath) as XML_File:
+        tree = ET.parse(XML_File)
+        root = tree.getroot()
+        allshapes = []
+        for x in root:
+            if x.find('shape') is not None:
+                shapes = x.find('shape').text
+                allshapes.append(shapes)
+        if allshapes is not None:
+            Shapetypes = hf.countElements(allshapes)
+        return Shapetypes
 
 def extractShapeTypeFromGML(filePath):
-    #todo
-    return ""
+    with open(filePath) as GML_File:
+        #G = nx.parse_gml(GML_File)
+        #print(G.node)
+        #return None
+        tree = ET.parse(GML_File)
+        root = tree.getroot()
+        GML=[]
+        for x in root:
+            gml_single = x.text
+            GML.append(gml_single)
+            print(GML.index("base:Identifier"))
+
+def extractTemporalExtentFromGML(filePath):
+    with open(filePath) as GML_File:
+        return None
+
+def extractSpatialExtentFromGML(filePath):
+    with open(filePath) as GML_File:
+        return None

@@ -3,7 +3,7 @@ from six.moves import configparser
 from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO, handleGeotiff
+import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO
 import dicttoxml, xml, subprocess
 from lxml import etree
 
@@ -32,7 +32,7 @@ def usage():
             cli.py -t </absoulte/path/to/record>|</absoulte/path/to/directory>
             cli.py -l </absoulte/path/to/record>|</absoulte/path/to/directory>
 
-            Suppoted formats:
+            Supported formats:
 
                     .dbf     |
                     .shp     |
@@ -79,14 +79,13 @@ def errorFunction():
 
 if len(sys.argv) == 1:
     print(usage())
-    sys.exit(1)
 
 try:
     OPTS, ARGS = getopt.getopt(sys.argv[1:], 'e:s:t:l:')
 except getopt.GetoptError as err:
     print('\nERROR: %s' % err)
     print(usage())
-    sys.exit(2)
+    #sys.exit(2)
 
 if len(OPTS) == 0:
     errorFunction()
@@ -220,9 +219,9 @@ def getDatabaseElementFromMetadata(metadataDictionary):
 
 # function is called when filePath is included in commanline (with tag 'e', 't' or 's')
 # how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
-# returns False if the format is not supported, else returns True 
+# returns None if the format is not supported, else returns True 
 def extractMetadataFromFile(filePath, whatMetadata):
-    fileFormat = a[a.rfind('.')+1:]
+    fileFormat = filePath[filePath.rfind('.')+1:]
     if fileFormat == 'shp' or fileFormat == 'dbf':
         metadata = handleShapefile.extractMetadata(fileFormat, filePath, whatMetadata)
     elif fileFormat == 'csv':
@@ -235,12 +234,10 @@ def extractMetadataFromFile(filePath, whatMetadata):
         metadata = handleGeopackage.extractMetadata(filePath, whatMetadata)
     elif fileFormat == 'geotiff' or fileFormat == 'tif':
         metadata = handleGeotiff.extractMetadata(fileFormat, filePath, whatMetadata)
-    elif fileFormat == 'gml':
+    elif fileFormat == 'gml' or fileFormat =='xml':
         metadata = handleISO.extractMetadata(fileFormat, filePath, whatMetadata)
-    else: return False
-    hf.printObject(metadata)
-    return True
-
+    else: return None
+    return metadata
 
 def insertIntoDatabase(dictionary, dbpath, table):
     if hf.exists(dbpath):
@@ -262,73 +259,145 @@ def insertIntoDatabase(dictionary, dbpath, table):
 
 # function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
 def extractMetadataFromFolder(folderPath, whatMetadata):
-    f = []
-    for (dirpath, dirnames, filenames) in walk(folderPath):
-        #fullPath = os.path.join(folderPath, filenames)
-        f.extend(filenames)
-        break
-    metadataElements = []
-    fullPaths = []
-    for x in f:
-        fullPaths.append(str(os.path.join(folderPath, x)))
-    #handle each of the files in the folder seperate
-    filesSkiped = 0
-    for x in fullPaths:
-        fileFormat = x[x.rfind('.')+1:]
-        if fileFormat == 'shp': #here not 'dbf' so that it does not take the object twice into account
-            metadataElements.append(handleShapefile.extractMetadata("shp", x, whatMetadata))
-        elif fileFormat == 'csv':
-            metadataElements.append(handleCSV.extractMetadata(x, whatMetadata))
-        elif fileFormat == 'nc':
-            metadataElements.append(handleNetCDF.extractMetadata(fileFormat, x, whatMetadata))
-        elif fileFormat == 'geojson' or fileFormat == 'json': #here both because it is either geojson OR json
-            metadataElements.append(handleGeojson.extractMetadata(fileFormat, x, whatMetadata))
-        elif fileFormat == 'gpkg':
-            metadataElements.append(handleGeopackage.extractMetadata(x, whatMetadata))
-        elif fileFormat == 'geotiff' or fileFormat == 'tif': #here both because it is either geotiff OR tif
-            metadataElements.append(handleGeotiff.extractMetadata(fileFormat, x, whatMetadata))
-        elif fileFormat == 'gml':
-            metadataElements.append(handleISO.extractMetadata(fileFormat, x, whatMetadata))
-        elif not (fileFormat == 'shp' or fileFormat == 'dbf'): 
-            filesSkiped += 1
+
+    if not os.path.isdir(folderPath):
+        raise FileNotFoundError()
+    else:
+        metadata = {}
+        f = []
+        for (dirpath, dirnames, filenames) in walk(folderPath):
+            #fullPath = os.path.join(folderPath, filenames)
+            f.extend(filenames)
+        metadataElements = []
+        fullPaths = []
+        for x in f:
+            fullPaths.append(str(os.path.join(folderPath, x)))
+        #handle each of the files in the folder seperate
+        filesSkiped = 0
+        bboxes = []
+        temporal_extents = []
+        vector_representations = []
+        for x in fullPaths:
+            metadataOfFile = extractMetadataFromFile(x, "e")
+            if metadataOfFile is not None:
+                metadataElements.append(metadataOfFile)
+                if 'bbox' in metadataOfFile:
+                    if metadataOfFile["bbox"] is not None:
+                        bboxes.append(metadataOfFile["bbox"])
+                if 'vector_representation' in metadataOfFile:
+                    if metadataOfFile["vector_representation"] is not None:
+                        vector_representations.append(len(metadataOfFile["vector_representation"])) # TO DO: here all the coors should be appended later
+                if 'temporal_extent' in metadataOfFile:
+                    if metadataOfFile["temporal_extent"] is not None:
+                        temporal_extents.append(metadataOfFile["temporal_extent"]) 
+            else:
+                # fileformat is not supported
+                filesSkiped += 1
+        # computes temporal extent from parameter 'array'
+        # uses helpfunction
+        def getTemporalExtentFromFolder(array):
+            print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a temporal extent.")
+
+            if len(array) > 0 and hf.computeTempExtentOfMultiple(array) is not None:
+                return hf.computeTempExtentOfMultiple(array)
+
+            else: return None
+
+        # computes boundingbox from parameter 'array'
+        # uses helpfunction
+        def getBboxFromFolder(array):
+            print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a bbox.")
+            
+            if len(array) > 0 and hf.computeBboxOfMultiple(array) is not None:
+                return hf.computeBboxOfMultiple(array)
+
+            else: return None
+
+        # computes vector representation from parameter 'array'
+        # uses helpfunction
+        def getVectorRepFromFile(array):
+            print(str(len(array)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
+            if len(array) > 0: # TO DO: helpfunction and here catch is if result is None (Handle union of multiple vector representations)
+                return array
+
+            return None
+
+    bbox = getBboxFromFolder(bboxes)
+    vector_rep = getVectorRepFromFile(vector_representations)
+    temp_ext = getTemporalExtentFromFolder(temporal_extents)
+
+    if whatMetadata == "e":
+        
+        if bbox is not None:
+            metadata["bbox"] = bbox
+        
+        if vector_rep is not None:
+            metadata["vector_representation"] = vector_rep
+        
+        if temp_ext is not None:
+            metadata["temporal_extent"] = temp_ext
+    
+
+    if whatMetadata == "s":
+        
+        if bbox is not None and vector_rep is not None:
+            metadata["bbox"] = bbox
+            metadata["vector_representation"] = vector_rep
+
+        else: raise Exception("A spatial extent cannot be computed out any file in this folder")
+
+    if whatMetadata == "t":
+
+        if temp_ext is not None:
+            metadata["temporal_extent"] = temp_ext
+
+        else: raise Exception("A temporal extent cannot be computed out any file in this folder")
+        
     if filesSkiped != 0: 
-        print(str(filesSkiped) + ' file(s) has been skipped as its format is not suppoted; to see the suppoted formats look at -help')
-    else: print("No file in directory with metadata")
+        print(str(filesSkiped) + ' file(s) has been skipped as its format is not supported; to see the supported formats look at -help')
+    if len(fullPaths) - filesSkiped == 0:
+        raise Exception("None of the files in the dictionary are supported.")
+    return metadata
+
 
 # tells the program what to do with certain tags and their attributes that are
 # inserted over the command line
 for o, a in OPTS:
-
+    ending = a
+    if "/" in a:
+        ending = a[a.rfind("/")+1:]
     if o == '-e':
         COMMAND = a
         print("Extract all metadata:\n")
-        if hf.exists(a):
-            print("File exists")
+        if '.' in ending:
+            # handle it as a file
             output = extractMetadataFromFile(a, 'e')
-        elif os.path.isdir(a):
-            #the input is a valid folder 
-            extractMetadataFromFolder(a, 'e')
-        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+        else:
+            # handle it as a folder
+            output = extractMetadataFromFolder(a, 'e')
+
     elif o == '-t':
         print("\n")
         print("Extract Temporal metadata only:\n")
         COMMAND = a
-        if hf.exists(a):
+        if '.' in ending:
+            # handle it as a file
             output = extractMetadataFromFile(a, 't')
-        elif os.path.isdir(a):
-            #the input is a valid folder 
-            extractMetadataFromFolder(a, 't')
-        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+        else:
+            # handle it as a folder
+            output = extractMetadataFromFolder(a, 't')
+        
     elif o == '-s':
         print("\n")
         print("Extract Spatial metadata only:\n")
         COMMAND = a
-        if hf.exists(a):
+        if '.' in ending:
+            # handle it as a file
             output = extractMetadataFromFile(a, 's')
-        elif os.path.isdir(a):
-            #the input is a valid folder 
-            extractMetadataFromFolder(a, 's')
-        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
+        else:
+            # handle it as a folder
+            output = extractMetadataFromFolder(a, 's')
+
     elif o == '-l':
         print("\n")
         print("Load metadata of file on pycsw ...\n")
@@ -336,8 +405,6 @@ for o, a in OPTS:
         if hf.exists(a):
             output = getDatabaseElementFromMetadata(extractMetadataFromFile(a, 'e')) 
             cp = configparser.RawConfigParser()
-
-
             dirOfThisFile = os.path.dirname(os.path.abspath(__file__))
             pycswpath = os.path.join("", '/home/niklas/Dokumente/pycsw/pycsw/pycsw')
             pathOfConfic = os.path.join(pycswpath, 'default.cfg')
@@ -362,5 +429,3 @@ for o, a in OPTS:
         if type(output) == list or type(output) == dict:
             hf.printObject(output)
         else: print(output)
-
-#subprocess.call(["pycsw-admin.py", "-c", "load_records", "-f", "/home/kathy/Documents/Geosoftware2/pycswDocker1/pycsw/pycsw/default.cfg", "-p", "./" + ident +".xml"])]
