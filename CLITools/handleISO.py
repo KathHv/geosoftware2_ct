@@ -37,4 +37,3 @@ def extractShapeTypeFromGML(filePath):
     #todo
     return ""
 
-extractMetadata("/home/ilka/Desktop/testi.gml", "e")

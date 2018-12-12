@@ -63,5 +63,4 @@ def extractMetadata(filePath, whatMetadata):
     print (metadata)
     return metadata
 
-extractMetadata("/home/ilka/Desktop/postcode_polygonsempty.gpkg", "e")
 

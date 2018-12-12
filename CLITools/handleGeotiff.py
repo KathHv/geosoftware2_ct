@@ -114,4 +114,3 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
     print (metadata)
     return metadata
 
-extractMetadata("tif", "/home/ilka/Desktop/TC_NG_Baghdad_IQ_Geo.tif", "e")

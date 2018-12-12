@@ -116,4 +116,3 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
     print (metadata)
     return metadata
 
-extractMetadata("nc", "/home/ilka/Desktop/netcdfTest.nc", "e")

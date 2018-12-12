@@ -50,5 +50,3 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         metadata["shapetype"] =  ourFile.shapeTypeName
         metadata["shape_elements"] = len(ourFile)
     return metadata
-
-extractMetadata("shp", "/home/ilka/Desktop/shape.shp", "e")
