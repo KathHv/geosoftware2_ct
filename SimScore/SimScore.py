@@ -278,6 +278,26 @@ def getInterGeoSim(entryA,entryB):
     if points[3]==1:
         minLat=minLatB
         maxLon=maxLonB
+       
+    elif points[0]==0 and points[1]==0 and points[2]==0:
+        points = pointsInBbox(entryB["wkt_geometry"], entryA["wkt_geometry"])
+        
+        if points[0]==1:
+            maxLon=maxLonB
+            minLat=minLatB
+    
+        if points[1]==1:
+            minLat=minLatB
+            minLon=minLonB
+    
+        if points[2]==1:
+            maxLat=maxLatB
+            maxLon=maxLonB
+
+        if points[3]==1:
+            maxLat=maxLatB
+            minLon=minLonB
+     
 
     intersecarea=getAr([minLat,maxLat,minLon,maxLon])
 
