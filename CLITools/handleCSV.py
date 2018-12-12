@@ -8,10 +8,6 @@ def extractMetadata(filePath, whatMetadata):
         metadata["spatial_extent"] = extractSpatialExtentFromCSV(filePath)
         return metadata
     if whatMetadata=="t":
-<<<<<<< HEAD
-        #metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
-        #gehört hier Start- oder Endzeit rein? Weil Temporal gibt es ja nicht mehr?
-=======
         metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
         return metadata
     if whatMetadata=="e":
@@ -65,7 +61,7 @@ def extractSpatialExtentFromCSV(filePath):
         SpatialExtent= {}
         SpatialLatExtent= {}
         SpatialLonExtent= {}
-        SpatialLatExtent["lat"] = hf.searchForParameters(elements, ["lat", "latitude"])
+        SpatialLatExtent["lat"] = hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
         minlat= None
         maxlat= None
         if hf.searchForParameters(elements, ["lat", "latitude"]) is None:
@@ -73,7 +69,7 @@ def extractSpatialExtentFromCSV(filePath):
         else:
             minlat= (min(SpatialLatExtent["lat"]))
             maxlat= (max(SpatialLatExtent["lat"]))
-        SpatialLonExtent["lon"] = hf.searchForParameters(elements, ["lon", "longitude"])
+        SpatialLonExtent["lon"] = hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
         minlon= None
         maxlon= None
         if hf.searchForParameters(elements, ["lon", "longitude"]) is None:
@@ -90,16 +86,12 @@ def extractTemporalExtentFromCSV(filePath):
         elements = []
         for x in daten:
             elements.append(x)
-        AllSpatialExtent= {}
-        AllSpatialExtent["Time"] = hf.searchForParameters(elements, ["time", "timestamp"])
-        minTime=None
-        maxTime=None
+        AllSpatialExtent= []
+        AllSpatialExtent.append(hf.searchForParameters(elements, ["time", "timestamp"]))
         if hf.searchForParameters(elements, ["time", "timestamp"] ) is None:
-            pass
+            return None
         else:
-            minTime= (min(AllSpatialExtent["Time"]))
-            maxTime= (max(AllSpatialExtent["Time"]))
-        time=[]
-        time.append(minTime)
-        time.append(maxTime)
-        return time
+            time=[]
+            time.append(min(AllSpatialExtent))
+            time.append(max(AllSpatialExtent))
+            return time
