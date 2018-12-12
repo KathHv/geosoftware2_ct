@@ -278,7 +278,8 @@ def getInterGeoSim(entryA,entryB):
     if points[3]==1:
         minLat=minLatB
         maxLon=maxLonB
-       
+    
+    #If only points of B are in A, but not of A in B
     elif points[0]==0 and points[1]==0 and points[2]==0:
         points = pointsInBbox(entryB["wkt_geometry"], entryA["wkt_geometry"])
         
