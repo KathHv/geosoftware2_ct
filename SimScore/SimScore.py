@@ -163,9 +163,9 @@ def getTempExtSim(entryA,entryB):
         extA=1
     if extB==0:
         extB=1
-    min = min(extA, extB)
-    max = max(extA, extB)
-    sim = float(min/max)
+    minV = min(extA, extB)
+    maxV = max(extA, extB)
+    sim = float(minV/maxV)
     return sim
 
 
