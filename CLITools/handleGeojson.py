@@ -14,7 +14,7 @@ import unicodedata
 
 foundCoordsX = []
 foundCoordsY = []
-
+dateArray= []
 coordinates = []      
 metadataList = []
 
@@ -109,7 +109,7 @@ def searchForTimeElements(gjsonContent, dateArray):
     if type(gjsonContent) == dict:
         for key, value in gjsonContent.items():     
             if key not in ignore:
-                   searchForTimeElements(value, dateArray)    
+                searchForTimeElements(value, dateArray)    
     else: 
         if type(gjsonContent) == list:
             for element in gjsonContent:
@@ -120,12 +120,10 @@ def searchForTimeElements(gjsonContent, dateArray):
                 if type(datetime_object) ==datetime.datetime: #date
                     dateArray.append(gjsonContent)
 
-
-
 #extract timeextend from json string
 def getTemporalExtent (gjsonContent):
     try:
-        dateArray = []
+        global dateArray
         timeExtent = []
 
         searchForTimeElements(gjsonContent,dateArray)

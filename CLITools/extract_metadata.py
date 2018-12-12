@@ -234,7 +234,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
         metadata = handleGeopackage.extractMetadata(filePath, whatMetadata)
     elif fileFormat == 'geotiff' or fileFormat == 'tif':
         metadata = handleGeotiff.extractMetadata(fileFormat, filePath, whatMetadata)
-    elif fileFormat == 'gml' or fileFormat =='xml':
+    elif fileFormat == 'gml' or fileFormat =='xml' or fileFormat == 'kml':
         metadata = handleISO.extractMetadata(fileFormat, filePath, whatMetadata)
     else: return None
     return metadata
