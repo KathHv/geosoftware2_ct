@@ -37,6 +37,10 @@ def checkValidity(entries, cmp, n, e, d, l, g, t):
     return True
 
 
+def ConvertToRadian(input):
+    return input * math.pi/ 180
+
+
 #Calculates diagonal of Bounding Box by use of Haversine Formula
 
 
@@ -48,7 +52,7 @@ def getDiagonal(entry):
     lat1 = entry["wkt_geometry"][0]
 
     # convert decimal degrees to radians 
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    lon1, lat1, lon2, lat2 = map(ConvertToRadian, [lon1, lat1, lon2, lat2])
 
     # haversine formula 
     dlon = lon2 - lon1 
@@ -81,8 +85,6 @@ def getCenter(entry):
     center = [lon,lat]
     return center
 
-def ConvertToRadian(input):
-    return input * math.pi / 180
 
 
 #output in m²
@@ -100,7 +102,7 @@ def getArea(coordinates):
         area = area * 6378137 * 6378137 / 2
     
 
-    return abs(area) #statt math.abs
+    return abs(area)
 
 
 
@@ -141,14 +143,13 @@ Extent Similarity:
 '''
 
 
-
 # Similarity of geographical extent
 def getGeoExtSim(entryA, entryB):
     diagonalA=float(getDiagonal(entryA))
     diagonalB=float(getDiagonal(entryB))
-    min = min(diagonalA, diagonalB)
-    max = max(diagonalA, diagonalB)
-    sim = float(min/max)
+    minV = min(diagonalA, diagonalB)
+    maxV = max(diagonalA, diagonalB)
+    sim = float(minV/maxV)
     return sim
 
 
@@ -162,9 +163,9 @@ def getTempExtSim(entryA,entryB):
         extA=1
     if extB==0:
         extB=1
-    min = min(extA, extB)
-    max = max(extA, extB)
-    sim = float(min/max)
+    minV = min(extA, extB)
+    maxV = max(extA, extB)
+    sim = float(minV/maxV)
     return sim
 
 
@@ -212,7 +213,7 @@ def getCenterTempSim(entryA, entryB):
     tdelta = centerA-centerB
     tdelta = tdelta.total_seconds
 
-    max = timedelta(days=365000).total_seconds
+    max = datetime.timedelta(days=365000).total_seconds
 
     return tdelta/max
 
@@ -426,7 +427,7 @@ getSimilarityScore: Berechnet den SimilarityScore
 
                 entry:      {
                                 "id" : idOfTheEntry,
-                                "wkt_geometry" : [[minLat],[maxLat],[minLon],[maxLon]],
+                                "wkt_geometry" : [minLat,maxLat,minLon,maxLon],
                                 "vector" : [[x,y],[x,y]...],
                                 "time" : [start, end],
                                 "raster"  : bool
@@ -454,16 +455,16 @@ def getSimilarRecords(entries, cmp, n, e, d, l, g, t):
     i=0
 
     while i < n:
-        heappush(records, [entries[i]["id"], getSimScoreTotal(cmp, entries[i], g, t, e, d, l)])
+        heapq.heappush(records, [entries[i]["id"], getSimScoreTotal(cmp, entries[i], g, t, e, d, l)])
         i=i+1
     
     while i < len(entries):
-        min = heappop(records)
+        min = heapq.heappop(records)
         currscore = getSimScoreTotal(cmp, entries[i], g, t, e, d, l)
         if min[1]<currscore:
-            heappush(records, [entries[i]["id"], getSimScoreTotal(cmp, entries[i], g, t, e, d, l)])
+            heapq.heappush(records, [entries[i]["id"], getSimScoreTotal(cmp, entries[i], g, t, e, d, l)])
         else:
-            heappush(records, min)
+            heapq.heappush(records, min)
         i=i+1
     
     output=sorted(records, key= lambda x: x[1])
