@@ -3,7 +3,7 @@ import os
 import os.path
 import filecmp
 import math
-import SimilarRecords
+import SimScore
 
 
 #testet, ob die richtigen Resultate beim Vergleichen zweier Datentypen geografischer
@@ -17,7 +17,7 @@ import SimilarRecords
 # entry1, eintry2: Zu Vergleichende Einträge aus einem Dictionary
 
 def test_getGeoDatSim(dict, entry1, entry2):
-    geoSimilarity = SimilarRecords.getGeoDatSim(dict, entry1, entry2)
+    geoSimilarity = SimScore.getGeoDatSim(dict, entry1, entry2)
     print (geoSimilarity)
     # geoSimilarity = 0 || geoSimilarity = 0.8 || geoSimilarity = 1
     ans = 0
@@ -29,13 +29,9 @@ def test_getGeoDatSim(dict, entry1, entry2):
     assert ans == geoSimilarity
 
 #testet, ob die richtigen Resultate beim Vergleichen zweier Datentypen zeitlicher
-#Informationen ausgegeben werden
-#Ausgaben:
-    #1: beide Intervall oder Punkt
-    #0: sonst
-
+#Informationen ausgegeben werden getTempDatSim(dict, entry1, entry2):
 def test_getTempDatSim(dict, entry1, entry2):
-    tempSimilarity = SimilarRecords.getTempDatSim(dict, entry1, entry2)
+    tempSimilarity = SimScore.getTempDatSim(dict, entry1, entry2)
     print (tempSimilarity)
     ans = 0
     if (dict[entry1]["start"] == dict[entry1]["end"] and dict[entry2]["start"] == dict[entry2]["end"]):
@@ -52,7 +48,7 @@ def test_getTempDatSim(dict, entry1, entry2):
 #testet, die Eingaben in Bezug auf Größenähnlichkeit
 
 def test_getGeoExtSim(dict, entry1, entry2):
-    GeoExtentSimilarity = SimilarRecords.getGeoExtSim(dict[entry1], dict[entry2])
+    GeoExtentSimilarity = SimScore.getGeoExtSim(dict[entry1], dict[entry2])
     print (GeoExtentSimilarity)
     ans = False
     if (GeoExtentSimilarity >= 0 and GeoExtentSimilarity <= 1):
@@ -62,7 +58,7 @@ def test_getGeoExtSim(dict, entry1, entry2):
 #testet, die Eingaben in Bezug auf Zeitähnlichkeit
 
 def test_getTempExtSim(dict, entry1, entry2):
-    TemporalExtentSimilarity = SimilarRecords.getTemporalExtSim(dict[entry1], dict[entry2])
+    TemporalExtentSimilarity = SimScore.getTemporalExtSim(dict[entry1], dict[entry2])
     print (TemporalExtentSimilarity)
     ans = False
     if (TemporalExtentSimilarity > 0 and TemporalExtentSimilarity <= 1):
@@ -78,18 +74,23 @@ def test_getTempExtSim(dict, entry1, entry2):
     #4. Kein Schnitt: Ähnlichkeit 0
 
 def test_getInterGeoSim(dict, entry1, entry2):
-    InterGeoSimilarity = SimilarRecords.getInterGeoSim(dict[entry1], dict[entry2])
+    InterGeoSimilarity = SimScore.getInterGeoSim(dict[entry1], dict[entry2])
     print (InterGeoSimilarity)
     if(InterGeoSimilarity):
         k = 5
     #TODO
 
+def test_getInterTempSim(dict, entry1, entry2):
+    InterTempSimilarity = SimScore.getInterTempSim(dict[entry1], dict[entry2])
+    print (InterTempSimilarity)
+    if (InterTempSimilarity):
+        #TODO
 #testet, ob der Unterschied zwischen den Bounding Boxes von Entry1 und Entry2 der selbe ist wie zwischen Entry2 und Entry1
 # Ilka ist hübsch
 
-def test_getCentGeoSim(dict, entry1, entry2):
-    geoCentSim1 = SimilarRecords.getCentGeoSim(dict[entry1], dict[entry2])
-    geoCentSim2 = SimilarRecords.getCentGeoSim(dict[entry2], dict[entry1])
+def test_getCenterGeoSim(dict, entry1, entry2):
+    geoCentSim1 = SimScore.getCenterGeoSim(dict[entry1], dict[entry2])
+    geoCentSim2 = SimScore.getCenterGeoSim(dict[entry2], dict[entry1])
     print (geoCentSim1)
     print (geoCentSim2)    
     ans = False
@@ -101,8 +102,8 @@ def test_getCentGeoSim(dict, entry1, entry2):
 #testet, ob der Unterschied zwischen den Intervallen von Entry1 und Entry2 der selbe ist wie zwischen Entry2 und Entry1
 
 def test_getCentTempSim(dict, entry1, entry2):
-    tempCentSim1 = SimilarRecords.getCentTempSim(dict[entry1], dict[entry2])
-    tempCentSim2 = SimilarRecords.getCentTempSim(dict[entry2], dict[entry1])
+    tempCentSim1 = SimScore.getCentTempSim(dict[entry1], dict[entry2])
+    tempCentSim2 = SimScore.getCentTempSim(dict[entry2], dict[entry1])
     print (tempCentSim1)
     print (tempCentSim2)    
     ans = False
@@ -110,9 +111,6 @@ def test_getCentTempSim(dict, entry1, entry2):
         ans = True
     assert ans == True   
 
-#
-#getLocSim:
-#TODO
 
 #Helpfunction:
     #1. Validity-Check
@@ -127,7 +125,7 @@ def intBetween(x, bottom, top):
         return False 
 
 def test_checkValidity(entries, cmps, n, e, d, l, g, t):
-    Validity = SimilarRecords.checkValidity(entries)
+    Validity = SimScore.checkValidity(entries)
     print(Validity)
     ans = False
     #entries ein Dict
@@ -149,13 +147,13 @@ def test_checkValidity(entries, cmps, n, e, d, l, g, t):
                
 
 def test_getDiagonal(entry): 
-    Diagonale = SimilarRecords.test_getDiagonal(entry)
+    Diagonale = SimScore.test_getDiagonal(entry)
     print (Diagonale)     
     ans = False 
     #TODO                                                                                                    
 
 def test_getInterv(entry):
-    Intervall = SimilarRecords.test_getInterv(entry)
+    Intervall = SimScore.test_getInterv(entry)
     print (Intervall)
     ans = False
     if(Intervall == entry["time"][1] - entry ["time"][0]):
@@ -163,7 +161,7 @@ def test_getInterv(entry):
     assert ans == True
     
 def test_getAr(pt1, pt2):
-    Ar = SimilarRecords.test_getAr(pt1, pt2)
+    Ar = SimScore.test_getAr(pt1, pt2)
     print (Ar)
     #TODO     
 
