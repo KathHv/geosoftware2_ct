@@ -427,7 +427,7 @@ getSimilarityScore: Berechnet den SimilarityScore
 
                 entry:      {
                                 "id" : idOfTheEntry,
-                                "wkt_geometry" : [[minLat],[maxLat],[minLon],[maxLon]],
+                                "wkt_geometry" : [minLat,maxLat,minLon,maxLon],
                                 "vector" : [[x,y],[x,y]...],
                                 "time" : [start, end],
                                 "raster"  : bool
