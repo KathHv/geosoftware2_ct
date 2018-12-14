@@ -14,7 +14,7 @@ import unicodedata
 
 foundCoordsX = []
 foundCoordsY = []
-
+dateArray= []
 coordinates = []      
 metadataList = []
 
@@ -109,7 +109,7 @@ def searchForTimeElements(gjsonContent, dateArray):
     if type(gjsonContent) == dict:
         for key, value in gjsonContent.items():     
             if key not in ignore:
-                   searchForTimeElements(value, dateArray)    
+                searchForTimeElements(value, dateArray)    
     else: 
         if type(gjsonContent) == list:
             for element in gjsonContent:
@@ -120,12 +120,10 @@ def searchForTimeElements(gjsonContent, dateArray):
                 if type(datetime_object) ==datetime.datetime: #date
                     dateArray.append(gjsonContent)
 
-
-
 #extract timeextend from json string
 def getTemporalExtent (gjsonContent):
     try:
-        dateArray = []
+        global dateArray
         timeExtent = []
 
         searchForTimeElements(gjsonContent,dateArray)
@@ -195,8 +193,6 @@ def fillIfAvailable(searchParam, gjsonContent, metadata):
                     metadataList = []
                     if key == 'coord' or key == 'coords' or key == 'coordinates' or key == 'coordinate':
                             extractCoordinatesForMetadata(value)
-                            print("coordinates:")
-                            print(coordinates)
                             value = coordinates
                     elif type(value) == dict:
                         extractFromDict(value) 
@@ -245,8 +241,6 @@ def getVectorRepresentation(gjsonContent):
     coordDict = {}
     searchParams = ['coordinates', 'coords', 'coord', 'coordinate']
     fillIfAvailable(searchParams, gjsonContent, coordDict)
-    print("coordinates")
-    print(coordinates)
     for key, value in metadataList:
         coordinates.append(value)
     return coordinates
@@ -311,5 +305,4 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         print('Warning: missing metadata. Could not extract all metadata')
         print (e)
 
-    print (metadata)
     return metadata

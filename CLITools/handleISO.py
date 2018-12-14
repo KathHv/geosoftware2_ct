@@ -1,39 +1,35 @@
 import xml.etree.ElementTree as ET  
-import networkx as nx
 import helpfunctions as hf
+import ogr2ogr
+import pygeoj
+import os
 
 
 #gets called when the argument of the command request is a ISOxxx
 def extractMetadata(fileFormat, filePath, whatMetadata):
+        metadata = {}
         if fileFormat== "xml":
             if whatMetadata=="s":
-                metadata = {}
                 metadata["bbox"] = extractSpatialExtentFromXML(filePath)
                 return metadata
             if whatMetadata=="t":
-                metadata = {}
                 metadata["temporal_extent"] = extractTemporalExtentFromXML(filePath)
                 return metadata
             if whatMetadata=="e":
-                metadata = {}
                 metadata["bbox"] = extractSpatialExtentFromXML(filePath)
                 metadata["temporal_extent"] = extractTemporalExtentFromXML(filePath)
                 metadata["Shapetypes"] = extractShapeTypeFromXML(filePath)
                 return metadata
-        if fileFormat== "gml":
+        if fileFormat== "gml" or fileFormat== "kml":
             if whatMetadata=="s":
-                metadata = {}
                 metadata["bbox"] = extractSpatialExtentFromGML(filePath)
                 return metadata
             if whatMetadata=="t":
-                metadata = {}
                 metadata["temporal_extent"] = extractTemporalExtentFromGML(filePath)
                 return metadata
             if whatMetadata=="e":
-                metadata = {}
                 metadata["bbox"] = extractSpatialExtentFromGML(filePath)
                 metadata["temporal_extent"] = extractTemporalExtentFromGML(filePath)
-                metadata["Shapetypes"] = extractShapeTypeFromGML(filePath)
                 return metadata
 
 def extractSpatialExtentFromXML(filePath):
@@ -85,10 +81,12 @@ def extractTemporalExtentFromXML(filePath):
         if alltime is not None:
             minTime=min(alltime)
             maxTime=max(alltime)
-        time=[]
-        time.append(minTime)
-        time.append(maxTime)
-        return time
+            time=[]
+            time.append(minTime)
+            time.append(maxTime)
+            return time
+        else:
+            return None
 
 def extractShapeTypeFromXML(filePath):
     with open(filePath) as XML_File:
@@ -101,25 +99,33 @@ def extractShapeTypeFromXML(filePath):
                 allshapes.append(shapes)
         if allshapes is not None:
             Shapetypes = hf.countElements(allshapes)
-        return Shapetypes
-
-def extractShapeTypeFromGML(filePath):
-    with open(filePath) as GML_File:
-        #G = nx.parse_gml(GML_File)
-        #print(G.node)
-        #return None
-        tree = ET.parse(GML_File)
-        root = tree.getroot()
-        GML=[]
-        for x in root:
-            gml_single = x.text
-            GML.append(gml_single)
-            print(GML.index("base:Identifier"))
-
-def extractTemporalExtentFromGML(filePath):
-    with open(filePath) as GML_File:
-        return None
+            return Shapetypes
+        else: 
+            return None
 
 def extractSpatialExtentFromGML(filePath):
-    with open(filePath) as GML_File:
-        return None
+        ogr2ogr.main(["","-f", "GeoJSON", "output.json", filePath])
+        myGeojson = pygeoj.load(filepath="output.json")
+        if myGeojson.bbox is not None:    
+            return (myGeojson.bbox)
+        else:
+            return None
+
+def extractTemporalExtentFromGML(filePath):
+        dateArray= []
+        ogr2ogr.main(["","-f", "GeoJSON", "output.json", filePath])
+        myGeojson = pygeoj.load(filepath="output.json")
+        properties= (myGeojson.get_feature(0).properties)
+        for key, value in properties.items():     
+                if key=="beginLifespanVersion" or key=="date" or key=="endLifespanVersion" or key=="Start_Date" or key=="End_Date":
+                    dateArray.append(value)
+                else:
+                    pass
+        temporal_extent= []
+        os.remove("output.json")
+        if(len(dateArray) > 0):
+            temporal_extent.append(min(dateArray))
+            temporal_extent.append(max(dateArray))
+            return temporal_extent
+        else: 
+            return None 
