@@ -12,17 +12,31 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         addictionalMetadata = getAdditionalMetadata(filePath, fileFormat)
         for x in addictionalMetadata:
             metadata[x] = addictionalMetadata[x]
+        try:
+            metadata["bbox"] = getBoundingBox(filePath)
+        except Exception as e:
+            print("Exception: " + str(e))   
+        try:
+            metadata["temporal_extent"] = getTemporalExtent(filePath)
+        except Exception as e:
+            print("Exception: " + str(e))
+        try:
+            metadata["vector_representation"] = getVectorRepresentation(filePath)
+        except Exception as e:
+            print("Exception: " + str(e))
         
     if whatMetadata == "e" or whatMetadata == "s":
         metadata["bbox"] = getBoundingBox(filePath)
         #metadata["crs"] = getCRS(filePath)
         metadata["vector_representation"] = getVectorRepresentation(filePath)
 
-    if whatMetadata == "t" or whatMetadata == "e":
-        #metadata["temporal_extent"] = getTemporalExtent(filePath)
-        pass
+    if whatMetadata == "t":
+        metadata["temporal_extent"] = getTemporalExtent(filePath)
 
     return metadata
+
+def getTemporalExtent(path):
+    raise Exception("The temporal extent cannot (yet) be extracted of a shapefile")
 
 def getAdditionalMetadata(path, format):
     metadata = {}
@@ -91,6 +105,7 @@ def getVectorRepresentation(path):
             except:
                 print("Error: Value cannot be converted into float" + value[0])
         return coordinates
+    raise Exception("The vector representaton could not be extracted from the file")
 
 
 def getBoundingBox(path):
@@ -105,7 +120,7 @@ def getBoundingBox(path):
                         if crs == "4326":
                             return bboxInOriginalCRS
                         else:
-                            # first transform into WGS 84
+                            # TO DO: first transform into WGS 84
                             return "BBOX liegt in anderem Format vor (" + str(crs) + "): " + str(bboxInOriginalCRS)
     pathWithoutEnding = path[:len(path)-4]
     if '.shp' in path:
@@ -120,3 +135,5 @@ def getBoundingBox(path):
         if 'mydbf' in locals():
             r = shapefile.Reader(shp=myshp, dbf=mydbf)
             return r.bbox
+    raise Exception("The bounding box could not be extracted from the file")
+
