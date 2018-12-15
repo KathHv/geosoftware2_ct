@@ -59,7 +59,13 @@ def getAdditionalMetadata(path, format):
 
 
 def getVectorRepresentation(path):
-    coordinates = []
+    if not '.shp' in path:
+        shpPath = path[:path.rfind(".")+1]
+        shpPath += "shp"
+        if not hf.exists(shpPath):
+            raise FileNotFoundError("Related shp-file could not be found!")
+        else:
+            path = shpPath
     with fiona.open(path) as datasetFiona:
         if datasetFiona is not None:
             coordinates = ""
