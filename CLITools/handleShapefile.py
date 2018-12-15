@@ -15,15 +15,15 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         try:
             metadata["bbox"] = getBoundingBox(filePath)
         except Exception as e:
-            print("Exception: " + str(e))   
+            print("Warning: " + str(e))   
         try:
             metadata["temporal_extent"] = getTemporalExtent(filePath)
         except Exception as e:
-            print("Exception: " + str(e))
+            print("Warning: " + str(e))
         try:
             metadata["vector_representation"] = getVectorRepresentation(filePath)
         except Exception as e:
-            print("Exception: " + str(e))
+            print("Warning: " + str(e))
         
     if whatMetadata == "e" or whatMetadata == "s":
         metadata["bbox"] = getBoundingBox(filePath)

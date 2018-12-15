@@ -11,14 +11,32 @@ def extractMetadata(filePath, whatMetadata):
         addictionalMetadata = getAddictionalMetadata(filePath)
         for x in addictionalMetadata:
             metadata[x] = addictionalMetadata[x]
+        try:
+            metadata["bbox"] = getBoundingBox(filePath)
+        except Exception as e:
+            print("Warning: " + str(e))   
+        try:
+            metadata["temporal_extent"] = getTemporalExtent(filePath)
+        except Exception as e:
+            print("Warning: " + str(e))
+        try:
+            metadata["vector_representation"] = getVectorRepresentation(filePath)
+        except Exception as e:
+            print("Warning: " + str(e))
 
-    if whatMetadata == "e" or whatMetadata == "s":
+    if whatMetadata == "s":
         metadata["bbox"] = getBoundingBox(filePath)
         metadata["crs"] = getCRS(filePath)
         metadata["vector_representation"] = getVectorRepresentation(filePath)
+    
+    if whatMetadata == "t":
+        metadata["temporal_extent"] = getTemporalExtent(filePath)
 
     return metadata
     
+def getTemporalExtent(path):
+    raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
+
 def getBoundingBox(path):
     # try to get the bbox with fiona
     with fiona.open(path) as datasetFiona:
@@ -42,6 +60,8 @@ def getBoundingBox(path):
                 lats.extend([row[1], row[3]])
         if len(longs) > 1 and len(lats) > 1:
             return [min(longs), min(lats), max(longs), max(lats)]
+
+    raise Exception("The bounding box could not be extracted from the file")
 
 def getAddictionalMetadata(path):
     metadata = {}
@@ -71,8 +91,8 @@ def getAddictionalMetadata(path):
     return metadata
 
 def getVectorRepresentation(path):
+    coordinates = []
     with fiona.open(path) as datasetFiona:
-        coordinates = []
         for shapeElement in datasetFiona:
             if 'geometry' in shapeElement:
                 if shapeElement["geometry"] is not None:
@@ -105,7 +125,11 @@ def getVectorRepresentation(path):
                                 if type(element[0]) == float and type(element[1]) == float:
                                     coordinates.append([element[0], element[1]])
                         getCoordinatesFromArray(element)
-    return coordinates
+    if len(coordinates) > 0:
+        return coordinates
+    else:
+        raise Exception("The vector representaton could not be extracted from the file")
+
 
 
 def getCRS(path):
