@@ -35,10 +35,14 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
 
     return metadata
 
+def getCRS(path):
+    raise Exception("The CRS cannot be extracted from shapefiles")
+
 def getTemporalExtent(path):
     raise Exception("The temporal extent cannot (yet) be extracted of a shapefile")
 
-def getAdditionalMetadata(path, format):
+def getAdditionalMetadata(path):
+    format = path[path.rfind('.')+1:]
     metadata = {}
     with fiona.open(path) as datasetFiona:
         metadata["encoding"] = datasetFiona.encoding
