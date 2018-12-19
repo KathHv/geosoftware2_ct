@@ -14,8 +14,20 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         for x in addictionalMetadata:
             metadata[x] = addictionalMetadata[x]
         metadata["temporal_extent"] = getTemporalExtent(filePath)
+        try:
+            metadata["bbox"] = getBoundingBox(filePath)
+        except Exception as e:
+            print("Warning: " + str(e))   
+        try:
+            metadata["temporal_extent"] = getTemporalExtent(filePath)
+        except Exception as e:
+            print("Warning: " + str(e))
+        try:
+            metadata["vector_representation"] = getVectorRepresentation(filePath)
+        except Exception as e:
+            print("Warning: " + str(e))
 
-    if whatMetadata == "s" or whatMetadata == "e":
+    if whatMetadata == "s":
         metadata["bbox"] = getBoundingBox(filePath)
         metadata["vector_representation"] = getVectorRepresentation(filePath)
 
@@ -23,9 +35,7 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         metadata["crs"] = getCRS(filePath)
     
     if whatMetadata == "t":
-        if getTemporalExtent(filePath) is not None:
-            metadata["temporal_extent"] = getTemporalExtent(filePath)
-        else: raise Exception("The temporal extent could not be extracted")
+        metadata["temporal_extent"] = getTemporalExtent(filePath)
     
     return metadata
         
@@ -73,7 +83,7 @@ def getVectorRepresentation(path):
     if 'lats' in locals()  and 'lons' in locals():
         return { 'lat': lats,
                     'lon': lons }
-    else: return []
+    raise Exception("The vector representaton could not be extracted from the file")
 
 def getBoundingBox(path):
     ncDataset = NCDataset(path)
@@ -97,7 +107,7 @@ def getBoundingBox(path):
                             if len(dataLats) > 0 and len(dataLons) > 0:
                                 bbox = [min(dataLons), min(dataLats), max(dataLons), max(dataLats)]
                             return bbox
-    return None
+    raise Exception("The bounding box could not be extracted from the file")
 
 def getCRS(path):
     xarrayForNetCDF = xarray.open_dataset(path)
@@ -112,46 +122,43 @@ def getCRS(path):
     return "No CRS found"
 
 def getTemporalExtent(path):
-    try:
-        ncDataset = NCDataset(path)
-        datasetGDAL = gdal.Open(path)
-        metadataGDAL = datasetGDAL.GetMetadata()
-        if 'time' in ncDataset.variables:
-            times = ncDataset.variables["time"][:]
-            temporal_extent =  str([min(times), max(times)]) + " Warning: Unit not absolute" 
-            def getAbsoulteTimestamp(plusdays, steps, origin):
-                origin = dtime.strptime(origin ,'%Y-%m-%d %H:%M:%S')
-                if "days" in steps:
-                    return origin + datetime.timedelta(days=plusdays)
-                elif "hours" in steps:
-                    return origin + datetime.timedelta(hours=plusdays)
-                elif "minutes" in steps:
-                    return origin + datetime.timedelta(minutes=plusdays)
-                elif "seconds" in steps:
-                    return origin + datetime.timedelta(seconds=plusdays)       
-            if hasattr(ncDataset.variables["time"], 'units'):
-                unit = ncDataset.variables["time"].units
+    ncDataset = NCDataset(path)
+    datasetGDAL = gdal.Open(path)
+    metadataGDAL = datasetGDAL.GetMetadata()
+    if 'time' in ncDataset.variables:
+        times = ncDataset.variables["time"][:]
+        temporal_extent =  str([min(times), max(times)]) + " Warning: Unit not absolute" 
+        def getAbsoulteTimestamp(plusdays, steps, origin):
+            origin = dtime.strptime(origin ,'%Y-%m-%d %H:%M:%S')
+            if "days" in steps:
+                return origin + datetime.timedelta(days=plusdays)
+            elif "hours" in steps:
+                return origin + datetime.timedelta(hours=plusdays)
+            elif "minutes" in steps:
+                return origin + datetime.timedelta(minutes=plusdays)
+            elif "seconds" in steps:
+                return origin + datetime.timedelta(seconds=plusdays)       
+        if hasattr(ncDataset.variables["time"], 'units'):
+            unit = ncDataset.variables["time"].units
+            steps = unit[:unit.rfind(" since")]
+            origin = unit[unit.rfind("since ")+6:]
+            if origin[:4] == "0000":
+                origin = "2000" + origin[4:]
+            if len(origin) < 11:
+                origin += " 00:00:00"
+
+        elif "time#units" in metadataGDAL:
+                unit = metadataGDAL["time#units"]
                 steps = unit[:unit.rfind(" since")]
                 origin = unit[unit.rfind("since ")+6:]
-                if origin[:4] == "0000":
-                    origin = "2000" + origin[4:]
-                if len(origin) < 11:
-                    origin += " 00:00:00"
-
-            elif "time#units" in metadataGDAL:
-                    unit = metadataGDAL["time#units"]
-                    steps = unit[:unit.rfind(" since")]
-                    origin = unit[unit.rfind("since ")+6:]
-            if times is not None:
-                if len(times) > 0:
-                    if 'steps' in locals():
-                        temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
-                        if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
-                            print("temporal extent of " + path + " is not valid! (" + str(temporal_extent) + ")")
-                            return None
-                        else:
-                            return temporal_extent
-    except Exception as e:
-        print("Error: The temporal extent could not be extracted: " + str(e))
-        return None
+        if times is not None:
+            if len(times) > 0:
+                if 'steps' in locals():
+                    temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
+                    if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
+                        print("temporal extent of " + path + " is not valid! (" + str(temporal_extent) + ")")
+                        return None
+                    else:
+                        return temporal_extent
+    raise Exception("The temporal extent could not be extracted from the file")
 

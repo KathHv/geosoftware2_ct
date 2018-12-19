@@ -79,16 +79,18 @@ def errorFunction():
 
 if len(sys.argv) == 1:
     print(usage())
+    sys.exit(1)
 
 try:
-    OPTS, ARGS = getopt.getopt(sys.argv[1:], 'e:s:t:l:')
+    OPTS, ARGS = getopt.getopt(sys.argv[1:], 'e:s:t:l:ho:')
 except getopt.GetoptError as err:
     print('\nERROR: %s' % err)
     print(usage())
     #sys.exit(2)
 
-if len(OPTS) == 0:
-    errorFunction()
+if 'OPTS' in globals(): 
+    if len(OPTS) == 0:
+        errorFunction()
 
 def getDatabaseElementFromMetadata(metadataDictionary):
     ''' 
@@ -360,6 +362,9 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
     return metadata
 
 
+if 'OPTS' not in globals():
+    raise Exception("An Argument is required")
+
 # tells the program what to do with certain tags and their attributes that are
 # inserted over the command line
 for o, a in OPTS:
@@ -421,10 +426,11 @@ for o, a in OPTS:
             #the input is a valid folder 
             raise Exception("Only single dictionaries can be uploaded into pycsw")
         #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
-    elif o == '-help':
-        print("\n")
+
+    elif o == '-h':  # dump help and exit
         print(usage())
-        print("\n")
+        sys.exit(3)
+        
     if 'output' in globals():
         if type(output) == list or type(output) == dict:
             hf.printObject(output)
