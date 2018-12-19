@@ -193,8 +193,6 @@ def fillIfAvailable(searchParam, gjsonContent, metadata):
                     metadataList = []
                     if key == 'coord' or key == 'coords' or key == 'coordinates' or key == 'coordinate':
                             extractCoordinatesForMetadata(value)
-                            print("coordinates:")
-                            print(coordinates)
                             value = coordinates
                     elif type(value) == dict:
                         extractFromDict(value) 
@@ -243,8 +241,6 @@ def getVectorRepresentation(gjsonContent):
     coordDict = {}
     searchParams = ['coordinates', 'coords', 'coord', 'coordinate']
     fillIfAvailable(searchParams, gjsonContent, coordDict)
-    print("coordinates")
-    print(coordinates)
     for key, value in metadataList:
         coordinates.append(value)
     return coordinates
@@ -309,5 +305,4 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
         print('Warning: missing metadata. Could not extract all metadata')
         print (e)
 
-    print (metadata)
     return metadata

@@ -1,31 +1,47 @@
 #packages to install
 
 
-pip install lxml
-pip install SQLAlchemy
-pip install pyproj
-pip install Shapely
-pip install OWSLib
-pip install six
-pip install xmltodict
+pip install csv
+pip install datetime
+pip install dateutil.parser
+pip install dicttoxml
+pip install errno
+pip install fiona
+pip install gdal
+pip install geojson
 pip install geolinks
-pip install pycsw==3.0.0 (wenn das nicht funktioniert dann $ easy_install pycsw==3.0.0)
+pip install getopt
+pip install gunicorn
+pip install heapq
 pip install libxml2-dev
 pip install libxslt-dev
-sudo apt-get install libgeos-dev
-pip install gunicorn
-pip install pylint
-
-
-##curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-##python get-pip.py
-
-pip install geojson
-pip install pyshp
-pip install nio
-pip install gdal
+pip install lxml
+pip install math
 pip install netCDF4
-pip install 
-
+pip install nio
+pip install ogr2ogr
+pip install os
+pip install osgeo 
+pip install OWSLib
+pip install pathlib
+pip install platform
+pip install pygeoj
+pip install pylint
+pip install pyproj
+pip install pyshp
+pip install pytest
+pip install shapefile
+pip install Shapely
+pip install six
+pip install six.moves
+pip install SQLAlchemy
+pip install sqlite3
+pip install stat
+pip install subprocess
 pip install subprocess32
-pip install fiona
+pip install sys
+pip install uuid
+pip install xarray
+pip install xml
+pip install xmltodict
+sudo apt-get install libgeos-dev

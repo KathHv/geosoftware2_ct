@@ -1,4 +1,5 @@
-import sys, os, platform, datetime, math, shapefile, fiona, nio
+import sys, os, platform, datetime, math, shapefile, fiona 
+#nio
 from datetime import datetime as dtime
 from six.moves import configparser
 from netCDF4 import Dataset as NCDataset
