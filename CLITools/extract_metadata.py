@@ -1,9 +1,9 @@
 import sys, os, getopt, datetime, errno, sqlite3, subprocess, uuid # important
 from six.moves import configparser
-from pathlib import Path
+#from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO
+import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO, handleGeotiff
 import dicttoxml, xml, subprocess
 from lxml import etree
 
@@ -224,21 +224,54 @@ def getDatabaseElementFromMetadata(metadataDictionary):
 # returns None if the format is not supported, else returns True 
 def extractMetadataFromFile(filePath, whatMetadata):
     fileFormat = filePath[filePath.rfind('.')+1:]
+    metadata = {}
+    usedModule = None
+
     if fileFormat == 'shp' or fileFormat == 'dbf':
-        metadata = handleShapefile.extractMetadata(fileFormat, filePath, whatMetadata)
+        usedModule = handleShapefile
     elif fileFormat == 'csv':
         metadata = handleCSV.extractMetadata(filePath, whatMetadata)
     elif fileFormat == 'nc':
         metadata = handleNetCDF.extractMetadata(fileFormat, filePath, whatMetadata)
     elif fileFormat == 'geojson' or fileFormat == 'json':
-        metadata = handleGeojson.extractMetadata(fileFormat, filePath, whatMetadata)
+        usedModule = handleGeojson
     elif fileFormat == 'gpkg':
-        metadata = handleGeopackage.extractMetadata(filePath, whatMetadata)
+        usedModule = handleGeopackage
     elif fileFormat == 'geotiff' or fileFormat == 'tif':
-        metadata = handleGeotiff.extractMetadata(fileFormat, filePath, whatMetadata)
+        usedModule = handleGeotiff
     elif fileFormat == 'gml' or fileFormat =='xml' or fileFormat == 'kml':
-        metadata = handleISO.extractMetadata(fileFormat, filePath, whatMetadata)
-    else: return None
+        usedModule = handleISO
+    else: 
+        # file format is not supported
+        return None
+    
+    try:
+        metadata["bbox"] = usedModule.getBoundingBox(filePath)
+    except Exception as e:
+        print("Warning: " + str(e))   
+    try:
+        metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
+    except Exception as e:
+        print("Warning: " + str(e))
+    try:
+        metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+    except Exception as e:
+        print("Warning: " + str(e))
+
+    if whatMetadata == "e" or whatMetadata == "s":
+        metadata["bbox"] = usedModule.getBoundingBox(filePath)
+        metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+
+        try:
+            if hasattr(usedModule, 'getCRS'):
+                metadata["crs"] = usedModule.getCRS(filePath)
+            else: print ("Warning: The CRS cannot be extracted from the file")
+        except Exception as e:
+            print("Warning: " + str(e))
+
+    if whatMetadata == "t":
+        metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
+    
     return metadata
 
 def insertIntoDatabase(dictionary, dbpath, table):
@@ -377,6 +410,8 @@ for o, a in OPTS:
         if '.' in ending:
             # handle it as a file
             output = extractMetadataFromFile(a, 'e')
+            if output is None:
+                raise Exception("This file format is not supported")
         else:
             # handle it as a folder
             output = extractMetadataFromFolder(a, 'e')
@@ -388,6 +423,8 @@ for o, a in OPTS:
         if '.' in ending:
             # handle it as a file
             output = extractMetadataFromFile(a, 't')
+            if output is None:
+                raise Exception("This file format is not supported")
         else:
             # handle it as a folder
             output = extractMetadataFromFolder(a, 't')
@@ -399,6 +436,8 @@ for o, a in OPTS:
         if '.' in ending:
             # handle it as a file
             output = extractMetadataFromFile(a, 's')
+            if output is None:
+                raise Exception("This file format is not supported")
         else:
             # handle it as a folder
             output = extractMetadataFromFolder(a, 's')

@@ -108,9 +108,9 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
     #    print("Could not open " + filePath)
     #    print e
 
-    except RuntimeError, e:
+    except RuntimeError as e:
         print ('RuntimeError')
-        print e
+        print(e)
         
      
     

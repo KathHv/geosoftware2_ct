@@ -18,7 +18,7 @@ onlyNetCDF = ABSOULTE_PATH + "netcdf/"
 onlyShapefile1 = ABSOULTE_PATH + "shapefile/antarctica-latest-free/"
 onlyShapefile2 = ABSOULTE_PATH + "shapefile/antarctica-latest-free2/"
 testfolder1 = ABSOULTE_PATH + "/TestFolder/Testfolder1"
-
+all_testfolders = [onlyCSV, onlyGeopackage, onlyNetCDF, onlyShapefile1, onlyShapefile2, testfolder1]
 
 def test_bbox():
     metadata = extractMetadataFromFolder(testfolder1, "e") 
@@ -83,5 +83,7 @@ def test_vectorrepresentation():
             assert True
             return
     assert False
+
+
 
 
