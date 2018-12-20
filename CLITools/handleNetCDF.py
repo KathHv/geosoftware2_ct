@@ -4,62 +4,6 @@ from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 
 
-#gets called when the argument of the command request is a NetCDF
-def extractMetadata(fileFormat, filePath, whatMetadata):
-    # file format can be either .nc or .cdf
-    metadata = {}
-
-    if whatMetadata == "e":
-        addictionalMetadata = getAddictionalMetadata(filePath)
-        for x in addictionalMetadata:
-            metadata[x] = addictionalMetadata[x]
-        metadata["temporal_extent"] = getTemporalExtent(filePath)
-        try:
-            metadata["bbox"] = getBoundingBox(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))   
-        try:
-            metadata["temporal_extent"] = getTemporalExtent(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-        try:
-            metadata["vector_representation"] = getVectorRepresentation(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-
-    if whatMetadata == "s":
-        metadata["bbox"] = getBoundingBox(filePath)
-        metadata["vector_representation"] = getVectorRepresentation(filePath)
-
-        # not yet complete (does not found correct CRS -> always WGS 84?)
-        metadata["crs"] = getCRS(filePath)
-    
-    if whatMetadata == "t":
-        metadata["temporal_extent"] = getTemporalExtent(filePath)
-    
-    return metadata
-        
-
-def getAddictionalMetadata(path):
-    ncDataset = NCDataset(path)
-    datasetGDAL = gdal.Open(path)
-    geotransformGDAL = datasetGDAL.GetGeoTransform()
-    metadataGDAL = datasetGDAL.GetMetadata()
-    dimensions = []
-    metadataGDAL = datasetGDAL.GetMetadata()
-    metadata = {}
-    for key in metadataGDAL:
-        if 'axis' in key:
-            dimensions.append(key[:key.rfind("#")])
-        if 'NC_GLOBAL' in key:
-            metadata[key[key.rfind("#")+1:]] = metadataGDAL[key]
-    metadata["filename"] = path[path.rfind("/")+1:path.rfind(".")]
-    metadata["format"] = "application/" + str(datasetGDAL.GetDriver().ShortName)
-    metadata["size"] = [datasetGDAL.RasterXSize, datasetGDAL.RasterYSize, datasetGDAL.RasterCount] # [raster width in pixels, raster height in pixels, number raster bands]
-    metadata["pixel_size"] = [geotransformGDAL[1], geotransformGDAL[5]]
-    metadata["origin"] = [geotransformGDAL[0], geotransformGDAL[3]]
-    return metadata
-
 def getVectorRepresentation(path):
     file = xarray.open_dataset(path)
     if file is not None:

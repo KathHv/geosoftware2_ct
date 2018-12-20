@@ -1,38 +1,5 @@
 import fiona, xarray, sqlite3
 import helpfunctions as hf
-
-
-#gets called when the argument of the command request is a geopackage
-def extractMetadata(filePath, whatMetadata):
-    metadata = {}
-    # gdal.Open not working
-    metadata = {}
-    if whatMetadata == "e":
-        addictionalMetadata = getAddictionalMetadata(filePath)
-        for x in addictionalMetadata:
-            metadata[x] = addictionalMetadata[x]
-        try:
-            metadata["bbox"] = getBoundingBox(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))   
-        try:
-            metadata["temporal_extent"] = getTemporalExtent(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-        try:
-            metadata["vector_representation"] = getVectorRepresentation(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-
-    if whatMetadata == "s":
-        metadata["bbox"] = getBoundingBox(filePath)
-        metadata["crs"] = getCRS(filePath)
-        metadata["vector_representation"] = getVectorRepresentation(filePath)
-    
-    if whatMetadata == "t":
-        metadata["temporal_extent"] = getTemporalExtent(filePath)
-
-    return metadata
     
 def getTemporalExtent(path):
     raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
@@ -62,33 +29,6 @@ def getBoundingBox(path):
             return [min(longs), min(lats), max(longs), max(lats)]
 
     raise Exception("The bounding box could not be extracted from the file")
-
-def getAddictionalMetadata(path):
-    metadata = {}
-    metadata["filename"] = path[path.rfind("/")+1:path.rfind(".")]
-    metadata["path"] = path
-    with fiona.open(path) as datasetFiona:
-        if 'driver' in datasetFiona.meta:
-            metadata["format"] = "application/" + str(datasetFiona.meta["driver"])
-        else: metadata["format"] = "application/gpkg"
-        metadata["shape_elements"] = len(datasetFiona)
-        if 'crs' in datasetFiona.meta:
-            if 'proj' in datasetFiona.meta["crs"]:
-                metadata["projection"] = datasetFiona.meta["crs"]["proj"]
-        metadata["encoding"] = datasetFiona.encoding
-        if 'ellps' in datasetFiona.crs:
-            metadata["used_ellipsoid"] = datasetFiona.crs["ellps"]
-        geoTypes = []
-        for shapeElement in datasetFiona:
-            if 'geometry' in shapeElement:
-                if shapeElement["geometry"] is not None:
-                    if 'type' in shapeElement["geometry"]:
-                        geoTypes.append(shapeElement["geometry"]["type"])
-        metadata["occurancy_shapetypes"] = hf.countElements(geoTypes)
-        if 'schema' in datasetFiona.meta:
-            if 'geometry' in datasetFiona.meta["schema"]:
-                metadata["shapetype"] = datasetFiona.meta["schema"]["geometry"]
-    return metadata
 
 def getVectorRepresentation(path):
     coordinates = []

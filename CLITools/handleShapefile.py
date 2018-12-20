@@ -4,37 +4,6 @@ import gdal
 from osgeo import ogr
 import sys
 
-#gets called when the argument of the command request is a shape-file
-def extractMetadata(fileFormat, filePath, whatMetadata):
-    metadata = {}
-    
-    if whatMetadata == "e":
-        addictionalMetadata = getAdditionalMetadata(filePath, fileFormat)
-        for x in addictionalMetadata:
-            metadata[x] = addictionalMetadata[x]
-        try:
-            metadata["bbox"] = getBoundingBox(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))   
-        try:
-            metadata["temporal_extent"] = getTemporalExtent(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-        try:
-            metadata["vector_representation"] = getVectorRepresentation(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-        
-    if whatMetadata == "e" or whatMetadata == "s":
-        metadata["bbox"] = getBoundingBox(filePath)
-        #metadata["crs"] = getCRS(filePath)
-        metadata["vector_representation"] = getVectorRepresentation(filePath)
-
-    if whatMetadata == "t":
-        metadata["temporal_extent"] = getTemporalExtent(filePath)
-
-    return metadata
-
 def getCRS(path):
     raise Exception("The CRS cannot be extracted from shapefiles")
 
