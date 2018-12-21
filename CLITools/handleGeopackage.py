@@ -1,47 +1,16 @@
 import fiona, xarray, sqlite3
 import helpfunctions as hf
-
-
-#gets called when the argument of the command request is a geopackage
-def extractMetadata(filePath, whatMetadata):
-    metadata = {}
-    # gdal.Open not working
-    metadata = {}
-    if whatMetadata == "e":
-        addictionalMetadata = getAddictionalMetadata(filePath)
-        for x in addictionalMetadata:
-            metadata[x] = addictionalMetadata[x]
-        try:
-            metadata["bbox"] = getBoundingBox(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))   
-        try:
-            metadata["temporal_extent"] = getTemporalExtent(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-        try:
-            metadata["vector_representation"] = getVectorRepresentation(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-
-    if whatMetadata == "s":
-        metadata["bbox"] = getBoundingBox(filePath)
-        metadata["crs"] = getCRS(filePath)
-        metadata["vector_representation"] = getVectorRepresentation(filePath)
-    
-    if whatMetadata == "t":
-        metadata["temporal_extent"] = getTemporalExtent(filePath)
-
-    return metadata
     
 def getTemporalExtent(path):
     raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
 
+# returns the bounding box of the file: an array with len(array) = 4 
 def getBoundingBox(path):
     # try to get the bbox with fiona
     with fiona.open(path) as datasetFiona:
         bbox = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]
         return bbox
+        
     # if not try the same with a database connection (sqlite)
     sqliteConnection = sqlite3.connect(path)
     if sqliteConnection is not None:
@@ -54,6 +23,7 @@ def getBoundingBox(path):
         lats = []
         longs = []
         crs = []
+        # TO DO: transform the bbox for each row in gpkg_contents depending on its CRS and after that compute the overall bbox
         for row in c.execute('SELECT min_x, min_y, max_x, max_y FROM gpkg_contents'):
             if not None in row:
                 longs.extend([row[0], row[2]])
@@ -63,33 +33,10 @@ def getBoundingBox(path):
 
     raise Exception("The bounding box could not be extracted from the file")
 
-def getAddictionalMetadata(path):
-    metadata = {}
-    metadata["filename"] = path[path.rfind("/")+1:path.rfind(".")]
-    metadata["path"] = path
-    with fiona.open(path) as datasetFiona:
-        if 'driver' in datasetFiona.meta:
-            metadata["format"] = "application/" + str(datasetFiona.meta["driver"])
-        else: metadata["format"] = "application/gpkg"
-        metadata["shape_elements"] = len(datasetFiona)
-        if 'crs' in datasetFiona.meta:
-            if 'proj' in datasetFiona.meta["crs"]:
-                metadata["projection"] = datasetFiona.meta["crs"]["proj"]
-        metadata["encoding"] = datasetFiona.encoding
-        if 'ellps' in datasetFiona.crs:
-            metadata["used_ellipsoid"] = datasetFiona.crs["ellps"]
-        geoTypes = []
-        for shapeElement in datasetFiona:
-            if 'geometry' in shapeElement:
-                if shapeElement["geometry"] is not None:
-                    if 'type' in shapeElement["geometry"]:
-                        geoTypes.append(shapeElement["geometry"]["type"])
-        metadata["occurancy_shapetypes"] = hf.countElements(geoTypes)
-        if 'schema' in datasetFiona.meta:
-            if 'geometry' in datasetFiona.meta["schema"]:
-                metadata["shapetype"] = datasetFiona.meta["schema"]["geometry"]
-    return metadata
-
+# abstract the geometry of the file with a polygon
+# first: collects all the points of the file
+# then: call the function that computes the polygon of it
+# returns the polygon as an array of points
 def getVectorRepresentation(path):
     coordinates = []
     with fiona.open(path) as datasetFiona:
@@ -127,11 +74,12 @@ def getVectorRepresentation(path):
                         getCoordinatesFromArray(element)
     if len(coordinates) > 0:
         return coordinates
+        # TO DO: call function that computes polygon
     else:
         raise Exception("The vector representaton could not be extracted from the file")
 
 
-
+# gets all the coordinate reference systems from the geopackage (through a database connection)
 def getCRS(path):
     sqliteConnection = sqlite3.connect(path)
     if sqliteConnection is not None:
