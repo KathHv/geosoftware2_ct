@@ -19,7 +19,7 @@ XSD = None
 TIMEOUT = 30
 FORCE_CONFIRM = False
 
-#the capabilities of our CLI
+# the capabilities of our CLI
 def usage():
     """Provide usage instructions"""
     return '''
@@ -164,7 +164,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
 def extractMetadataFromFolder(folderPath, whatMetadata):
 
     if not os.path.isdir(folderPath):
-        raise FileNotFoundError()
+        raise FileNotFoundError("This directory could not be found")
     else:
         # initialization of later output dict
         metadata = {}
@@ -323,12 +323,12 @@ for o, a in OPTS:
         elif os.path.isdir(a):
             #the input is a valid folder 
             raise Exception("Only single dictionaries can be uploaded into pycsw")
-        #else: raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), a)
 
     elif o == '-h':  # dump help and exit
         print(usage())
         sys.exit(3)
         
+    # print output differently depending on the outputs type
     if 'output' in globals():
         if type(output) == list or type(output) == dict:
             hf.printObject(output)
