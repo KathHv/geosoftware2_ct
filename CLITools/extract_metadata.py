@@ -159,8 +159,9 @@ def extractMetadataFromFile(filePath, whatMetadata):
     return metadata
 
 # function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
-# returns None if the format is not supported, else returns the metadata of the file as a dict 
-# (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
+# returns the metadata of the folder as a dict
+# calls the extractMetadataFromFile-function and computes the average for the metadata fields
+# (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations'
 def extractMetadataFromFolder(folderPath, whatMetadata):
 
     if not os.path.isdir(folderPath):

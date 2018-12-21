@@ -3,7 +3,10 @@ from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 
-
+# abstract the geometry of the file with a polygon
+# first: collects all the points of the file
+# then: call the function that computes the polygon of it
+# returns the polygon as an array of points
 def getVectorRepresentation(path):
     file = xarray.open_dataset(path)
     if file is not None:
@@ -27,8 +30,10 @@ def getVectorRepresentation(path):
     if 'lats' in locals()  and 'lons' in locals():
         return { 'lat': lats,
                     'lon': lons }
+        # TO DO: call function that computes polygon
     raise Exception("The vector representaton could not be extracted from the file")
 
+# returns the bounding box of the file: an array with len(array) = 4 
 def getBoundingBox(path):
     ncDataset = NCDataset(path)
     if 'latitude' in ncDataset.variables:
@@ -51,8 +56,10 @@ def getBoundingBox(path):
                             if len(dataLats) > 0 and len(dataLons) > 0:
                                 bbox = [min(dataLons), min(dataLats), max(dataLons), max(dataLats)]
                             return bbox
+
     raise Exception("The bounding box could not be extracted from the file")
 
+# returns the bounding box of the netcdf file
 def getCRS(path):
     xarrayForNetCDF = xarray.open_dataset(path)
     if xarrayForNetCDF is not None:
@@ -63,8 +70,11 @@ def getCRS(path):
                         lons = xarrayForNetCDF.to_dict()["coords"]["lon"]
                         crs = [ lats["attrs"], lons["attrs"] ]
                         return crs
+                        # HERE: CRS is in a different format
     return "No CRS found"
 
+# extracts the temporal extent of the netCDF file
+# the returned values is an array with the schema [ startpoint, endpoint ]
 def getTemporalExtent(path):
     ncDataset = NCDataset(path)
     datasetGDAL = gdal.Open(path)
@@ -101,8 +111,9 @@ def getTemporalExtent(path):
                     temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
                     if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
                         print("temporal extent of " + path + " is not valid! (" + str(temporal_extent) + ")")
-                        return None
                     else:
                         return temporal_extent
+    # raises exception when 1) no time variable could be found OR 2) no time unit could be found
+
     raise Exception("The temporal extent could not be extracted from the file")
 
