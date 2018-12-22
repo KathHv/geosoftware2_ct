@@ -6,6 +6,7 @@ import helpfunctions as hf
 import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO, handleGeotiff
 import dicttoxml, xml, subprocess
 from lxml import etree
+import threading 
 
 
 COMMAND = None
@@ -106,9 +107,9 @@ def extractMetadataFromFile(filePath, whatMetadata):
     if fileFormat == 'shp' or fileFormat == 'dbf':
         usedModule = handleShapefile
     elif fileFormat == 'csv':
-        metadata = handleCSV.extractMetadata(filePath, whatMetadata)
+        usedModule = handleCSV
     elif fileFormat == 'nc':
-        metadata = handleNetCDF.extractMetadata(fileFormat, filePath, whatMetadata)
+        usedModule = handleNetCDF
     elif fileFormat == 'geojson' or fileFormat == 'json':
         usedModule = handleGeojson
     elif fileFormat == 'gpkg':
@@ -121,40 +122,87 @@ def extractMetadataFromFile(filePath, whatMetadata):
         # file format is not supported
         return None
     
+    class thread(threading.Thread): 
+        def __init__(self, thread_ID): 
+            threading.Thread.__init__(self) 
+            self.thread_ID = thread_ID
+        def run(self):
+            print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
+            #metadata[self.thread_ID] = self.thread_ID
+            if self.thread_ID == 100:
+                try:
+                    metadata["bbox"] = usedModule.getBoundingBox(filePath)
+                except Exception as e:
+                    print("Warning: " + str(e)) 
+            elif self.thread_ID == 101:
+                try:
+                    metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
+                except Exception as e:
+                    print("Warning: " + str(e))
+            elif self.thread_ID == 102:
+                try:
+                    metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+                except Exception as e:
+                    print("Warning: " + str(e))
+            elif self.thread_ID == 200:
+                metadata["bbox"] = usedModule.getBoundingBox(filePath)
+            elif self.thread_ID == 201:
+                metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
+            elif self.thread_ID == 202:
+                metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+            elif self.thread_ID == 103:
+                try:
+                    # the CRS is not neccessarily required
+                    if hasattr(usedModule, 'getCRS'):
+                        metadata["crs"] = usedModule.getCRS(filePath)
+                    else: print ("Warning: The CRS cannot be extracted from the file")
+                except Exception as e:
+                    print("Warning: " + str(e))
+            try:
+                barrier.wait() 
+            except Exception as e:
+                print(e)
+            
+    
+    thread_bbox_except = thread(100) 
+    thread_temp_except = thread(101) 
+    thread_vector_except = thread(102)
+    thread_crs_except = thread(103)
+    thread_bbox = thread(200) 
+    thread_temp = thread(201) 
+    thread_vector = thread(202) 
+
     if whatMetadata == "e":
         # none of the metadata field is required 
         # so the system does not crash even if it does not find anything
-        try:
-            metadata["bbox"] = usedModule.getBoundingBox(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))   
-        try:
-            metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-        try:
-            metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
+        barrier = threading.Barrier(4)
+        thread_bbox_except.start() 
+        thread_temp_except.start() 
+        thread_vector_except.start() 
 
+        barrier.wait() 
+        barrier.reset() 
+        barrier.abort() 
+        
     if whatMetadata == "s":
         # only spatial extent is required
         # if one of the metadata field could not be extrated, the system crashes
-        metadata["bbox"] = usedModule.getBoundingBox(filePath)
-        metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
-
-        try:
-            # the CRS is not neccessarily required
-            if hasattr(usedModule, 'getCRS'):
-                metadata["crs"] = usedModule.getCRS(filePath)
-            else: print ("Warning: The CRS cannot be extracted from the file")
-        except Exception as e:
-            print("Warning: " + str(e))
+        barrier = threading.Barrier(4)
+        thread_bbox.start()
+        thread_vector.start()
+        thread_crs_except.start()
+        barrier.wait()
+        barrier.reset() 
+        barrier.abort() 
 
     if whatMetadata == "t":
         # only temporal extent is required
         # if one of the metadata field could not be extrated, the system crashes
-        metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
+        barrier = threading.Barrier(2)
+        thread_temp.start()
+        barrier.wait()
+        barrier.reset() 
+        barrier.abort() 
     
     return metadata
 
@@ -264,7 +312,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         if temp_ext is not None:
             metadata["temporal_extent"] = temp_ext
 
-        else: raise Exception("A temporal extent cannot be computed out any file in this folder")
+        else: raise Exception("A temporal extent cannot be computed out of any file in this folder")
         
     if filesSkiped != 0: 
         print(str(filesSkiped) + ' file(s) has been skipped as its format is not supported; to see the supported formats look at -help')
@@ -319,11 +367,10 @@ for o, a in OPTS:
                 raise Exception("This file format is not supported")
         else:
             # handle it as a folder
-            output = extractMetadataFromFolder(a, 's')
-            
-        elif os.path.isdir(a):
-            #the input is a valid folder 
-            raise Exception("Only single dictionaries can be uploaded into pycsw")
+            if os.path.isdir(a):
+                output = extractMetadataFromFolder(a, 's')
+            else:
+                raise Exception("The path is not a valid folder or file")
 
     elif o == '-h':  # dump help and exit
         print(usage())
