@@ -2,15 +2,15 @@ import pytest
 import os
 import os.path
 import sqlite3
-import filecmp
+import filecmp  
 import math
 import SimScore
 
 
-dasEntry1 = {"id" : 1,"wkt_geometry" : [45,50, 30,45],"vector" : [[1,1]],"time" : [5, 100],"raster" : False}
-dasEntry2 = {"id" : 2,"wkt_geometry" : [50,55,10,12],"vector" : [[1,1],[2,12]],"time" : [2, 10000],"raster" : True}
-dasEntry3 = {"id" : 3,"wkt_geometry" : [20,25,4,8],"vector" : [[10,50]],"time" : [150, 500],"raster" : True}
-dasEntry4 = {"id" : 4,"wkt_geometry" : [20,22,23,28],"vector" : [[2,1],[3,5],[4,20]],"time" : [0, 3],"raster" : False}
+dasEntry1 = {"id" : 1,"wkt_geometry" : [45,50,30,45],"vector" : [[1,1], [0,9]],"time" : ["2000-07-16T19:20:30+01:00", "2001-07-16T19:20:30+01:00"],"raster" : False}
+dasEntry2 = {"id" : 2,"wkt_geometry" : [50,55,10,12],"vector" : [[1,1],[2,12]],"time" : ["1999-07-16T19:20:30+01:00", "2000-07-16T19:20:30+01:00"],"raster" : True}
+dasEntry3 = {"id" : 3,"wkt_geometry" : [20,25,4,8],"vector" : [[10,50],[3,54]],"time" : ["1998-07-16T19:20:30+01:00", "1999-07-16T19:20:30+01:00"],"raster" : True}
+dasEntry4 = {"id" : 4,"wkt_geometry" : [20,22,23,28],"vector" : [[2,1],[3,5],[4,20]],"time" : ["1997-07-16T19:20:30+01:00", "1998-07-16T19:20:30+01:00"],"raster" : False}
 dasDict = [dasEntry1,dasEntry2,dasEntry3,dasEntry4]
 
 #testet, ob die richtigen Resultate beim Vergleichen zweier Datentypen geografischer
@@ -214,9 +214,14 @@ def test_getAr():
     points = dasEntry2["wkt_geometry"]
     Ar = SimScore.getAr(points)
     print (Ar)
-    ans = 0
-    if ((points[0]==points[1]) or (points[2] == points[3])):
-        ans = 0.01
-    assert ans == 0.01
-    #checken lassen     
+    ans = 1
+    if ((points[0] == points[2]) and (points[1] == points[3])):
+        ans = 0
+    if(Ar == 0 and ans == 0):
+        ans = True
+    elif(Ar != 0 and ans != 0):
+        ans = True
+    else:
+        ans = False
+    assert ans == True
 

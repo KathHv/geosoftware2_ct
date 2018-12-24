@@ -3,6 +3,9 @@ import heapq
 from datetime import datetime
 import dateutil.parser
 
+# die Ähnlichkeitsberechnung muss aus dem geosoftware2_ct repository in das pycsw repository
+# damit es dort in die API integriert werden kann. 
+# Aus dem jetzigen Repository kann die Ähnlcihkeitsberechnugn dann komplett herausgelöscht werden.
 
 
 '''
@@ -90,7 +93,6 @@ def getCenter(entry):
 #output in m²
 def getArea(coordinates):
     area = 0
-
     if (len(coordinates)>2):
         i=0
         p1Lon = coordinates[i+2]
@@ -105,9 +107,11 @@ def getArea(coordinates):
     return abs(area)
 
 
-
+#Wenn das eine Linie oder ein Punkt ist, dann ist die Fläche ja nicht 0,1 sondern 0
+#Alternative vielleicht: Zeile 317 - 322
 def getAr(points):
     if (points[0]==points[1]) or (points[2]==points[3]):
+        print(points)
         return 0.1
     return getArea(points)
 
@@ -192,8 +196,8 @@ Location Similarity
 
 
 def getCenterGeoSim(entryA, entryB):
-    centerA= getCenter(entryA)
-    centerB= getCenter(entryB)
+    #centerA= getCenter(entryA)
+    #centerB= getCenter(entryB)
     diagonal = float(getDiagonal([[],[],[entryA[1], entryB[1]]]))
     circumf = 20038
     sim = diagonal/circumf
@@ -236,6 +240,7 @@ ________________
 '''
 
 # Calculate intersection area of both bounding boxes
+# Das wkt-geometry_Format ist anders, als das, was hier benutzt wird
 def getInterGeoSim(entryA,entryB):
     minLatA=entryA["wkt_geometry"][0]
     maxLatA=entryA["wkt_geometry"][1]
@@ -246,12 +251,22 @@ def getInterGeoSim(entryA,entryB):
     minLonB=entryB["wkt_geometry"][2]
     maxLonB=entryB["wkt_geometry"][3]
     
-    #disjunct?
+    #disjunct
     if minLonA > maxLonB or maxLonA < minLonB or maxLatA < minLatB or minLatA > maxLonB:
+        print(0)
         return 0
     
-    #A in B 
+    # A in B 
+    # wenn wir mit einer Linie testen, die durch ein Quadrat läuft (nicht in einem Quadrat liegt!!),
+    # gibt er uns 1 aus, also dass A in B liegt.
+    # Wir haben es unter anderem getestet mit:
+    # punktA = {"wkt_geometry": [0,4,2,2]}
+    # punktB = {"wkt_geometry": [1, 3, 1, 3]},
+    # oder
+    # punktA = {"wkt_geometry": [2,4,2,2]}
+    # punktB = {"wkt_geometry": [1, 3, 1, 3]}
     if minLonA > minLonB and maxLonA < maxLonB and minLonA > minLonB and maxLonA < maxLonB:
+        print(1)
         return 1
 
     areaA = getAr(entryA["wkt_geometry"])
@@ -287,11 +302,11 @@ def getInterGeoSim(entryA,entryB):
         if points[0]==1:
             maxLon=maxLonB
             minLat=minLatB
-    
+
         if points[1]==1:
             minLat=minLatB
             minLon=minLonB
-    
+
         if points[2]==1:
             maxLat=maxLatB
             maxLon=maxLonB
@@ -302,9 +317,16 @@ def getInterGeoSim(entryA,entryB):
      
 
     intersecarea=getAr([minLat,maxLat,minLon,maxLon])
-
+    print(intersecarea)
+    print(areaA)
+    '''
+    if( areaA == 0):
+        return 0
+    else:
+        return float(intersecarea/areaA)
+    '''
+    print(float(intersecarea/areaA))
     return float(intersecarea/areaA)
-
 
 
 
@@ -441,8 +463,12 @@ getSimilarityScore: Berechnet den SimilarityScore
         e : weight of extent similarity 
         l : weight of location similarity
 '''
-
-def getSimilarRecords(entries, cmp, n, e, d, l, g, t):
+# du brauchst noch eine weitere Obermethode, die dann diese Methode aufruft, 
+# da die einzelnen Parameter noch aus der Konstanten-Datei gelesen werden müssen. 
+# Als Übergabe dafür, zu welchem Element similarRecords gesucht werde,n ist denke ich die uuid sinnvoll.
+# Als Rückgabewert wäre dann ein Array da [[uuid, simscore],[uuid, simscore],[uuid, simscore],...]
+# Dann können wir das gut in die API übernehmen.
+def getSimilarRecords(entries, cmp, n, e, d, l, g, t):  
     
     if checkValidity(entries, cmp, n, e, d, l, g, t) is False:
         return False
@@ -470,3 +496,9 @@ def getSimilarRecords(entries, cmp, n, e, d, l, g, t):
     output=sorted(records, key= lambda x: x[1])
 
     return output
+
+
+punktA = {"wkt_geometry": [2,4,2,2]}
+punktB = {"wkt_geometry": [1, 3, 1, 3]}
+
+getInterGeoSim(punktA, punktB)
