@@ -34,8 +34,10 @@ def extractMetadata(filePath, whatMetadata):
 
     return metadata
     
+#Hier fehlt ein return, für Fehler in Zeile 23 und 32 "metadata["temporal_extent"] = getTemporalExtent(filePath)"
 def getTemporalExtent(path):
     raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
+    #return 1
 
 def getBoundingBox(path):
     # try to get the bbox with fiona

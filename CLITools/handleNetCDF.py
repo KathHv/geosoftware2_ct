@@ -162,3 +162,9 @@ def getTemporalExtent(path):
                         return temporal_extent
     raise Exception("The temporal extent could not be extracted from the file")
 
+
+    # filename, format, size, pixel_size, origin, subject, original_units, units, dimensions
+    # NC_GLOBAL: title, source, dimensions, references, realization, project_id, institution, history, experiment_id, Conventions(of metadata!), contact, comment, cmor_version
+    print (metadata)
+    return metadata
+
