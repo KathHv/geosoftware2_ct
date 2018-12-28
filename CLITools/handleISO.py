@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET  
+import igraph as ig
 import helpfunctions as hf
 import ogr2ogr
 import pygeoj
