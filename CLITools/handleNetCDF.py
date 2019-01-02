@@ -3,63 +3,10 @@ from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 
-
-#gets called when the argument of the command request is a NetCDF
-def extractMetadata(fileFormat, filePath, whatMetadata):
-    # file format can be either .nc or .cdf
-    metadata = {}
-
-    if whatMetadata == "e":
-        addictionalMetadata = getAddictionalMetadata(filePath)
-        for x in addictionalMetadata:
-            metadata[x] = addictionalMetadata[x]
-        metadata["temporal_extent"] = getTemporalExtent(filePath)
-        try:
-            metadata["bbox"] = getBoundingBox(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))   
-        try:
-            metadata["temporal_extent"] = getTemporalExtent(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-        try:
-            metadata["vector_representation"] = getVectorRepresentation(filePath)
-        except Exception as e:
-            print("Warning: " + str(e))
-
-    if whatMetadata == "s":
-        metadata["bbox"] = getBoundingBox(filePath)
-        metadata["vector_representation"] = getVectorRepresentation(filePath)
-
-        # not yet complete (does not found correct CRS -> always WGS 84?)
-        metadata["crs"] = getCRS(filePath)
-    
-    if whatMetadata == "t":
-        metadata["temporal_extent"] = getTemporalExtent(filePath)
-    
-    return metadata
-        
-
-def getAddictionalMetadata(path):
-    ncDataset = NCDataset(path)
-    datasetGDAL = gdal.Open(path)
-    geotransformGDAL = datasetGDAL.GetGeoTransform()
-    metadataGDAL = datasetGDAL.GetMetadata()
-    dimensions = []
-    metadataGDAL = datasetGDAL.GetMetadata()
-    metadata = {}
-    for key in metadataGDAL:
-        if 'axis' in key:
-            dimensions.append(key[:key.rfind("#")])
-        if 'NC_GLOBAL' in key:
-            metadata[key[key.rfind("#")+1:]] = metadataGDAL[key]
-    metadata["filename"] = path[path.rfind("/")+1:path.rfind(".")]
-    metadata["format"] = "application/" + str(datasetGDAL.GetDriver().ShortName)
-    metadata["size"] = [datasetGDAL.RasterXSize, datasetGDAL.RasterYSize, datasetGDAL.RasterCount] # [raster width in pixels, raster height in pixels, number raster bands]
-    metadata["pixel_size"] = [geotransformGDAL[1], geotransformGDAL[5]]
-    metadata["origin"] = [geotransformGDAL[0], geotransformGDAL[3]]
-    return metadata
-
+# abstract the geometry of the file with a polygon
+# first: collects all the points of the file
+# then: call the function that computes the polygon of it
+# returns the polygon as an array of points
 def getVectorRepresentation(path):
     file = xarray.open_dataset(path)
     if file is not None:
@@ -83,8 +30,10 @@ def getVectorRepresentation(path):
     if 'lats' in locals()  and 'lons' in locals():
         return { 'lat': lats,
                     'lon': lons }
+        # TO DO: call function that computes polygon
     raise Exception("The vector representaton could not be extracted from the file")
 
+# returns the bounding box of the file: an array with len(array) = 4 
 def getBoundingBox(path):
     ncDataset = NCDataset(path)
     if 'latitude' in ncDataset.variables:
@@ -107,8 +56,10 @@ def getBoundingBox(path):
                             if len(dataLats) > 0 and len(dataLons) > 0:
                                 bbox = [min(dataLons), min(dataLats), max(dataLons), max(dataLats)]
                             return bbox
+
     raise Exception("The bounding box could not be extracted from the file")
 
+# returns the bounding box of the netcdf file
 def getCRS(path):
     xarrayForNetCDF = xarray.open_dataset(path)
     if xarrayForNetCDF is not None:
@@ -119,8 +70,11 @@ def getCRS(path):
                         lons = xarrayForNetCDF.to_dict()["coords"]["lon"]
                         crs = [ lats["attrs"], lons["attrs"] ]
                         return crs
+                        # HERE: CRS is in a different format
     return "No CRS found"
 
+# extracts the temporal extent of the netCDF file
+# the returned values is an array with the schema [ startpoint, endpoint ]
 def getTemporalExtent(path):
     ncDataset = NCDataset(path)
     datasetGDAL = gdal.Open(path)
@@ -157,9 +111,10 @@ def getTemporalExtent(path):
                     temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
                     if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
                         print("temporal extent of " + path + " is not valid! (" + str(temporal_extent) + ")")
-                        return None
                     else:
                         return temporal_extent
+    # raises exception when 1) no time variable could be found OR 2) no time unit could be found
+
     raise Exception("The temporal extent could not be extracted from the file")
 
 
