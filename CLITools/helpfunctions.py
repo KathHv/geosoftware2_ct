@@ -90,9 +90,16 @@ def searchForParameters(elements, paramArray):
 #transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system)
 def transformingIntoWGS84 (crs, point):
     inProj = Proj(init = crs)
-    outProj = Proj(init='epsg:4978')
+    outProj = Proj(init ='epsg:4978')
     x1, y1 = point
     x2, y2 = transform(inProj,outProj,x1,y1)
     print (x2,y2)
     retPoint = x2, y2
     return retPoint
+
+#transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
+def transformingArrayIntoWGS84(crs, pointArray):
+    array = []
+    for x in pointArray:
+        array[x] = transformingIntoWGS84(crs, pointArray[x])
+    return array

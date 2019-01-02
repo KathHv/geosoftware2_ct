@@ -110,10 +110,7 @@ def extractMetadata(fileFormat, filePath, whatMetadata):
 
     except RuntimeError as e:
         print ('RuntimeError')
-        print(e)
-        
-     
-    
-
-
+        print (e)
+    print (metadata)
     return metadata
+

@@ -1,8 +1,10 @@
 import fiona, xarray, sqlite3
 import helpfunctions as hf
     
+#Hier fehlt ein return, für Fehler in Zeile 23 und 32 "metadata["temporal_extent"] = getTemporalExtent(filePath)"
 def getTemporalExtent(path):
     raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
+    #return 1
 
 # returns the bounding box of the file: an array with len(array) = 4 
 def getBoundingBox(path):
