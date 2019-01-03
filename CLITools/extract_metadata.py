@@ -3,7 +3,7 @@ from six.moves import configparser
 #from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO, handleGeotiff
+import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleISO, handleGeotiff #handleGeopackage,
 import dicttoxml, xml, subprocess
 from lxml import etree
 import threading 
