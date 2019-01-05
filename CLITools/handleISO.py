@@ -1,7 +1,10 @@
 import igraph as ig
 import helpfunctions as hf
 
-#gets called when the argument of the command request is a ISOxxx
+# Function name: extractMetadata
+# Function purpose: gets called when the argument of the command request is a ISOxxx
+# Input: whatMetadata, filePath
+# Output: object metadata
 def extractMetadata(filePath, whatMetadata):
         if whatMetadata=="s":
             metadaten = {}
@@ -21,6 +24,10 @@ def extractMetadata(filePath, whatMetadata):
             metadaten = {}
             return metadaten
 
+# Function name: extractSpatialExtentFromGML
+# Function purpose: extracting the spatial extent from a gml-file
+# Input: filePath
+# Output: object g
 def extractSpatialExtentFromGML(filePath):
     with open(filePath) as gml_file:
         g = {}
@@ -29,10 +36,18 @@ def extractSpatialExtentFromGML(filePath):
         print(g)
         return g
 
+# Function name: extractTemporalExtentFromGML
+# Function purpose: extracting the temporal extent from a gml-file
+# Input: filePath
+# Output: 
 def extractTemporalExtentFromGML(filePath):
     #todo
     return ""
 
+# Function name: extractShapeTypeFromGML
+# Function purpose: extracting the shape type from a gml-file
+# Input: filePath
+# Output:
 def extractShapeTypeFromGML(filePath):
     #todo
     return ""

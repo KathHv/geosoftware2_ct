@@ -17,7 +17,11 @@ foundCoordsY = []
 coordinates = []      
 metadataList = []
 
-#extract geometry
+
+# Function name: extractGeometry
+# Function purpose: extracts the geometry from a geojson-file
+# Input: json
+# Output: jsonGeometry
 def extractGeometry (json): 
     try:
         jsonGeometry = None
@@ -35,11 +39,10 @@ def extractGeometry (json):
         print(e)
         return jsonGeometry 
         
-
-
-
-
-# extract Coordinates from coordinate Arrays
+# Function name: extractCoordinatesForBbox
+# Function purpose: extract Coordinates from coordinate Arrays
+# Input: List coordinateArray
+# Output: -
 def extractCoordinatesForBbox(coordinateArray):
     #further arrays with coordinates
     if type(coordinateArray) == list and len(coordinateArray) == 2 and type(coordinateArray[0]) == float and type(coordinateArray[1]):
@@ -52,7 +55,10 @@ def extractCoordinatesForBbox(coordinateArray):
             for value in coordinateArray:
                 extractCoordinatesForBbox(value)
                         
-#search in Json for Lists or Dicts of coordinates
+# Function name: extractCoordinatesForBbox
+# Function purpose: searches in Json for Lists or Dicts of coordinates
+# Input: Dict gjsonContent
+# Output: -
 def searchForCoordinates (gjsonContent):
     if type(gjsonContent) == dict:
         for key, value in gjsonContent.items():           
@@ -67,7 +73,10 @@ def searchForCoordinates (gjsonContent):
             searchForCoordinates(element)
 
 
-# extract bounding box
+# Function name: extractCoordinatesForBbox
+# Function purpose: extracting bounding box
+# Input: contentString, content, geometry
+# Output: array bbox
 def getBoundingBox (contentString, content, geometry):
     try:
         bbox = None
@@ -89,7 +98,10 @@ def getBoundingBox (contentString, content, geometry):
         return bbox
 
 
-
+# Function name: getCRS
+# Function purpose: extracting CRS
+# Input: gjsonContent
+# Output: object crs
 def getCRS(gjsonContent):
     crs= {}
     
@@ -103,7 +115,10 @@ def getCRS(gjsonContent):
 ignore = ["created_at", "closed_at", "created", "closed", "initilize", "init", "last_viewed", "last_change", "change", "last_Change", "lastChange"]    
 #ignore = []
 
-#searches for time elements in a json
+# Function name: searchForTimeElements
+# Function purpose: searcheing for time elements in a json
+# Input: gjsonContent, dateArray
+# Output: -
 def searchForTimeElements(gjsonContent, dateArray):
     if type(gjsonContent) == dict:
         for key, value in gjsonContent.items():     
@@ -120,8 +135,10 @@ def searchForTimeElements(gjsonContent, dateArray):
                     dateArray.append(gjsonContent)
 
 
-
-#extract timeextend from json string
+# Function name: searchForTimeElements
+# Function purpose: extracting time extend from json string
+# Input: gjsonContent
+# Output: timeExtent
 def getTemporalExtent (gjsonContent):
     try:
         dateArray = []
@@ -141,13 +158,10 @@ def getTemporalExtent (gjsonContent):
         print('Warning: missing metadata. Could not extract timestamps')
         print (e)
       
-
-
-
-
-
-
-#extract coordinates as tuples for metadata keyword 'coordinate', 'coord', 'coordinates' or 'coords'
+# Function name: extractCoordinatesForMetadata
+# Function purpose: extracting coordinates as tuples for metadata keyword 'coordinate', 'coord', 'coordinates' or 'coords'
+# Input: coordinateArray
+# Output: -
 def extractCoordinatesForMetadata(coordinateArray):
     global coordinates
     #further arrays with coordinates
@@ -158,7 +172,10 @@ def extractCoordinatesForMetadata(coordinateArray):
             for value in coordinateArray:
                 extractCoordinatesForMetadata(value)
 
-#extracts values and keys from a dict and saves them in a list
+# Function name: extractFromDict
+# Function purpose: extracting values and keys from a dict and saves them in a list
+# Input: content
+# Output: -
 def extractFromDict(content):
     global metadataList
     for key, value in content.items():
@@ -170,7 +187,10 @@ def extractFromDict(content):
         else:
             metadataList.append(value)
 
-#extracts all values from a list (also from list inside the list) and saves them in a one dimensional list
+# Function name: extractFromList
+# Function purpose: extracting all values from a list (also from list inside the list) and saves them in a one dimensional list
+# Input: content
+# Output: -
 def extractFromList(content):
     global metadataList
 
@@ -183,7 +203,10 @@ def extractFromList(content):
             if value not in metadataList:
                 metadataList.append(value)
 
-#fill metadata for keywords if possible
+# Function name: fillIfAvailable
+# Function purpose: filling metadata for keywords if possible
+# Input: searchParam, gjsonContent, metadata
+# Output: -
 def fillIfAvailable(searchParam, gjsonContent, metadata):
     global metadataList
 
@@ -221,7 +244,10 @@ def fillIfAvailable(searchParam, gjsonContent, metadata):
             fillIfAvailable(searchParam, element, metadata)
        
 
-#extracts additional metadata
+# Function name: getAdditionalMetadata
+# Function purpose: extracting additional metadata
+# Input: gjsonContent, fileFormat, filePath
+# Output: object metadataDict
 def getAdditionalMetadata(gjsonContent, fileFormat, filePath):
             metadataDict = {}
 
@@ -238,7 +264,10 @@ def getAdditionalMetadata(gjsonContent, fileFormat, filePath):
 
             return metadataDict
 
-#extracts vector representation
+# Function name: getVectorRepresentation
+# Function purpose: extracting vector representation
+# Input: gjsonContent
+# Output: coordinates
 def getVectorRepresentation(gjsonContent):
     global metadataList
     coordDict = {}
@@ -250,7 +279,10 @@ def getVectorRepresentation(gjsonContent):
         coordinates.append(value)
     return coordinates
 
-#gets called when the argument of the command request is a geojson
+# Function name: extractMetadata
+# Function purpose: gets called when the argument of the command request is a geojson
+# Input: fileFormat, filePath, whatMetadata
+# Output: object metadata
 def extractMetadata(fileFormat, filePath, whatMetadata):
     metadata = {}
 

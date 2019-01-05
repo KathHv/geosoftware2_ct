@@ -2,7 +2,10 @@ import fiona, xarray, sqlite3
 import helpfunctions as hf
 
 
-#gets called when the argument of the command request is a geopackage
+# Function name: extractMetadata
+# Function purpose: gets called when the argument of the command request is a geopackage
+# Input: filePath, whatMetadata
+# Output: object metadata
 def extractMetadata(filePath, whatMetadata):
     metadata = {}
     # gdal.Open not working
@@ -35,10 +38,19 @@ def extractMetadata(filePath, whatMetadata):
     return metadata
     
 #Hier fehlt ein return, für Fehler in Zeile 23 und 32 "metadata["temporal_extent"] = getTemporalExtent(filePath)"
+
+# Function name: getTemporalExtent
+# Function purpose: raising exception
+# Input: path
+# Output: -
 def getTemporalExtent(path):
     raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
     #return 1
 
+# Function name: getBoundingBox
+# Function purpose: getting the Bounding Box
+# Input: path
+# Output: array bbox
 def getBoundingBox(path):
     # try to get the bbox with fiona
     with fiona.open(path) as datasetFiona:
@@ -65,6 +77,10 @@ def getBoundingBox(path):
 
     raise Exception("The bounding box could not be extracted from the file")
 
+# Function name: getAddictionalMetadata
+# Function purpose: getting additional metadata
+# Input: path
+# Output: object metadata
 def getAddictionalMetadata(path):
     metadata = {}
     metadata["filename"] = path[path.rfind("/")+1:path.rfind(".")]
@@ -92,6 +108,10 @@ def getAddictionalMetadata(path):
                 metadata["shapetype"] = datasetFiona.meta["schema"]["geometry"]
     return metadata
 
+# Function name: getVectorRepresentation
+# Function purpose: getting coordinates as vector representation in possible, raisig expetion if not
+# Input: path
+# Output: array coordinates
 def getVectorRepresentation(path):
     coordinates = []
     with fiona.open(path) as datasetFiona:
@@ -132,8 +152,10 @@ def getVectorRepresentation(path):
     else:
         raise Exception("The vector representaton could not be extracted from the file")
 
-
-
+# Function name: getCRS
+# Function purpose: ?
+# Input: path
+# Output: countElements, crsid, ?init
 def getCRS(path):
     sqliteConnection = sqlite3.connect(path)
     if sqliteConnection is not None:

@@ -4,8 +4,10 @@ from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 
-
-#gets called when the argument of the command request is a NetCDF
+# Function name: extractMetadata
+# Function purpose: gets called when the argument of the command request is a NetCDF
+# Input: filePath, fileFormat, whatMetadata
+# Output: object metadata
 def extractMetadata(fileFormat, filePath, whatMetadata):
     # file format can be either .nc or .cdf
     metadata = {}

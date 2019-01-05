@@ -8,23 +8,33 @@ import getopt
 from os import walk
 from pyproj import Proj, transform
 
-#output of metadata object
+# Function name: printObject
+# Function purpose: output of metadata object
+# Input: object
+# Output: print("/n")
 def printObject(object):
     print("\n")
     for a,b in object.items():
         print(str(a) + ": " + str(b))
     print("\n")
 
-#does a file with the relative path 'filename' exist locally?
+# Does a file with the relative path 'filename' exist locally?
+# Function name: extists
+# Function purpose: checks whether the filename exists
+# Input: filename
+# Output: boolean true or false
 def exists(filename):
     if os.path.isfile(filename):
         return True
     else:
         return False
 
-# compute an overall bbox from an array of bounding boxes
-# required format of parameter 'bboxes': [ bbox1, bbox2, ..., bboxn ]
-# while earch bbox has the format: [ min(longs), min(lats), max(longs), max(lats) ]
+# Function name: computeBboxOfMultiple
+# Function purpose: # compute an overall bbox from an array of bounding boxes
+                    # required format of parameter 'bboxes': [ bbox1, bbox2, ..., bboxn ]
+                    # while earch bbox has the format: [ min(longs), min(lats), max(longs), max(lats) ]
+# Input: bboxes
+# Output: array of coordinates
 def computeBboxOfMultiple(bboxes):
     coordinate0 = 200
     coordinate1 = 200
@@ -41,10 +51,12 @@ def computeBboxOfMultiple(bboxes):
             coordinate3 = x[3]
     return [coordinate0, coordinate1, coordinate2, coordinate3]
 
-
-# get multiple temporal extents in the schema [ temp1, temp2, ..., tempn ]
-# with the schema of each temporal extent being: [ 'yyyy-mm-dd hh:mm:ss', 'yyyy-mm-dd hh:mm:ss' ]
-# returning the overall temporal extent in ISO format
+# Function name: computeTempExtentOfMultiple
+# Function purpose: # get multiple temporal extents in the schema [ temp1, temp2, ..., tempn ]
+                    # with the schema of each temporal extent being: [ 'yyyy-mm-dd hh:mm:ss', 'yyyy-mm-dd hh:mm:ss' ]
+                    # returning the overall temporal extent in ISO format
+# Input: temporal_extents
+# Output: array tempExtent (if startingpoint and endpoint follow given rules), None (if they don't)
 def computeTempExtentOfMultiple(temporal_extents):
     if len(temporal_extents) > 0:
         startPoint = dtime.strptime(temporal_extents[0][0] ,'%Y-%m-%d %H:%M:%S')
@@ -60,8 +72,10 @@ def computeTempExtentOfMultiple(temporal_extents):
         return [tempExtent[0].isoformat() + "Z", tempExtent[1].isoformat() + "Z"]
     else: return None
 
-
-#return the occurancies of all values in the array
+# Function name: countElements
+# Function purpose: return the occurancies of all values in the array
+# Input: array
+# Output: array list
 def countElements(array):
     list = []
     for x in array:
@@ -69,8 +83,10 @@ def countElements(array):
                 list.append([x, array.count(x)])
     return list
 
-
-#help-function to get all row elements for a specific string
+# Function name: getAllRowElements
+# Function purpose: help-function to get all row elements for a specific string
+# Input: rowname, elements
+# Output: array values
 def getAllRowElements(rowname,elements):
     for idx, val in enumerate(elements[0]):
         if  rowname in val:
@@ -81,13 +97,20 @@ def getAllRowElements(rowname,elements):
                     values.append(x[indexOf])
             return values
 
+# Function name: searchForParameters
+# Function purpose: ?
+# Input: paramArray, elements
+# Output: getAllRowElements(x,elements)
 def searchForParameters(elements, paramArray):
     for x in paramArray:
         for row in elements[0]:
             if x in row:
                 return getAllRowElements(x,elements)
 
-#transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system)
+# Function name: transformingIntoWGS84
+# Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system)
+# Input: crs, point
+# Output: retPoint constisting of x2, y2 (transformed points)
 def transformingIntoWGS84 (crs, point):
     inProj = Proj(init = crs)
     outProj = Proj(init ='epsg:4978')
@@ -97,7 +120,10 @@ def transformingIntoWGS84 (crs, point):
     retPoint = x2, y2
     return retPoint
 
-#transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
+# Function name: transformingIntoWGS84
+# Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
+# Input: crs, pointArray
+# Output: array array
 def transformingArrayIntoWGS84(crs, pointArray):
     array = []
     for x in pointArray:

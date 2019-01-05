@@ -5,7 +5,7 @@ import dateutil.parser
 
 # die Ähnlichkeitsberechnung muss aus dem geosoftware2_ct repository in das pycsw repository
 # damit es dort in die API integriert werden kann. 
-# Aus dem jetzigen Repository kann die Ähnlcihkeitsberechnugn dann komplett herausgelöscht werden.
+# Aus dem jetzigen Repository kann die Ähnlichkeitsberechnung dann komplett herausgelöscht werden.
 
 
 '''
@@ -47,7 +47,7 @@ def ConvertToRadian(input):
 #Calculates diagonal of Bounding Box by use of Haversine Formula
 
 
-# Checken, ob floats etc richtig
+# Checks, whether floats (etc.) are corrent
 def getDiagonal(entry):
     lon1 = entry["wkt_geometry"][2]
     lon2 = entry["wkt_geometry"][3]

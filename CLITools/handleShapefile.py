@@ -4,7 +4,10 @@ import gdal
 from osgeo import ogr
 import sys
 
-#gets called when the argument of the command request is a shape-file
+# Function name: extractMetadata
+# Function purpose: gets called when the argument of the command request is a shape-file
+# Input: filePath, fileFormat, whatMetadata
+# Output: object metadata
 def extractMetadata(fileFormat, filePath, whatMetadata):
     metadata = {}
     # gdal.open not working

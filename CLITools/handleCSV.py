@@ -1,7 +1,10 @@
 import csv
 import helpfunctions as hf
 
-#gets called when the argument of the command request is a csv-file
+# Function name: extractMetadata
+# Function purpose: Gets called when the argument of the command request is a csv-file
+# Input: filePath, whatMetadata (e, s or t)
+# Output: object Metadata (corresponding to whatMetadata)
 def extractMetadata(filePath, whatMetadata): 
     metadata = {}
     if whatMetadata=="s":
@@ -9,7 +12,7 @@ def extractMetadata(filePath, whatMetadata):
         return metadata
     if whatMetadata=="t":
         metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
-        #gehört hier Start- oder Endzeit rein? Weil Temporal gibt es ja nicht mehr?
+        # gehört hier Start- oder Endzeit rein? Weil Temporal gibt es ja nicht mehr?
         return metadata
     if whatMetadata=="e":
         metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
@@ -22,6 +25,10 @@ def extractMetadata(filePath, whatMetadata):
     else:
         return metadata
 
+# Function name: extractKeywordsFromCSV
+# Function purpose: ?
+# Input: filePath
+# Output: Array firstrow (if no keyword is found), object Metadata (if keyword is found)
 def extractKeywordsFromCSV(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
@@ -41,6 +48,10 @@ def extractKeywordsFromCSV(filePath):
             metadata= hf.searchForParameters(elements,["key","keywords","keys"] ) 
             return metadata
 
+# Function name: extractShapeTypeFromCSV
+# Function purpose: extracts the Shapetype from the csv-file
+# Input: filePath
+# Output: object Shapetypes (if shapetype is found), None (if Shapetype is not found)
 def extractShapeTypeFromCSV(filePath):
      with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
@@ -54,6 +65,10 @@ def extractShapeTypeFromCSV(filePath):
             Shapetypes = hf.countElements(hf.searchForParameters(elements, ["shape", "shapetype"]))
             return Shapetypes
 
+# Function name: extractSpatialExtentFromCSV
+# Function purpose: extracts the spatial entent from a csv-file
+# Input: filePath
+# Output: object SpatialExtent consisting of minlon, minlat, maxlon, maxlat
 def extractSpatialExtentFromCSV(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
@@ -72,6 +87,10 @@ def extractSpatialExtentFromCSV(filePath):
         SpatialExtent= [minlon,minlat,maxlon,maxlat]
         return SpatialExtent
 
+# Function name: extractStartTimeFromCSV
+# Function purpose: extracts the starting time from a csv-file
+# Input: filePath
+# Output: minTime
 def extractStartTimeFromCSV(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
@@ -83,6 +102,10 @@ def extractStartTimeFromCSV(filePath):
         minTime= (min(AllSpatialExtent["Time"]))
         return minTime
 
+# Function name: extractEndTimeFromCSV
+# Function purpose: extracts the ending time from a csv-file
+# Input: filePath
+# Output: maxTime
 def extractEndTimeFromCSV(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())

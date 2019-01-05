@@ -4,7 +4,10 @@ import os
 import osgeo.osr as osr
 
 
-#returns boundin box of submitted geotiff
+# Function name: getBoundingBox
+# Function purpose: returns bounding box of submitted geotiff
+# Input: gtiffContent
+# Output: array boundingBox
 def getBoundingBox(gtiffContent):
     boundingBox = []
 
@@ -20,14 +23,19 @@ def getBoundingBox(gtiffContent):
 
     return boundingBox
 
+# Function name: getCRS
+# Function purpose: returns the ID of the CRS of the submitted geotiff
+# Input: gtiffContent
+# Output: crsId
 def getCRS(gtiffContent):
     crsId = None
     crsId = format(gtiffContent.GetProjection())
     return crsId
 
-
-
-#returns vector representation of submitted geotiff
+# Function name: getVectorRepresentation
+# Function purpose: returns vector representation of submitted geotiff
+# Input: gtiffContent
+# Output: array vectorRepresentation
 def getVectorRepresentation(gtiffContent):
     vectorRepresentation = []
     
@@ -43,13 +51,19 @@ def getVectorRepresentation(gtiffContent):
 
     return vectorRepresentation
 
-#returns temporal extent of submitted geotiff
+# Function name: getTemporalExtent
+# Function purpose: returns temporal extent of submitted geotiff
+# Input: gtiffContent
+# Output: array temporalExtent
 def getTemporalExtent(gtiffContent):
     temporalExtent = []
     
     return temporalExtent
 
-#returns addditional metadata of submitted geotiff
+# Function name: getAdditionalMetadata
+# Function purpose: returns addditional metadata of submitted geotiff
+# Input: gtiffContent, fileFormat, filePath
+# Output: object additionalMetadata
 def getAdditionalMetadata(gtiffContent, fileFormat, filePath):
     additionalMetadata = {}
     # extract other metadata
@@ -64,11 +78,10 @@ def getAdditionalMetadata(gtiffContent, fileFormat, filePath):
  
     return additionalMetadata
 
-
-
-
-
-#gets called when the argument of the command request is a GeoTIFF
+# Function name: extractMetadata
+# Function purpose: gets called when the argument of the command request is a GeoTIFF
+# Input: whatMetadata, fileFormat, filePath
+# Output: object metadata
 def extractMetadata(fileFormat, filePath, whatMetadata):
     metadata = {}
     
