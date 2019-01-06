@@ -4,9 +4,9 @@ sys.path.insert(1, os.path.join(sys.path[0], '..') + "/CLITools")
 import helpfunctions
 import pytest
 import FileForTestOr
-from handleCSV import extractMetadataFromCSV
-from handleGeopackage import extractMetadataGeopackage
-from handleGeojson import extractMetadataGeojson
+from handleCSV import extractMetadata
+from handleGeopackage import extractMetadata
+from handleGeojson import extractMetadata
 
 #testet, ob die Datei nicht existiert
 def test_exists_FileNotFound():
@@ -66,7 +66,7 @@ def test_extractMetadataFromFile_shpWithoutDbf():
     assert errorString in str(ans.value)
 
 #testet, ob die Metadaten eine BB besitzen
-def test_extractMetadataFromFile_hasBoundingBox():
+def test_extractMetadataFroFromCSVmFile_hasBoundingBox():
     ans = FileForTestOr.extractMetadataFromFile("/home/ilka/Desktop/test.csv", "e")
     print(ans)
     assert [] != ans["BoundingBox"]
@@ -81,7 +81,7 @@ def test_extractMetadataFromFile_hasBoundingBoxGrEins():
     assert ans2 == True
 
 #testet, ob der temporal extend extrahiert werden kann
-def test_extractMetadataFromFile_hasBoundingBoxGrEins():
+def test_extractMetadataFromFile_hasTemporalExtent():
     ans = FileForTestOr.extractMetadataFromFile("/home/ilka/Desktop/test.csv", "t")
     print(ans)
     assert len(ans["Temporal Extent"]) >= 1
@@ -161,3 +161,4 @@ def test_extractMetadataFromFile_BoundingBoxExists():
     if len(ans) > 0:
         ans2 = True
     assert ans == 5
+'''

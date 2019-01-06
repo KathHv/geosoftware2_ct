@@ -3,53 +3,10 @@ from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 
-
-#gets called when the argument of the command request is a NetCDF
-def extractMetadata(fileFormat, filePath, whatMetadata):
-    # file format can be either .nc or .cdf
-    metadata = {}
-
-    if whatMetadata == "e":
-        addictionalMetadata = getAddictionalMetadata(filePath)
-        for x in addictionalMetadata:
-            metadata[x] = addictionalMetadata[x]
-        metadata["temporal_extent"] = getTemporalExtent(filePath)
-
-    if whatMetadata == "s" or whatMetadata == "e":
-        metadata["bbox"] = getBoundingBox(filePath)
-        metadata["vector_representation"] = getVectorRepresentation(filePath)
-
-        # not yet complete (does not found correct CRS -> always WGS 84?)
-        metadata["crs"] = getCRS(filePath)
-    
-    if whatMetadata == "t":
-        if getTemporalExtent(filePath) is not None:
-            metadata["temporal_extent"] = getTemporalExtent(filePath)
-        else: raise Exception("The temporal extent could not be extracted")
-    
-    return metadata
-        
-
-def getAddictionalMetadata(path):
-    ncDataset = NCDataset(path)
-    datasetGDAL = gdal.Open(path)
-    geotransformGDAL = datasetGDAL.GetGeoTransform()
-    metadataGDAL = datasetGDAL.GetMetadata()
-    dimensions = []
-    metadataGDAL = datasetGDAL.GetMetadata()
-    metadata = {}
-    for key in metadataGDAL:
-        if 'axis' in key:
-            dimensions.append(key[:key.rfind("#")])
-        if 'NC_GLOBAL' in key:
-            metadata[key[key.rfind("#")+1:]] = metadataGDAL[key]
-    metadata["filename"] = path[path.rfind("/")+1:path.rfind(".")]
-    metadata["format"] = "application/" + str(datasetGDAL.GetDriver().ShortName)
-    metadata["size"] = [datasetGDAL.RasterXSize, datasetGDAL.RasterYSize, datasetGDAL.RasterCount] # [raster width in pixels, raster height in pixels, number raster bands]
-    metadata["pixel_size"] = [geotransformGDAL[1], geotransformGDAL[5]]
-    metadata["origin"] = [geotransformGDAL[0], geotransformGDAL[3]]
-    return metadata
-
+# abstract the geometry of the file with a polygon
+# first: collects all the points of the file
+# then: call the function that computes the polygon of it
+# returns the polygon as an array of points
 def getVectorRepresentation(path):
     file = xarray.open_dataset(path)
     if file is not None:
@@ -73,8 +30,10 @@ def getVectorRepresentation(path):
     if 'lats' in locals()  and 'lons' in locals():
         return { 'lat': lats,
                     'lon': lons }
-    else: return []
+        # TO DO: call function that computes polygon
+    raise Exception("The vector representaton could not be extracted from the file")
 
+# returns the bounding box of the file: an array with len(array) = 4 
 def getBoundingBox(path):
     ncDataset = NCDataset(path)
     if 'latitude' in ncDataset.variables:
@@ -97,8 +56,10 @@ def getBoundingBox(path):
                             if len(dataLats) > 0 and len(dataLons) > 0:
                                 bbox = [min(dataLons), min(dataLats), max(dataLons), max(dataLats)]
                             return bbox
-    return None
 
+    raise Exception("The bounding box could not be extracted from the file")
+
+# returns the bounding box of the netcdf file
 def getCRS(path):
     xarrayForNetCDF = xarray.open_dataset(path)
     if xarrayForNetCDF is not None:
@@ -109,49 +70,56 @@ def getCRS(path):
                         lons = xarrayForNetCDF.to_dict()["coords"]["lon"]
                         crs = [ lats["attrs"], lons["attrs"] ]
                         return crs
+                        # HERE: CRS is in a different format
     return "No CRS found"
 
+# extracts the temporal extent of the netCDF file
+# the returned values is an array with the schema [ startpoint, endpoint ]
 def getTemporalExtent(path):
-    try:
-        ncDataset = NCDataset(path)
-        datasetGDAL = gdal.Open(path)
-        metadataGDAL = datasetGDAL.GetMetadata()
-        if 'time' in ncDataset.variables:
-            times = ncDataset.variables["time"][:]
-            temporal_extent =  str([min(times), max(times)]) + " Warning: Unit not absolute" 
-            def getAbsoulteTimestamp(plusdays, steps, origin):
-                origin = dtime.strptime(origin ,'%Y-%m-%d %H:%M:%S')
-                if "days" in steps:
-                    return origin + datetime.timedelta(days=plusdays)
-                elif "hours" in steps:
-                    return origin + datetime.timedelta(hours=plusdays)
-                elif "minutes" in steps:
-                    return origin + datetime.timedelta(minutes=plusdays)
-                elif "seconds" in steps:
-                    return origin + datetime.timedelta(seconds=plusdays)       
-            if hasattr(ncDataset.variables["time"], 'units'):
-                unit = ncDataset.variables["time"].units
+    ncDataset = NCDataset(path)
+    datasetGDAL = gdal.Open(path)
+    metadataGDAL = datasetGDAL.GetMetadata()
+    if 'time' in ncDataset.variables:
+        times = ncDataset.variables["time"][:]
+        temporal_extent =  str([min(times), max(times)]) + " Warning: Unit not absolute" 
+        def getAbsoulteTimestamp(plusdays, steps, origin):
+            origin = dtime.strptime(origin ,'%Y-%m-%d %H:%M:%S')
+            if "days" in steps:
+                return origin + datetime.timedelta(days=plusdays)
+            elif "hours" in steps:
+                return origin + datetime.timedelta(hours=plusdays)
+            elif "minutes" in steps:
+                return origin + datetime.timedelta(minutes=plusdays)
+            elif "seconds" in steps:
+                return origin + datetime.timedelta(seconds=plusdays)       
+        if hasattr(ncDataset.variables["time"], 'units'):
+            unit = ncDataset.variables["time"].units
+            steps = unit[:unit.rfind(" since")]
+            origin = unit[unit.rfind("since ")+6:]
+            if origin[:4] == "0000":
+                origin = "2000" + origin[4:]
+            if len(origin) < 11:
+                origin += " 00:00:00"
+
+        elif "time#units" in metadataGDAL:
+                unit = metadataGDAL["time#units"]
                 steps = unit[:unit.rfind(" since")]
                 origin = unit[unit.rfind("since ")+6:]
-                if origin[:4] == "0000":
-                    origin = "2000" + origin[4:]
-                if len(origin) < 11:
-                    origin += " 00:00:00"
+        if times is not None:
+            if len(times) > 0:
+                if 'steps' in locals():
+                    temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
+                    if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
+                        print("temporal extent of " + path + " is not valid! (" + str(temporal_extent) + ")")
+                    else:
+                        return temporal_extent
+    # raises exception when 1) no time variable could be found OR 2) no time unit could be found
 
-            elif "time#units" in metadataGDAL:
-                    unit = metadataGDAL["time#units"]
-                    steps = unit[:unit.rfind(" since")]
-                    origin = unit[unit.rfind("since ")+6:]
-            if times is not None:
-                if len(times) > 0:
-                    if 'steps' in locals():
-                        temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
-                        if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
-                            print("temporal extent of " + path + " is not valid! (" + str(temporal_extent) + ")")
-                            return None
-                        else:
-                            return temporal_extent
-    except Exception as e:
-        print("Error: The temporal extent could not be extracted: " + str(e))
-        return None
+    raise Exception("The temporal extent could not be extracted from the file")
+
+
+    # filename, format, size, pixel_size, origin, subject, original_units, units, dimensions
+    # NC_GLOBAL: title, source, dimensions, references, realization, project_id, institution, history, experiment_id, Conventions(of metadata!), contact, comment, cmor_version
+    print (metadata)
+    return metadata
 
