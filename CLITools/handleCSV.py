@@ -15,7 +15,7 @@ def extractMetadata(filePath, whatMetadata):
         metadata["keywords"] = extractKeywordsFromCSV(filePath)
         metadata["bbox"] = extractSpatialExtentFromCSV(filePath)
         metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
-        metadata["Shapetypes"] = extractShapeTypeFromCSV(filePath)
+        metadata["Vectors"] = extractVectorRepFromCSV(filePath)
         return metadata
     else:
         return metadata
@@ -59,24 +59,26 @@ def extractSpatialExtentFromCSV(filePath):
         for x in daten:
             elements.append(x)
         SpatialExtent= {}
-        SpatialLatExtent= {}
-        SpatialLonExtent= {}
-        SpatialLatExtent["lat"] = hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
+        SpatialLatExtent=[]
+        SpatialLonExtent=[]
+        SpatialLatExtent= hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
         minlat= None
         maxlat= None
-        if hf.searchForParameters(elements, ["lat", "latitude"]) is None:
+        if hf.searchForParameters(elements, ["lat", "latitude","Latitude"]) is None:
             pass
         else:
-            minlat= (min(SpatialLatExtent["lat"]))
-            maxlat= (max(SpatialLatExtent["lat"]))
-        SpatialLonExtent["lon"] = hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
+            SpatialLatExtent.pop(0)
+            minlat= (min(SpatialLatExtent))
+            maxlat= (max(SpatialLatExtent))
+        SpatialLonExtent= hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
         minlon= None
         maxlon= None
-        if hf.searchForParameters(elements, ["lon", "longitude"]) is None:
+        if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
             pass
         else:
-            minlon= (min(SpatialLonExtent["lon"]))
-            maxlon= (max(SpatialLonExtent["lon"]))
+            SpatialLonExtent.pop(0)
+            minlon= (min(SpatialLonExtent))
+            maxlon= (max(SpatialLonExtent))
         SpatialExtent= [minlon,minlat,maxlon,maxlat]
         return SpatialExtent
 
@@ -95,3 +97,31 @@ def extractTemporalExtentFromCSV(filePath):
             time.append(min(AllSpatialExtent))
             time.append(max(AllSpatialExtent))
             return time
+
+def extractVectorRepFromCSV(filePath):
+   with open(filePath) as csv_file:
+        daten = csv.reader(csv_file.readlines())
+        elements = []
+        for x in daten:
+            elements.append(x)
+        VectorArray= []
+        SpatialLatExtent=[]
+        SpatialLonExtent=[]
+        SpatialLatExtent= hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
+        SpatialLonExtent= hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
+        if hf.searchForParameters(elements, ["lat", "latitude","Latitude"]) is None:
+            return None
+        else:
+            SpatialLatExtent.pop(0)
+            if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
+                return None
+            else:
+                SpatialLonExtent.pop(0)
+                counter=0
+                for x in SpatialLatExtent:
+                    SingleArray=[]
+                    SingleArray.append(SpatialLonExtent[counter])
+                    SingleArray.append(SpatialLatExtent[counter])
+                    VectorArray.append(SingleArray)
+                    counter=counter+1
+                return VectorArray
