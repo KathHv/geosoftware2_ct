@@ -17,4 +17,5 @@ To install pip just use the Terminal and type python get-pip.py. Then Visual Stu
 
 ### **Make the CLI-tools work with one command:**
 (assuming [GDAL](https://www.gdal.org) is installed):
+  
 `git clone https://github.com/KathHv/geosoftware2_ct.git && cd geosoftware2_ct && pip install -r requirements.txt && cd CLITools && python3 extract_metadata.py -h`
