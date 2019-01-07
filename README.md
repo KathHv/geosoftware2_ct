@@ -20,9 +20,9 @@ To install our CLI-Tools the required packages to install are [pip](https://pip.
   
 `git clone https://github.com/KathHv/geosoftware2_ct.git && cd geosoftware2_ct && pip install -r requirements.txt && cd CLITools && python3 extract_metadata.py -h`
 
-All CLITool impelementations can be found in the folder ['CLITools'](https://github.com/bennidietz/geosoftware2_ct/tree/master/CLITools). The [extract_metadata.py-file](https://github.com/bennidietz/geosoftware2_ct/blob/master/CLITools/extract_metadata.py) is the only file that is intended to be executed.
+All CLITool impelementations can be found in the folder [CLITools](https://github.com/bennidietz/geosoftware2_ct/tree/master/CLITools). The [extract_metadata.py-file](https://github.com/bennidietz/geosoftware2_ct/blob/master/CLITools/extract_metadata.py) is the only file that is intended to be executed.
 
-Tests can be found in the folder ['Tests'](https://github.com/bennidietz/geosoftware2_ct/tree/master/Tests) and can be executed with pytest
+Tests can be found in the folder [Tests](https://github.com/bennidietz/geosoftware2_ct/tree/master/Tests) and can be executed with pytest
 
 
 Our pycsw repository: [https://github.com/KathHv/pycsw](https://github.com/KathHv/pycsw)
