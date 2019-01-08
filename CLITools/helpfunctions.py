@@ -7,7 +7,7 @@ import netCDF4
 import getopt
 from os import walk
 from pyproj import Proj, transform
-
+import convex_hull
 
 
 '''
@@ -180,5 +180,5 @@ def enablePrint():
 def transformingArrayIntoWGS84(crs, pointArray):
     array = []
     for x in pointArray:
-        array[x] = transformingIntoWGS84(crs, pointArray[x])
+        array.append(transformingIntoWGS84(crs, pointArray[x]))
     return array

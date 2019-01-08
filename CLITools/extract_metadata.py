@@ -3,7 +3,8 @@ from six.moves import configparser
 #from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleISO, handleGeotiff, handleGeopackage,
+import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleISO, handleGeotiff, handleGeopackage
+#import handelXml, handleGml, handleKml
 import dicttoxml, xml, subprocess
 from lxml import etree
 import threading 
@@ -91,6 +92,11 @@ if 'OPTS' in globals():
     if len(OPTS) == 0:
         errorFunction()
 
+
+
+
+
+
 '''
  function is called when filePath is included in commanline (with tag 'e', 't' or 's')
  how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
@@ -98,6 +104,26 @@ if 'OPTS' in globals():
  (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
 '''
 def extractMetadataFromFile(filePath, whatMetadata):
+
+    '''
+    input
+    output
+    '''
+    def computeBbox(module, path):
+        bbox_in_orig_crs = module.getBoundingBox(path)
+        try:
+            crs = module.getCRS(path)
+        except:
+            print("Exception")
+            pass
+        if 'crs' in locals() and crs is not None:
+            print(bbox_in_orig_crs)
+            for x in bbox_in_orig_crs:
+                print(type(x))
+            print(hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs))
+        else:
+            return bbox_in_orig_crs
+ 
     fileFormat = filePath[filePath.rfind('.')+1:]
     usedModule = None
 
@@ -117,8 +143,12 @@ def extractMetadataFromFile(filePath, whatMetadata):
         usedModule = handleGeopackage
     elif fileFormat == 'geotiff' or fileFormat == 'tif':
         usedModule = handleGeotiff
-    elif fileFormat == 'gml' or fileFormat =='xml' or fileFormat == 'kml':
-        usedModule = handleISO
+    elif fileFormat == 'gml':
+        usedModule = handleGml
+    elif fileFormat =='xml':
+        usedModule = handleXml
+    elif fileFormat == 'kml':
+        usedModule = handelKml
     else: 
         # file format is not supported
         return None
@@ -132,7 +162,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
             #metadata[self.thread_ID] = self.thread_ID
             if self.thread_ID == 100:
                 try:
-                    metadata["bbox"] = usedModule.getBoundingBox(filePath)
+                    metadata["bbox"] = computeBbox(usedModule, filePath)
                 except Exception as e:
                     print("Warning: " + str(e)) 
             elif self.thread_ID == 101:
@@ -146,7 +176,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
                 except Exception as e:
                     print("Warning: " + str(e))
             elif self.thread_ID == 200:
-                metadata["bbox"] = usedModule.getBoundingBox(filePath)
+                metadata["bbox"] = computeBbox(usedModule, filePath)
             elif self.thread_ID == 201:
                 metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
             elif self.thread_ID == 202:

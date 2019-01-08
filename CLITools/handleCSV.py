@@ -1,6 +1,6 @@
 import csv
 import helpfunctions as hf
-
+import convex_hull
 
 
 '''
@@ -94,4 +94,5 @@ def getVectorRepresentation(filePath):
                     SingleArray.append(SpatialLatExtent[counter])
                     VectorArray.append(SingleArray)
                     counter=counter+1
+                VectorArray = convex_hull.graham_scan(VectorArray)
                 return VectorArray

@@ -7,6 +7,7 @@ import datetime
 from django.utils.dateparse import parse_datetime
 import django, pytz
 import unicodedata
+import convex_hull
 
 
 #type list, contains all longitudes of coordinates
@@ -172,7 +173,7 @@ def getCRS(filePath):
     gjsonContent = extractContentFromPath(filePath)
   
     #standard code after http://wiki.geojson.org/GeoJSON_draft_version_6#Specification
-    crsCode = 4326 
+    crsCode = None
     extracted = []
     extractAfterKeyword("crs", gjsonContent)
     if len(extracted) != 0 and type(extracted[0]) == dict:
@@ -184,7 +185,7 @@ def getCRS(filePath):
             else:
                 raise Exception("Crs could not be extracted key \"properties\" in \"crs\" is missing")
     else:
-        raise Exception("Crs could not be extracted. The standard crs EPSG:4326 is taken.")
+        raise Exception("Crs could not be extracted. The standard WGS 84 will be taken.")
     return crsCode
 
 
@@ -204,6 +205,7 @@ def getVectorRepresentation(filePath):
     extractCoordinates(extracted)
     if not coordinates:
         raise Exception("No coordinates found in File. Vector Representation could not be extracted.")
+    coordinates = convex_hull.graham_scan(coordinates)
     return coordinates
 
 

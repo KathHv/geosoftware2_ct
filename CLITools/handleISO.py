@@ -5,6 +5,7 @@ import ogr2ogr
 import pygeoj
 import sys, os
 from osgeo import gdal, ogr
+import convex_hull
 
 
 '''
@@ -237,6 +238,7 @@ def getVectorRepresentationFromKML(filePath):
             return None
         else:
             return(properties)'''
+        #coordinates = convex_hull.graham_scan(coordinates)
         return None
         #TODO
             
