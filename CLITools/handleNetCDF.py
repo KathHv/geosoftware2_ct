@@ -3,10 +3,15 @@ from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 
-# abstract the geometry of the file with a polygon
-# first: collects all the points of the file
-# then: call the function that computes the polygon of it
-# returns the polygon as an array of points
+
+
+'''
+ abstracts the geometry of the file with a polygon
+ first: collects all the points of the file
+ then: call the function that computes the polygon of it
+ input path: type string, file path to NetCDF file
+ output { 'lat': lats, 'lon': lons }: type list, list of lists with length = 2, contains extracted coordinates of content from NetCDF file
+'''
 def getVectorRepresentation(path):
     file = xarray.open_dataset(path)
     if file is not None:
@@ -33,7 +38,13 @@ def getVectorRepresentation(path):
         # TO DO: call function that computes polygon
     raise Exception("The vector representaton could not be extracted from the file")
 
-# returns the bounding box of the file: an array with len(array) = 4 
+
+
+'''
+ extracts bounding box from NetCDF
+ input path: type string, file path to NetCDF file
+ output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+'''
 def getBoundingBox(path):
     ncDataset = NCDataset(path)
     if 'latitude' in ncDataset.variables:
@@ -59,7 +70,13 @@ def getBoundingBox(path):
 
     raise Exception("The bounding box could not be extracted from the file")
 
-# returns the bounding box of the netcdf file
+
+
+'''
+ gets the coordinate reference systems from the NetCDF file
+ input path: type string, file path to NetCDF file
+ output crs: type list, list with two elements: 1. Crs of lats and 2. Crs of lons
+'''
 def getCRS(path):
     xarrayForNetCDF = xarray.open_dataset(path)
     if xarrayForNetCDF is not None:
@@ -72,9 +89,11 @@ def getCRS(path):
                         return crs
                         # HERE: CRS is in a different format
     return "No CRS found"
-
-# extracts the temporal extent of the netCDF file
-# the returned values is an array with the schema [ startpoint, endpoint ]
+'''
+ extracts the temporal extent of the netCDF file
+ input path: type string, file path to geotiff file
+ output temporal_extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
 def getTemporalExtent(path):
     ncDataset = NCDataset(path)
     datasetGDAL = gdal.Open(path)
@@ -116,10 +135,3 @@ def getTemporalExtent(path):
     # raises exception when 1) no time variable could be found OR 2) no time unit could be found
 
     raise Exception("The temporal extent could not be extracted from the file")
-
-
-    # filename, format, size, pixel_size, origin, subject, original_units, units, dimensions
-    # NC_GLOBAL: title, source, dimensions, references, realization, project_id, institution, history, experiment_id, Conventions(of metadata!), contact, comment, cmor_version
-    print (metadata)
-    return metadata
-

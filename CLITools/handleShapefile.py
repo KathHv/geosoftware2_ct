@@ -4,17 +4,33 @@ import gdal
 from osgeo import ogr
 import sys
 
+
+'''
+ gets the coordinate reference systems from the shapefile
+ input filepath: type string, file path to shapefile
+ output crsCode: type int, EPSG number of taken crs
+'''
 def getCRS(path):
     raise Exception("The CRS cannot be extracted from shapefiles")
 
+
+
+'''
+ extracts temporal extent of the shapefile
+ input path: type string, file path to shapefile file
+'''
 def getTemporalExtent(path):
     raise Exception("The temporal extent cannot (yet) be extracted of a shapefile")
 
 
-# abstract the geometry of the file with a polygon
-# first: collects all the points of the file
-# then: call the function that computes the polygon of it
-# returns the polygon as an array of points
+
+'''
+ abstract the geometry of the file with a polygon
+ first: collects all the points of the file
+ then: call the function that computes the polygon of it
+ input path: type string, file path to shapefile
+ output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from shapefile
+'''
 def getVectorRepresentation(path):
     if not '.shp' in path:
         shpPath = path[:path.rfind(".")+1]
@@ -51,7 +67,13 @@ def getVectorRepresentation(path):
         # TO DO: call function that computes polygon
     raise Exception("The vector representaton could not be extracted from the file")
 
-# returns the bounding box of the file: an array with len(array) = 4 
+
+
+'''
+ extracts bounding box from shapfile
+ input filepath: type string, file path to shapefile
+ output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+'''
 def getBoundingBox(path):
     # try to get the bounding box with fiona
     with fiona.open(path) as datasetFiona:
