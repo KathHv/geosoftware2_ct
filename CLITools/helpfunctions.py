@@ -97,6 +97,14 @@ def transformingIntoWGS84 (crs, point):
     retPoint = x2, y2
     return retPoint
 
+#Disable Prints
+def disablePrint():
+    sys.stdout = open(os.devnull, 'w')
+
+# Restore Prints
+def enablePrint():
+    sys.stdout = sys.__stdout__
+
 #transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
 def transformingArrayIntoWGS84(crs, pointArray):
     array = []
