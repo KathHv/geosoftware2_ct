@@ -21,18 +21,18 @@ def graham_scan(points):
     #The algorithm (as programmed) only works for positive X and Y values, therefore the coordinates might have to be moved altogether
     minX=min(points, key=lambda x: x[0])
     j=0
-    if minX<0:
+    if minX[0]<0:
         changedX=True
         while j < len(points):
-            points[j][0]=points[j][0]-minX
+            points[j][0]=points[j][0]-minX[0]
 
     
     minY=min(points, key=lambda x: x[1])
     j=0
-    if minY<0:
+    if minY[1]<0:
         changedY=True
         while j < len(points):
-            points[j][1]=points[j][1]-minY
+            points[j][1]=points[j][1]-minY[1]
 
 
 
