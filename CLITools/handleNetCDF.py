@@ -2,7 +2,7 @@ import datetime, xarray, gdal
 from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
-
+import convex_hull
 
 
 '''
@@ -33,9 +33,9 @@ def getVectorRepresentation(path):
             for x in longitudes:
                 lons.append(x)
     if 'lats' in locals()  and 'lons' in locals():
-        return { 'lat': lats,
-                    'lon': lons }
-        # TO DO: call function that computes polygon
+        coordinates = { 'lat': lats, 'lon': lons }
+        coordinates = convex_hull.graham_scan(coordinates)
+        return coordinates
     raise Exception("The vector representaton could not be extracted from the file")
 
 
