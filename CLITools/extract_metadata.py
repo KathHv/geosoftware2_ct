@@ -107,7 +107,6 @@ def extractMetadataFromFile(filePath, whatMetadata):
         try:
             crs = module.getCRS(path)
         except:
-            print("Exception")
             pass
         if 'crs' in locals() and crs is not None:
             print(bbox_in_orig_crs)
@@ -199,10 +198,11 @@ def extractMetadataFromFile(filePath, whatMetadata):
     if whatMetadata == "e":
         # none of the metadata field is required 
         # so the system does not crash even if it does not find anything
-        barrier = threading.Barrier(4)
+        barrier = threading.Barrier(5)
         thread_bbox_except.start() 
         thread_temp_except.start() 
         thread_vector_except.start() 
+        thread_crs_except.start()
 
         barrier.wait() 
         barrier.reset() 

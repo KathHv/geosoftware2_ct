@@ -7,12 +7,13 @@ import sys, os
 from osgeo import gdal, ogr
 import convex_hull
 
-'''
- extract bounding box from xml
- input filepath: type string, file path to xml file
- output SpatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
-'''
+
 def getBoundingBox(filePath):
+    '''
+    extract bounding box from xml
+    input filepath: type string, file path to xml file
+    output s: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+    '''
     with open(filePath) as XML_file:
         lat = []
         lon = []
@@ -33,28 +34,27 @@ def getBoundingBox(filePath):
                 if x.find('longitude') is not None:
                     longitude = x.find('longitude').text
                     lon.append(longitude)
-        SpatialExtent={}
+        spatialExtent={}
         if lat is not None:
             minlat=min(lat)
             maxlat=max(lat)
             if lon is not None:
                 minlon=min(lon)
                 maxlon=max(lon)
-                SpatialExtent= [minlon,minlat,maxlon,maxlat]
-                return SpatialExtent
+                spatialExtent= [minlon,minlat,maxlon,maxlat]
+                return spatialExtent
             else:
                 raise Exception('The xml file from ' + filePath + ' has no BoundingBox')
         else:
             raise Exception('The xml file from ' + filePath + ' has no BoundingBox')
 
 
-
-'''
- extracts temporal extent of the xml
- input filepath: type string, file path to xml file
- output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-'''
 def getTemporalExtent(filePath):
+    '''
+    extracts temporal extent of the xml
+    input filepath: type string, file path to xml file
+    output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    '''
     with open(filePath) as XML_File:
         tree = ET.parse(XML_File)
         root = tree.getroot()
@@ -75,12 +75,13 @@ def getTemporalExtent(filePath):
         else:
             raise Exception('The xml file from ' + filePath + ' has no TemporalExtent')
 
-'''
- extracts coordinates from xml File (for vector representation)
- input filepath: type string, file path to xml file
- output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from xml file
-'''
+
 def getVectorRepresentation(filePath):
+    '''
+    extracts coordinates from xml File (for vector representation)
+    input filepath: type string, file path to xml file
+    output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from xml file
+    '''
     with open(filePath) as XML_file:
         lat = []
         lon = []
@@ -101,7 +102,7 @@ def getVectorRepresentation(filePath):
                 if x.find('longitude') is not None:
                     longitude = x.find('longitude').text
                     lon.append(longitude)
-        VectorArray=[]
+        vectorArray=[]
         if lon is None:
             raise Exception('The xml file from ' + filePath + ' has no VectorRepresentation')
         else:
@@ -110,19 +111,20 @@ def getVectorRepresentation(filePath):
             else:
                 counter=0
                 for x in lon:
-                    SingleArray=[]
-                    SingleArray.append(lon[counter])
-                    SingleArray.append(lat[counter])
-                    VectorArray.append(SingleArray)
+                    singleArray=[]
+                    singleArray.append(lon[counter])
+                    singleArray.append(lat[counter])
+                    vectorArray.append(singleArray)
                     counter=counter+1
-            return VectorArray
+            return vectorArray
 
-'''
- extracts coordinatesystem from xml File 
- input filepath: type string, file path to xml file
- output properties: type list, contains extracted coordinate system of content from xml file
-'''
+
 def getCRS(filePath):
+    '''
+    extracts coordinatesystem from xml File 
+    input filepath: type string, file path to xml file
+    output properties: type list, contains extracted coordinate system of content from xml file
+    '''
     with open(filePath) as XML_File:
         tree = ET.parse(XML_File)
         root = tree.getroot()
@@ -131,7 +133,7 @@ def getCRS(filePath):
             if x.find('crs') is not None:  
                 crs = x.find('crs').text
                 coordinatesystem.append(crs)
-        if coordinatesystem is not None:
+        if(len(coordinatesystem) > 0):
             return coordinatesystem
         else:
             raise Exception('The xml file from ' + filePath + ' has no CRS')
