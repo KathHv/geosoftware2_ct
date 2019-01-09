@@ -125,23 +125,32 @@ def extractMetadataFromFile(filePath, whatMetadata):
 
     # first get the module that will be called (depending on the format of the file)
     if fileFormat == 'shp' or fileFormat == 'dbf':
+        import handleShapefile
         usedModule = handleShapefile
     elif fileFormat == 'csv':
+        import handleCSV
         usedModule = handleCSV
     elif fileFormat == 'nc':
+        import handleNetCDF
         usedModule = handleNetCDF
     elif fileFormat == 'geojson' or fileFormat == 'json':
+        import handleGeojson
         usedModule = handleGeojson
     elif fileFormat == 'gpkg':
+        import handleGeopackage
         usedModule = handleGeopackage
     elif fileFormat == 'geotiff' or fileFormat == 'tif':
+        import handleGeotiff
         usedModule = handleGeotiff
     elif fileFormat == 'gml':
-        usedModule = handleGML
+        import handleGML
+        usedModule = handleGMl
     elif fileFormat =='xml':
-        usedModule = handleXML
+        import handleXML
+        usedModule = handleXMl
     elif fileFormat == 'kml':
-        usedModule = handleKML
+        import handleKML
+        usedModule = handelKMl
     else: 
         # file format is not supported
         return None
