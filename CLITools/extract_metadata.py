@@ -3,8 +3,7 @@ from six.moves import configparser
 #from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleISO, handleGeotiff, handleGeopackage
-#import handelXml, handleGml, handleKml
+import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleGeotiff, handleGeopackage,handleXML, handleGML, handleKML
 import dicttoxml, xml, subprocess
 from lxml import etree
 import threading 
@@ -138,11 +137,11 @@ def extractMetadataFromFile(filePath, whatMetadata):
     elif fileFormat == 'geotiff' or fileFormat == 'tif':
         usedModule = handleGeotiff
     elif fileFormat == 'gml':
-        usedModule = handleGml
+        usedModule = handleGML
     elif fileFormat =='xml':
-        usedModule = handleXml
+        usedModule = handleXML
     elif fileFormat == 'kml':
-        usedModule = handelKml
+        usedModule = handleKML
     else: 
         # file format is not supported
         return None
