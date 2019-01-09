@@ -3,37 +3,17 @@ import jgraph as ig
 import helpfunctions as hf
 import ogr2ogr
 import pygeoj
-import os
+import sys, os
+from osgeo import gdal, ogr
+import convex_hull
 
 
-#gets called when the argument of the command request is a ISOxxx
-def extractMetadata(fileFormat, filePath, whatMetadata):
-        metadata = {}
-        if fileFormat== "xml":
-            if whatMetadata=="s":
-                metadata["bbox"] = extractSpatialExtentFromXML(filePath)
-                return metadata
-            if whatMetadata=="t":
-                metadata["temporal_extent"] = extractTemporalExtentFromXML(filePath)
-                return metadata
-            if whatMetadata=="e":
-                metadata["bbox"] = extractSpatialExtentFromXML(filePath)
-                metadata["temporal_extent"] = extractTemporalExtentFromXML(filePath)
-                metadata["Shapetypes"] = extractShapeTypeFromXML(filePath)
-                return metadata
-        if fileFormat== "gml" or fileFormat== "kml":
-            if whatMetadata=="s":
-                metadata["bbox"] = extractSpatialExtentFromGML(filePath)
-                return metadata
-            if whatMetadata=="t":
-                metadata["temporal_extent"] = extractTemporalExtentFromGML(filePath)
-                return metadata
-            if whatMetadata=="e":
-                metadata["bbox"] = extractSpatialExtentFromGML(filePath)
-                metadata["temporal_extent"] = extractTemporalExtentFromGML(filePath)
-                return metadata
-
-def extractSpatialExtentFromXML(filePath):
+'''
+ extract bounding box from xml
+ input filepath: type string, file path to xml file
+ output SpatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+'''
+def getBoundingFromXML(filePath):
     with open(filePath) as XML_file:
         lat = []
         lon = []
@@ -68,7 +48,14 @@ def extractSpatialExtentFromXML(filePath):
         else:
             return None
 
-def extractTemporalExtentFromXML(filePath):
+
+
+'''
+ extracts temporal extent of the xml
+ input filepath: type string, file path to xml file
+ output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
+def getExtentFromXML(filePath):
     with open(filePath) as XML_File:
         tree = ET.parse(XML_File)
         root = tree.getroot()
@@ -89,22 +76,58 @@ def extractTemporalExtentFromXML(filePath):
         else:
             return None
 
-def extractShapeTypeFromXML(filePath):
-    with open(filePath) as XML_File:
-        tree = ET.parse(XML_File)
-        root = tree.getroot()
-        allshapes = []
-        for x in root:
-            if x.find('shape') is not None:
-                shapes = x.find('shape').text
-                allshapes.append(shapes)
-        if allshapes is not None:
-            Shapetypes = hf.countElements(allshapes)
-            return Shapetypes
-        else: 
-            return None
 
-def extractSpatialExtentFromGML(filePath):
+
+'''
+ extracts coordinates from xml File (for vector representation)
+ input filepath: type string, file path to xml file
+ output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from xml file
+'''
+def getVectorRepresentationFromXML(filePath):
+    with open(filePath) as XML_file:
+        lat = []
+        lon = []
+        tree = ET.parse(XML_file)
+        root = tree.getroot()
+        for x in root:
+            if x.find('lat') is not None:  
+                latitute = x.find('lat').text
+                lat.append(latitute)
+            else:
+                if x.find('latitude') is not None:
+                    latitute = x.find('latitude').text
+                    lat.append(latitute)
+            if x.find('lon') is not None:  
+                longitude = x.find('lon').text
+                lon.append(longitude)
+            else:
+                if x.find('longitude') is not None:
+                    longitude = x.find('longitude').text
+                    lon.append(longitude)
+        VectorArray=[]
+        if lon is None:
+            return None
+        else:
+            if lat is None:
+                return None
+            else:
+                counter=0
+                for x in lon:
+                    SingleArray=[]
+                    SingleArray.append(lon[counter])
+                    SingleArray.append(lat[counter])
+                    VectorArray.append(SingleArray)
+                    counter=counter+1
+            return VectorArray
+
+
+
+'''         
+ extract bounding box from gml
+ input filepath: type string, file path to gml file
+ output myGeojson.bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+'''
+def getBoundingBoxFromGML(filePath):
         ogr2ogr.main(["","-f", "GeoJSON", "output.json", filePath])
         myGeojson = pygeoj.load(filepath="output.json")
         if myGeojson.bbox is not None:    
@@ -112,7 +135,14 @@ def extractSpatialExtentFromGML(filePath):
         else:
             return None
 
-def extractTemporalExtentFromGML(filePath):
+
+
+'''
+ extracts temporal extent of the gml
+ input filepath: type string, file path to gml file
+ output temporal_extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
+def getTemporalExtentFromGML(filePath):
         dateArray= []
         ogr2ogr.main(["","-f", "GeoJSON", "output.json", filePath])
         myGeojson = pygeoj.load(filepath="output.json")
@@ -130,3 +160,85 @@ def extractTemporalExtentFromGML(filePath):
             return temporal_extent
         else: 
             return None 
+
+
+
+
+'''
+ extracts coordinates from gml File (for vector representation)
+ input filepath: type string, file path to gml file
+ output properties: type list, list of lists with length = 2, contains extracted coordinates of content from gml file
+'''
+def getVectorRepresentationFromGML(filePath):
+        ogr2ogr.main(["","-f", "GeoJSON", "output.json", filePath])
+        myGeojson = pygeoj.load(filepath="output.json")
+        properties= (myGeojson.get_feature(0).geometry.coordinates[0])
+        os.remove("output.json")
+        if properties is None:
+            return None
+        else:
+            return(properties)
+
+
+
+'''
+ extract bounding box from kml
+ input filepath: type string, file path to kml file
+ output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+'''
+def getBoundingBoxFromKML(filePath):
+        '''srcDS = gdal.OpenEx(filePath)
+        ds = gdal.VectorTranslate('output.json', srcDS, format='GeoJSON')
+        myGeojson = pygeoj.load(ds)
+        print(myGeojson)'''
+        return None
+        #TODO
+
+
+
+'''
+ extracts temporal extent of the kml
+ input filepath: type string, file path to kml file
+ output timeExtent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
+def getTemporalExtentFromKML(filePath):
+        '''dateArray= []
+        ogr2ogr.main(["","-f", "GeoJSON", "output.json", filePath])
+        myGeojson = pygeoj.load(filepath="output.json")
+        properties= (myGeojson.get_feature(0).properties)
+        for key, value in properties.items():     
+                if key=="beginLifespanVersion" or key=="date" or key=="endLifespanVersion" or key=="Start_Date" or key=="End_Date":
+                    dateArray.append(value)
+                else:
+                    pass
+        temporal_extent= []
+        os.remove("output.json")
+        if(len(dateArray) > 0):
+            temporal_extent.append(min(dateArray))
+            temporal_extent.append(max(dateArray))
+            return temporal_extent
+        else: 
+            return None '''
+        return None
+        #TODO
+
+
+
+'''
+ extracts coordinates from kml File (for vector representation)
+ input filepath: type string, file path to kml file
+ output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from kml file
+'''
+def getVectorRepresentationFromKML(filePath):
+        '''ogr2ogr.main(["","-f", "GeoJSON", "output.json", filePath])
+        myGeojson = pygeoj.load(filepath="output.json")
+        properties= (myGeojson.get_feature(0).geometry.coordinates[0])
+        os.remove("output.json")
+        if properties is None:
+            return None
+        else:
+            return(properties)'''
+        #coordinates = convex_hull.graham_scan(coordinates)
+        return None
+        #TODO
+            

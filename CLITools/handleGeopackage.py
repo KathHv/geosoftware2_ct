@@ -1,12 +1,24 @@
 import fiona, xarray, sqlite3
 import helpfunctions as hf
+import convex_hull
     
-#Hier fehlt ein return, für Fehler in Zeile 23 und 32 "metadata["temporal_extent"] = getTemporalExtent(filePath)"
+
+
+'''
+ extracts temporal extent of the geopackage
+ input path: type string, file path to geopackage file
+'''
 def getTemporalExtent(path):
     raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
     #return 1
 
-# returns the bounding box of the file: an array with len(array) = 4 
+
+
+'''
+ extract bounding box from geopackage
+ input path: type string, file path to geopackage file
+ output [min(longs), min(lats), max(longs), max(lats)]: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+'''
 def getBoundingBox(path):
     # try to get the bbox with fiona
     with fiona.open(path) as datasetFiona:
@@ -35,10 +47,15 @@ def getBoundingBox(path):
 
     raise Exception("The bounding box could not be extracted from the file")
 
-# abstract the geometry of the file with a polygon
-# first: collects all the points of the file
-# then: call the function that computes the polygon of it
-# returns the polygon as an array of points
+
+
+'''
+ abstract the geometry of the file with a polygon
+ first: collects all the points of the file
+ then: call the function that computes the polygon of it
+ input path: type string, file path to geopackage file
+ output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geopackage file
+'''
 def getVectorRepresentation(path):
     coordinates = []
     with fiona.open(path) as datasetFiona:
@@ -75,13 +92,18 @@ def getVectorRepresentation(path):
                                     coordinates.append([element[0], element[1]])
                         getCoordinatesFromArray(element)
     if len(coordinates) > 0:
+        coordinates = convex_hull.graham_scan(coordinates)
         return coordinates
-        # TO DO: call function that computes polygon
     else:
         raise Exception("The vector representaton could not be extracted from the file")
 
 
-# gets all the coordinate reference systems from the geopackage (through a database connection)
+
+'''
+ gets all the coordinate reference systems from the geopackage (through a database connection)
+ input path: type string, file path to geopackage file
+ output init[init.rfind(":")+1:]: type int, EPSG number of taken crs
+'''
 def getCRS(path):
     sqliteConnection = sqlite3.connect(path)
     if sqliteConnection is not None:

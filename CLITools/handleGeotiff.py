@@ -2,13 +2,15 @@ import helpfunctions as hf
 import gdal, gdalconst
 import os
 import osgeo.osr as osr
+import convex_hull
 
 
 
-
-#method to extract geotiff content from a file by using its filepath
-#input filepath: type string, path to file which shall be extracted
-#output gtiffContent: type string,  returns  geojson content of filepath 
+'''
+ method to extract geotiff content from a file by using its filepath
+ input filepath: type string, path to file which shall be extracted
+ output gtiffContent: type string,  returns  geotiff content of filepath 
+'''
 def extractContentFromPath(filePath):
     gdal.UseExceptions()
     
@@ -20,10 +22,11 @@ def extractContentFromPath(filePath):
         raise Exception("geotiff file cannot be opened, read or is empty.")
     return gtiffContent
 
-
-#extract bounding box from geotiff
-#input filepath: type string, file path to geotiff file
-#output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+'''
+ extracts bounding box from geotiff
+ input filepath: type string, file path to geotiff file
+ output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+'''
 def getBoundingBox(filePath):
         gtiffContent = extractContentFromPath(filePath)
         boundingBox = []
@@ -45,9 +48,11 @@ def getBoundingBox(filePath):
 
 
 
-#extracts EPSG number of the taken coordinate reference system (short: crs)
-#input filepath: type string, file path to geotiff file
-#output crsCode: type int, EPSG number of taken crs
+'''
+ gets the coordinate reference systems from the geotiff file
+ input filepath: type string, file path to geotiff file
+ output crsCode: type int, EPSG number of taken crs
+'''
 def getCRS(filePath):
 
     gtiffContent = extractContentFromPath(filePath)
@@ -55,15 +60,16 @@ def getCRS(filePath):
     proj = osr.SpatialReference(wkt=gtiffContent.GetProjection())
     crsCode = proj.GetAttrValue('AUTHORITY',1)
     if not crsCode :
-        raise Exception("Crs could not be extracted.")
+        raise Exception("Crs could not be extracted. WGS84 will be taken as standard.")
     return crsCode
 
 
 
-
-#extracts coordinates from geojson File (for vector representation)
-#input filepath: type string, file path to geotiff file
-#output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geotiff file
+'''
+ extracts coordinates from geotiff File (for vector representation)
+ input filepath: type string, file path to geotiff file
+ output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geotiff file
+'''
 def getVectorRepresentation(filePath):
     gtiffContent = extractContentFromPath(filePath)
     vectorRepresentation = []
@@ -77,14 +83,16 @@ def getVectorRepresentation(filePath):
     #raise Exception("Vector representation could not be extracted" + str(e))
     if not vectorRepresentation:
         raise Exception("No coordinates found in file. Vector Representation could not be extracted.")
+    vectorRepresentation = convex_hull.graham_scan(vectorRepresentation)
     return vectorRepresentation
 
 
 
-
-#extracts temporal extent of the geotiff
-#input filepath: type string, file path to geotiff file
-#output timeExtent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
+ extracts temporal extent of the geotiff
+ input filepath: type string, file path to geotiff file
+ output timeExtent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
 def getTemporalExtent(filePath):
     gtiffContent = extractContentFromPath(filePath)
 
