@@ -3,6 +3,7 @@ import helpfunctions as hf
 import gdal
 from osgeo import ogr
 import sys
+import convex_hull
 
 
 '''
@@ -63,8 +64,8 @@ def getVectorRepresentation(path):
                 coordinates[index][1] = float(value[1].replace("(", "").replace(")", ""))
             except:
                 print("Error: Value cannot be converted into float" + value[0])
+        coordinates = convex_hull.graham_scan(coordinates)
         return coordinates
-        # TO DO: call function that computes polygon
     raise Exception("The vector representaton could not be extracted from the file")
 
 

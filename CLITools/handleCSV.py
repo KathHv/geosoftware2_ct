@@ -1,14 +1,41 @@
 import csv
 import helpfunctions as hf
+import convex_hull
 
 
+def extractKeywordsFromCSV(filePath):
+    with open(filePath) as csv_file:
+        daten = csv.reader(csv_file.readlines())
+        counter=0
+        metadata = {}
+        elements = []
+        firstrow = []
+        for x in daten:
+            elements.append(x)
+        if hf.searchForParameters(elements, ["key","keywords","keys"]) is None:
+            for x in elements:
+                if counter < 1:
+                    firstrow.append(x)
+                    counter=counter+1    
+            return firstrow
+        else:
+            metadata= hf.searchForParameters(elements,["key","keywords","keys"] ) 
+            return metadata
 
-'''
- Function purpose: extracts the spatial extent (bounding box) from a csv-file
- input filepath: type string, file path to csv file
- output SpatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
-'''
-def getBoundingBox(filePath):
+def extractShapeTypeFromCSV(filePath):
+     with open(filePath) as csv_file:
+        daten = csv.reader(csv_file.readlines())
+        elements = []
+        for x in daten:
+            elements.append(x)
+        Shapetypes= {}
+        if hf.searchForParameters(elements, ["shape", "shapetype"]) is None:
+            return None
+        else:
+            Shapetypes = hf.countElements(hf.searchForParameters(elements, ["shape", "shapetype"]))
+            return Shapetypes
+
+def extractSpatialExtentFromCSV(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
@@ -94,4 +121,5 @@ def getVectorRepresentation(filePath):
                     SingleArray.append(SpatialLatExtent[counter])
                     VectorArray.append(SingleArray)
                     counter=counter+1
+                VectorArray = convex_hull.graham_scan(VectorArray)
                 return VectorArray
