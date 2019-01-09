@@ -1,5 +1,6 @@
 import fiona, xarray, sqlite3
 import helpfunctions as hf
+import convex_hull
     
 
 
@@ -91,8 +92,8 @@ def getVectorRepresentation(path):
                                     coordinates.append([element[0], element[1]])
                         getCoordinatesFromArray(element)
     if len(coordinates) > 0:
+        coordinates = convex_hull.graham_scan(coordinates)
         return coordinates
-        # TO DO: call function that computes polygon
     else:
         raise Exception("The vector representaton could not be extracted from the file")
 

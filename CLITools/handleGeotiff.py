@@ -2,6 +2,7 @@ import helpfunctions as hf
 import gdal, gdalconst
 import os
 import osgeo.osr as osr
+import convex_hull
 
 
 
@@ -59,7 +60,7 @@ def getCRS(filePath):
     proj = osr.SpatialReference(wkt=gtiffContent.GetProjection())
     crsCode = proj.GetAttrValue('AUTHORITY',1)
     if not crsCode :
-        raise Exception("Crs could not be extracted.")
+        raise Exception("Crs could not be extracted. WGS84 will be taken as standard.")
     return crsCode
 
 
@@ -82,6 +83,7 @@ def getVectorRepresentation(filePath):
     #raise Exception("Vector representation could not be extracted" + str(e))
     if not vectorRepresentation:
         raise Exception("No coordinates found in file. Vector Representation could not be extracted.")
+    vectorRepresentation = convex_hull.graham_scan(vectorRepresentation)
     return vectorRepresentation
 
 
