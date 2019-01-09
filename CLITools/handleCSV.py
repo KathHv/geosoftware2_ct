@@ -1,58 +1,14 @@
 import csv
 import helpfunctions as hf
 
-#gets called when the argument of the command request is a csv-file
-def extractMetadata(filePath, whatMetadata): 
-    metadata = {}
-    if whatMetadata=="s":
-        metadata["spatial_extent"] = extractSpatialExtentFromCSV(filePath)
-        return metadata
-    if whatMetadata=="t":
-        metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
-        return metadata
-    if whatMetadata=="e":
-        metadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
-        metadata["keywords"] = extractKeywordsFromCSV(filePath)
-        metadata["bbox"] = extractSpatialExtentFromCSV(filePath)
-        metadata["temporal_extent"] = extractTemporalExtentFromCSV(filePath)
-        metadata["Vectors"] = extractVectorRepFromCSV(filePath)
-        return metadata
-    else:
-        return metadata
 
-def extractKeywordsFromCSV(filePath):
-    with open(filePath) as csv_file:
-        daten = csv.reader(csv_file.readlines())
-        counter=0
-        metadata = {}
-        elements = []
-        firstrow = []
-        for x in daten:
-            elements.append(x)
-        if hf.searchForParameters(elements, ["key","keywords","keys"]) is None:
-            for x in elements:
-                if counter < 1:
-                    firstrow.append(x)
-                    counter=counter+1    
-            return firstrow
-        else:
-            metadata= hf.searchForParameters(elements,["key","keywords","keys"] ) 
-            return metadata
 
-def extractShapeTypeFromCSV(filePath):
-     with open(filePath) as csv_file:
-        daten = csv.reader(csv_file.readlines())
-        elements = []
-        for x in daten:
-            elements.append(x)
-        Shapetypes= {}
-        if hf.searchForParameters(elements, ["shape", "shapetype"]) is None:
-            return None
-        else:
-            Shapetypes = hf.countElements(hf.searchForParameters(elements, ["shape", "shapetype"]))
-            return Shapetypes
-
-def extractSpatialExtentFromCSV(filePath):
+'''
+ Function purpose: extracts the spatial extent (bounding box) from a csv-file
+ input filepath: type string, file path to csv file
+ output SpatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+'''
+def getBoundingBox(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
@@ -82,7 +38,14 @@ def extractSpatialExtentFromCSV(filePath):
         SpatialExtent= [minlon,minlat,maxlon,maxlat]
         return SpatialExtent
 
-def extractTemporalExtentFromCSV(filePath):
+
+
+'''
+ extracts temporal extent of the csv
+ input filepath: type string, file path to csv file
+ output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
+def getTemporalExtent(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
@@ -98,7 +61,14 @@ def extractTemporalExtentFromCSV(filePath):
             time.append(max(AllSpatialExtent))
             return time
 
-def extractVectorRepFromCSV(filePath):
+
+
+'''
+ extracts coordinates from csv File (for vector representation)
+ input filepath: type string, file path to csv file
+ output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from csv file
+'''
+def getVectorRepresentation(filePath):
    with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []

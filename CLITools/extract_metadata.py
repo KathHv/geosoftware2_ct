@@ -3,7 +3,7 @@ from six.moves import configparser
 #from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleISO, handleGeotiff #handleGeopackage,
+import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleISO, handleGeotiff, handleGeopackage,
 import dicttoxml, xml, subprocess
 from lxml import etree
 import threading 
@@ -91,11 +91,12 @@ if 'OPTS' in globals():
     if len(OPTS) == 0:
         errorFunction()
 
-
-# function is called when filePath is included in commanline (with tag 'e', 't' or 's')
-# how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
-# returns None if the format is not supported, else returns the metadata of the file as a dict 
-# (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
+'''
+ function is called when filePath is included in commanline (with tag 'e', 't' or 's')
+ how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
+ returns None if the format is not supported, else returns the metadata of the file as a dict 
+ (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
+'''
 def extractMetadataFromFile(filePath, whatMetadata):
     fileFormat = filePath[filePath.rfind('.')+1:]
     usedModule = None
@@ -206,10 +207,14 @@ def extractMetadataFromFile(filePath, whatMetadata):
     
     return metadata
 
-# function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
-# returns the metadata of the folder as a dict
-# calls the extractMetadataFromFile-function and computes the average for the metadata fields
-# (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations'
+
+
+'''
+ function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
+ returns the metadata of the folder as a dict
+ calls the extractMetadataFromFile-function and computes the average for the metadata fields
+ (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations'
+'''
 def extractMetadataFromFolder(folderPath, whatMetadata):
 
     if not os.path.isdir(folderPath):
@@ -322,11 +327,15 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
     return metadata
 
 
+
+
 if 'OPTS' not in globals():
     raise Exception("An Argument is required")
 
-# tells the program what to do with certain tags and their attributes that are
-# inserted over the command line
+'''
+ tells the program what to do with certain tags and their attributes that are
+ inserted over the command line
+'''
 for o, a in OPTS:
     ending = a
     if "/" in a:
