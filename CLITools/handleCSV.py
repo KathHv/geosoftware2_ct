@@ -30,7 +30,7 @@ def getBoundingBox(filePath):
         minlon= None
         maxlon= None
         if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
-            pass
+            raise Exception('The csv file from ' + filePath + ' has no BoundingBox')
         else:
             SpatialLonExtent.pop(0)
             minlon= (min(SpatialLonExtent))
@@ -54,7 +54,7 @@ def getTemporalExtent(filePath):
         AllSpatialExtent= []
         AllSpatialExtent.append(hf.searchForParameters(elements, ["time", "timestamp"]))
         if hf.searchForParameters(elements, ["time", "timestamp"] ) is None:
-            return None
+            raise Exception('The csv file from ' + filePath + ' has no TemporalExtent')
         else:
             time=[]
             time.append(min(AllSpatialExtent))
@@ -84,7 +84,7 @@ def getVectorRepresentation(filePath):
         else:
             SpatialLatExtent.pop(0)
             if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
-                return None
+                raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
             else:
                 SpatialLonExtent.pop(0)
                 counter=0
@@ -111,6 +111,6 @@ def getCRS(filePath):
         CoordinateSystem={}
         CoordinateSystem= hf.searchForParameters(elements, ["crs"])
         if hf.searchForParameters(elements, ["crs"]) is None:
-            return None
+            raise Exception('The csv file from ' + filePath + ' has no CRS')
         else:
             return CoordinateSystem

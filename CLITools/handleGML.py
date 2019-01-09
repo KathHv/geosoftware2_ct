@@ -18,7 +18,7 @@ def getBoundingBox(filePath):
         if myGeojson.bbox is not None:    
             return (myGeojson.bbox)
         else:
-            return None
+            raise Exception('The gml file from ' + filePath + ' has no BoundingBox')
 
 
 
@@ -44,7 +44,7 @@ def getTemporalExtent(filePath):
             temporal_extent.append(max(dateArray))
             return temporal_extent
         else: 
-            return None 
+            raise Exception('The gml file from ' + filePath + ' has no TemporalExtent') 
 
 '''
  extracts coordinates from gml File (for vector representation)
@@ -57,7 +57,7 @@ def getVectorRepresentation(filePath):
         properties= (myGeojson.get_feature(0).geometry.coordinates[0])
         os.remove("output.json")
         if properties is None:
-            return None
+            raise Exception('The gml file from ' + filePath + ' has no VectorRepresentation')
         else:
             return(properties)
 
@@ -80,5 +80,5 @@ def getCRS(filePath):
         if(len(coordinatesystem) > 0):
             return coordinatesystem
         else: 
-            return None 
+            raise Exception('The gml file from ' + filePath + ' has no CRS')
 

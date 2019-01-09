@@ -43,9 +43,9 @@ def getBoundingBox(filePath):
                 SpatialExtent= [minlon,minlat,maxlon,maxlat]
                 return SpatialExtent
             else:
-                return None
+                raise Exception('The xml file from ' + filePath + ' has no BoundingBox')
         else:
-            return None
+            raise Exception('The xml file from ' + filePath + ' has no BoundingBox')
 
 
 
@@ -73,7 +73,7 @@ def getTemporalExtent(filePath):
             time.append(maxTime)
             return time
         else:
-            return None
+            raise Exception('The xml file from ' + filePath + ' has no TemporalExtent')
 
 '''
  extracts coordinates from xml File (for vector representation)
@@ -103,10 +103,10 @@ def getVectorRepresentation(filePath):
                     lon.append(longitude)
         VectorArray=[]
         if lon is None:
-            return None
+            raise Exception('The xml file from ' + filePath + ' has no VectorRepresentation')
         else:
             if lat is None:
-                return None
+                raise Exception('The xml file from ' + filePath + ' has no VectorRepresentation')
             else:
                 counter=0
                 for x in lon:
@@ -134,4 +134,4 @@ def getCRS(filePath):
         if coordinatesystem is not None:
             return coordinatesystem
         else:
-            return None
+            raise Exception('The xml file from ' + filePath + ' has no CRS')
