@@ -93,16 +93,13 @@ if 'OPTS' in globals():
 
 
 
-
-
+def extractMetadataFromFile(filePath, whatMetadata):
 '''
  function is called when filePath is included in commanline (with tag 'e', 't' or 's')
  how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
  returns None if the format is not supported, else returns the metadata of the file as a dict 
  (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
 '''
-def extractMetadataFromFile(filePath, whatMetadata):
-
     '''
     input
     output
