@@ -1,8 +1,6 @@
 import xml.etree.ElementTree as ET  
-import jgraph as ig
 import helpfunctions as hf
 import ogr2ogr
-import pygeoj
 import sys, os
 from osgeo import gdal, ogr
 import convex_hull

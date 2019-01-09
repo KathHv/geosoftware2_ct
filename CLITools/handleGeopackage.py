@@ -1,4 +1,4 @@
-import fiona, xarray, sqlite3
+import fiona, sqlite3
 import helpfunctions as hf
 import convex_hull
     
