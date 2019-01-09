@@ -148,11 +148,11 @@ def extractMetadataFromFile(filePath, whatMetadata):
         import handleGeotiff
         usedModule = handleGeotiff
     elif fileFormat == 'gml':
-        usedModule = handleGml
+        usedModule = handleGML
     elif fileFormat =='xml':
-        usedModule = handleXml
+        usedModule = handleXML
     elif fileFormat == 'kml':
-        usedModule = handelKml
+        usedModule = handleKML
     else: 
         # file format is not supported
         return None

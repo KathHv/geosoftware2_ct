@@ -1,7 +1,14 @@
 #The functions expects coordinates in a 2-dimensional list of the form [[x,y]...]
 #It returns a list containing the sorted points of the convex hull of the original points
 import math
+''' Graham Scan 
+This function calculates the convex hull of 2-dimensional coordinates
+Input:
+    points  List of 2-dimensional points
 
+Output:   
+    Sorted list of points in convex hull
+'''
 def graham_scan(points):
     
     # If less than two coordinates are in the list, the Algorithm will not be called
@@ -14,18 +21,18 @@ def graham_scan(points):
     #The algorithm (as programmed) only works for positive X and Y values, therefore the coordinates might have to be moved altogether
     minX=min(points, key=lambda x: x[0])
     j=0
-    if minX<0:
+    if minX[0]<0:
         changedX=True
         while j < len(points):
-            points[j][0]=points[j][0]-minX
+            points[j][0]=points[j][0]-minX[0]
 
     
     minY=min(points, key=lambda x: x[1])
     j=0
-    if minY<0:
+    if minY[1]<0:
         changedY=True
         while j < len(points):
-            points[j][1]=points[j][1]-minY
+            points[j][1]=points[j][1]-minY[1]
 
 
 
@@ -33,15 +40,35 @@ def graham_scan(points):
     coords = sorted(points, key = lambda x: x[0])
     coords = sorted(coords, key = lambda x: x[1])
 
-    #Determines whether a given point C is left (return value 1) or right (return value 0) of a vector AB
+
+
+    ''' Triangle Calculation
+    Determines whether a given point C is left (return value 1) or right (return value 0) of a vector AB
+    Input:
+        a : 2D point as List
+        b : 2D point as List
+        c : 2D point as List
+
+    Output: 
+        true : if c is left of AB
+        false : if c is right of AB
+    '''
     def calcTriangle(a, b, c):
         res = (b[0]-a[0])*(c[1]-a[1])-(c[0]-a[0])*(b[1]-a[1])
         if res > 0:
             return True
         else:
             return False
+            
 
-    #Calculates the angle between p0 und p1 and the x-axis
+
+            
+    ''' Angle Calculation
+    Calculates the angle of a vector between two points and the x-axis
+    Input:
+        p0: 2D point as List
+        p1: 2D point as List
+    '''
     def calcAngle(p0, p1):
         if (p1[0]-p0[0])==0:
             return 90

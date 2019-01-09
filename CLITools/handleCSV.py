@@ -30,7 +30,7 @@ def getBoundingBox(filePath):
         minlon= None
         maxlon= None
         if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
-            pass
+            raise Exception('The csv file from ' + filePath + ' has no BoundingBox')
         else:
             SpatialLonExtent.pop(0)
             minlon= (min(SpatialLonExtent))
@@ -54,7 +54,7 @@ def getTemporalExtent(filePath):
         AllSpatialExtent= []
         AllSpatialExtent.append(hf.searchForParameters(elements, ["time", "timestamp"]))
         if hf.searchForParameters(elements, ["time", "timestamp"] ) is None:
-            return None
+            raise Exception('The csv file from ' + filePath + ' has no TemporalExtent')
         else:
             time=[]
             time.append(min(AllSpatialExtent))
@@ -84,7 +84,7 @@ def getVectorRepresentation(filePath):
         else:
             SpatialLatExtent.pop(0)
             if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
-                return None
+                raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
             else:
                 SpatialLonExtent.pop(0)
                 counter=0
@@ -96,3 +96,21 @@ def getVectorRepresentation(filePath):
                     counter=counter+1
                 VectorArray = convex_hull.graham_scan(VectorArray)
                 return VectorArray
+
+'''
+ extracts coordinatesystem from csv File 
+ input filepath: type string, file path to csv file
+ output properties: type list, contains extracted coordinate system of content from csv file
+'''
+def getCRS(filePath):
+    with open(filePath) as csv_file:
+        daten = csv.reader(csv_file.readlines())
+        elements = []
+        for x in daten:
+            elements.append(x)
+        CoordinateSystem={}
+        CoordinateSystem= hf.searchForParameters(elements, ["crs"])
+        if hf.searchForParameters(elements, ["crs"]) is None:
+            raise Exception('The csv file from ' + filePath + ' has no CRS')
+        else:
+            return CoordinateSystem
