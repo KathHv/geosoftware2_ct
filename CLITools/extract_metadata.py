@@ -3,7 +3,6 @@ from six.moves import configparser
 #from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleGeotiff, handleGeopackage,handleXML, handleGML, handleKML
 import dicttoxml, xml, subprocess
 from lxml import etree
 import threading 
@@ -92,10 +91,16 @@ if 'OPTS' in globals():
         errorFunction()
 
 
-# function is called when filePath is included in commanline (with tag 'e', 't' or 's')
-# how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
-# returns None if the format is not supported, else returns the metadata of the file as a dict 
-# (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
+
+
+
+
+'''
+ function is called when filePath is included in commanline (with tag 'e', 't' or 's')
+ how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
+ returns None if the format is not supported, else returns the metadata of the file as a dict 
+ (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
+'''
 def extractMetadataFromFile(filePath, whatMetadata):
 
     '''
