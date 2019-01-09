@@ -180,5 +180,5 @@ def enablePrint():
 def transformingArrayIntoWGS84(crs, pointArray):
     array = []
     for x in pointArray:
-        array.append(transformingIntoWGS84(crs, pointArray[x]))
+        array.append(transformingIntoWGS84(crs, x))
     return array
