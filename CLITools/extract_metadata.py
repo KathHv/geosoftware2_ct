@@ -3,7 +3,6 @@ from six.moves import configparser
 #from pathlib import Path
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV,  handleGeojson, handleGeotiff, handleGeopackage,handleXML, handleGML, handleKML
 import dicttoxml, xml, subprocess
 from lxml import etree
 import threading 
@@ -92,10 +91,16 @@ if 'OPTS' in globals():
         errorFunction()
 
 
-# function is called when filePath is included in commanline (with tag 'e', 't' or 's')
-# how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
-# returns None if the format is not supported, else returns the metadata of the file as a dict 
-# (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
+
+
+
+
+'''
+ function is called when filePath is included in commanline (with tag 'e', 't' or 's')
+ how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
+ returns None if the format is not supported, else returns the metadata of the file as a dict 
+ (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
+'''
 def extractMetadataFromFile(filePath, whatMetadata):
 
     '''
@@ -124,23 +129,32 @@ def extractMetadataFromFile(filePath, whatMetadata):
 
     # first get the module that will be called (depending on the format of the file)
     if fileFormat == 'shp' or fileFormat == 'dbf':
+        import handleShapefile
         usedModule = handleShapefile
     elif fileFormat == 'csv':
+        import handleCSV
         usedModule = handleCSV
     elif fileFormat == 'nc':
+        import handleNetCDF
         usedModule = handleNetCDF
     elif fileFormat == 'geojson' or fileFormat == 'json':
+        import handleGeojson
         usedModule = handleGeojson
     elif fileFormat == 'gpkg':
+        import handleGeopackage
         usedModule = handleGeopackage
     elif fileFormat == 'geotiff' or fileFormat == 'tif':
+        import handleGeotiff
         usedModule = handleGeotiff
     elif fileFormat == 'gml':
-        usedModule = handleGML
+        import handleGML
+        usedModule = handleGMl
     elif fileFormat =='xml':
-        usedModule = handleXML
+        import handleXML
+        usedModule = handleXMl
     elif fileFormat == 'kml':
-        usedModule = handleKML
+        import handleKML
+        usedModule = handelKMl
     else: 
         # file format is not supported
         return None
