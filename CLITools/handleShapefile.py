@@ -6,33 +6,32 @@ import sys
 import convex_hull
 
 
-'''
- gets the coordinate reference systems from the shapefile
- input filepath: type string, file path to shapefile
- output crsCode: type int, EPSG number of taken crs
-'''
+
 def getCRS(path):
+    ''' gets the coordinate reference systems from the shapefile
+    input path: type string, file path to shapefile
+    '''
     raise Exception("The CRS cannot be extracted from shapefiles")
 
 
 
-'''
- extracts temporal extent of the shapefile
- input path: type string, file path to shapefile file
-'''
 def getTemporalExtent(path):
+    ''' extracts temporal extent of the shapefile
+    input path: type string, file path to shapefile file
+    '''
+
     raise Exception("The temporal extent cannot (yet) be extracted of a shapefile")
 
 
 
-'''
- abstract the geometry of the file with a polygon
- first: collects all the points of the file
- then: call the function that computes the polygon of it
- input path: type string, file path to shapefile
- output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from shapefile
-'''
+
 def getVectorRepresentation(path):
+    ''' abstract the geometry of the file with a polygon
+    first: collects all the points of the file
+    then: call the function that computes the polygon of it
+    input path: type string, file path to shapefile
+    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from shapefile
+    '''
     if not '.shp' in path:
         shpPath = path[:path.rfind(".")+1]
         shpPath += "shp"
@@ -70,12 +69,12 @@ def getVectorRepresentation(path):
 
 
 
-'''
- extracts bounding box from shapfile
- input filepath: type string, file path to shapefile
- output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
-'''
+
 def getBoundingBox(path):
+    ''' extracts bounding box from shapfile
+    input filepath: type string, file path to shapefile
+    output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    '''
     # try to get the bounding box with fiona
     with fiona.open(path) as datasetFiona:
         if hasattr(datasetFiona, "crs"):
