@@ -1,3 +1,7 @@
+'''
+@author: Katharina Hovestadt, Niklas Aßelmann, Benjamin Dietz
+'''
+
 import sys, os, getopt, datetime, errno, sqlite3, subprocess, uuid # important
 from six.moves import configparser
 #from pathlib import Path
@@ -243,14 +247,14 @@ def extractMetadataFromFile(filePath, whatMetadata):
 
 
 
+
+def extractMetadataFromFolder(folderPath, whatMetadata):
 '''
  function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
  returns the metadata of the folder as a dict
  calls the extractMetadataFromFile-function and computes the average for the metadata fields
  (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations'
 '''
-def extractMetadataFromFolder(folderPath, whatMetadata):
-
     if not os.path.isdir(folderPath):
         raise FileNotFoundError("This directory could not be found")
     else:
@@ -366,11 +370,11 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 if 'OPTS' not in globals():
     raise Exception("An Argument is required")
 
+for o, a in OPTS:
 '''
  tells the program what to do with certain tags and their attributes that are
  inserted over the command line
 '''
-for o, a in OPTS:
     ending = a
     if "/" in a:
         ending = a[a.rfind("/")+1:]

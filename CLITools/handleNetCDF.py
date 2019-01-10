@@ -1,3 +1,7 @@
+'''
+@author: Benjamin Dietz
+'''
+
 import datetime, xarray, gdal
 from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset

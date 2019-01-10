@@ -1,3 +1,7 @@
+'''
+@author: Benjamin Dietz
+'''
+
 import fiona, xarray, sqlite3
 import helpfunctions as hf
 import convex_hull
