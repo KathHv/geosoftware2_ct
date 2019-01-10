@@ -8,10 +8,12 @@ from os import walk
 import pyproj
 import helpfunctions
 
-# Function name: test_tranformingIntoWGS84
-# Function purpose: testing whether function transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
-# Input: point, proj
-# Output: lon, lat, sat
+'''
+ Function purpose: testing whether function transforming SRS into WGS84
+ (EPSG:4978; used by the GPS satellite navigation system) from an array
+ input filepath: types array, string, point of two coordinates, proj(ektion)
+ output: transformed coordinates 
+'''
 def test_tranformingIntoWGS84(point, proj):
     # original projection, any reference system
     p = pyproj.Proj(init=proj)
