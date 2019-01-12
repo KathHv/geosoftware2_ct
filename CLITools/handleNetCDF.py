@@ -9,14 +9,14 @@ import helpfunctions as hf
 import convex_hull
 
 
+
 def getVectorRepresentation(path):
-'''
- abstracts the geometry of the file with a polygon
- first: collects all the points of the file
- then: call the function that computes the polygon of it
- input path: type string, file path to NetCDF file
- output { 'lat': lats, 'lon': lons }: type list, list of lists with length = 2, contains extracted coordinates of content from NetCDF file
-'''
+    ''' abstracts the geometry of the file with a polygon
+    first: collects all the points of the file
+    then: call the function that computes the polygon of it
+    input path: type string, file path to NetCDF file
+    output { 'lat': lats, 'lon': lons }: type list, list of lists with length = 2, contains extracted coordinates of content from NetCDF file
+    '''
     file = xarray.open_dataset(path)
     if file is not None:
         if 'coords' in file.to_dict():
@@ -44,12 +44,12 @@ def getVectorRepresentation(path):
 
 
 
+
 def getBoundingBox(path):
-'''
- extracts bounding box from NetCDF
- input path: type string, file path to NetCDF file
- output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
-'''
+    ''' extracts bounding box from NetCDF
+    input path: type string, file path to NetCDF file
+    output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    '''
     ncDataset = NCDataset(path)
     if 'latitude' in ncDataset.variables:
         lats = ncDataset.variables["latitude"][:]
@@ -76,12 +76,12 @@ def getBoundingBox(path):
 
 
 
+
 def getCRS(path):
-'''
- gets the coordinate reference systems from the NetCDF file
- input path: type string, file path to NetCDF file
- output crs: type list, list with two elements: 1. Crs of lats and 2. Crs of lons
-'''
+    ''' gets the coordinate reference systems from the NetCDF file
+    input path: type string, file path to NetCDF file
+    output crs: type list, list with two elements: 1. Crs of lats and 2. Crs of lons
+    '''
     xarrayForNetCDF = xarray.open_dataset(path)
     if xarrayForNetCDF is not None:
             if 'coords' in xarrayForNetCDF.to_dict():
@@ -95,12 +95,13 @@ def getCRS(path):
     return "No CRS found"
 
 
+
+
 def getTemporalExtent(path):
-'''
- extracts the temporal extent of the netCDF file
- input path: type string, file path to geotiff file
- output temporal_extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-'''
+    ''' extracts the temporal extent of the netCDF file
+    input path: type string, file path to geotiff file
+    output temporal_extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    '''
     ncDataset = NCDataset(path)
     datasetGDAL = gdal.Open(path)
     metadataGDAL = datasetGDAL.GetMetadata()

@@ -97,32 +97,37 @@ if 'OPTS' in globals():
 
 
 
+def computeBbox(module, path):
+    ''' input module: type module, module from which methods shall be used
+    input path: type string, path to file
+    output bbox_in_orig_crs or bbox_transformed, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
+    '''
+    
+    bbox_in_orig_crs = module.getBoundingBox(path)
+    try:
+        crs = module.getCRS(path)
+    except:
+        print("Exception in module.getCRS(path) in computeBbox(module, path). Exception will be passed.")
+        pass
+    if 'crs' in locals() and crs is not None:
+        print(bbox_in_orig_crs)
+        for x in bbox_in_orig_crs:
+            print(type(x))
+            bbox_transformed = hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs))
+            return bbox_transformed
+    else:
+        return bbox_in_orig_crs
+
+
+
+
 def extractMetadataFromFile(filePath, whatMetadata):
-'''
- function is called when filePath is included in commanline (with tag 'e', 't' or 's')
- how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
- returns None if the format is not supported, else returns the metadata of the file as a dict 
- (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
-'''
+    ''' function is called when filePath is included in commanline (with tag 'e', 't' or 's')
+    how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
+    returns None if the format is not supported, else returns the metadata of the file as a dict 
+    (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
     '''
-    input
-    output
-    '''
-    def computeBbox(module, path):
-        bbox_in_orig_crs = module.getBoundingBox(path)
-        try:
-            crs = module.getCRS(path)
-        except:
-            print("Exception")
-            pass
-        if 'crs' in locals() and crs is not None:
-            print(bbox_in_orig_crs)
-            for x in bbox_in_orig_crs:
-                print(type(x))
-            print(hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs))
-        else:
-            return bbox_in_orig_crs
- 
+    
     fileFormat = filePath[filePath.rfind('.')+1:]
     usedModule = None
 
@@ -236,7 +241,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
 
     if whatMetadata == "t":
         # only temporal extent is required
-        # if one of the metadata field could not be extrated, the system crashes
+        # if one of the metadata field could not be extracted, the system crashes
         barrier = threading.Barrier(2)
         thread_temp.start()
         barrier.wait()
@@ -249,12 +254,11 @@ def extractMetadataFromFile(filePath, whatMetadata):
 
 
 def extractMetadataFromFolder(folderPath, whatMetadata):
-'''
- function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
- returns the metadata of the folder as a dict
- calls the extractMetadataFromFile-function and computes the average for the metadata fields
- (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations'
-'''
+    '''function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
+    returns the metadata of the folder as a dict
+    calls the extractMetadataFromFile-function and computes the average for the metadata fields
+    (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations'
+    '''
     if not os.path.isdir(folderPath):
         raise FileNotFoundError("This directory could not be found")
     else:
@@ -296,9 +300,15 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
                 # fileformat is not supported
                 filesSkiped += 1
 
-        # computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents'
-        # uses helpfunction
+
+
+        
         def getTemporalExtentFromFolder(mult_temp_extents):
+            ''' computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents'
+            uses helpfunction
+            input mult_temp_extents: type list, list of list with temporal extent with length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+            output hf.computeBboxOfMultiple(mult_temp_extents): type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] one bbox out of of multiple bboxes
+            '''
             print(str(len(mult_temp_extents)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a temporal extent.")
 
             if len(mult_temp_extents) > 0 and hf.computeTempExtentOfMultiple(mult_temp_extents) is not None:
@@ -306,9 +316,14 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 
             else: return None
 
-        # computes boundingbox from multiple bounding boxes stored in the array 'mult_bboxes'
-        # uses helpfunction
+
+
+
         def getBboxFromFolder(mult_bboxes):
+            ''' computes boundingbox from multiple bounding boxes stored in the array 'mult_bboxes'
+            uses helpfunction
+            input mult_bboxes: type list, list with bounding boxes, one bbox has the following format:  length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+            '''
             print(str(len(mult_bboxes)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a bbox.")
             
             if len(mult_bboxes) > 0 and hf.computeBboxOfMultiple(mult_bboxes) is not None:
@@ -316,14 +331,24 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 
             else: return None
 
-        # computes vector representation from multiple vector representations stored in the array 'mult_vec_rep'
-        # uses helpfunction
+        
+
+
         def getVectorRepFromFile(mult_vec_rep):
+            '''
+            computes vector representation from multiple vector representations stored in the array 'mult_vec_rep'
+            uses helpfunction
+            input mult_vec_rep: type list, all vector representations from the files in the folder
+            output mult_vec_rep: type list, one vector representation of the files from folder
+            '''
             print(str(len(mult_vec_rep)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
             if len(mult_vec_rep) > 0: # TO DO: helpfunction and here catch is if result is None (Handle union of multiple vector representations)
                 return mult_vec_rep
 
             return None
+
+
+
 
     bbox = getBboxFromFolder(bboxes)
     vector_rep = getVectorRepFromFile(vector_representations)

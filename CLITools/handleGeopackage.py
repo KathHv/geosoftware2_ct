@@ -8,21 +8,22 @@ import convex_hull
     
 
 
+
 def getTemporalExtent(path):
-'''
- extracts temporal extent of the geopackage
- input path: type string, file path to geopackage file
-'''
+    ''' extracts temporal extent of the geopackage
+    input path: type string, file path to geopackage file
+    '''
     raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
     #return 1
 
 
+
 def getBoundingBox(path):
-'''
- extract bounding box from geopackage
- input path: type string, file path to geopackage file
- output [min(longs), min(lats), max(longs), max(lats)]: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
-'''
+    ''' extract bounding box from geopackage
+    input path: type string, file path to geopackage file
+    output [min(longs), min(lats), max(longs), max(lats)]: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    '''
+
     # try to get the bbox with fiona
     with fiona.open(path) as datasetFiona:
         bbox = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]
@@ -52,14 +53,14 @@ def getBoundingBox(path):
 
 
 
+
 def getVectorRepresentation(path):
-'''
- abstract the geometry of the file with a polygon
- first: collects all the points of the file
- then: call the function that computes the polygon of it
- input path: type string, file path to geopackage file
- output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geopackage file
-'''
+    ''' abstract the geometry of the file with a polygon
+    first: collects all the points of the file
+    then: call the function that computes the polygon of it
+    input path: type string, file path to geopackage file
+    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geopackage file
+    '''
     coordinates = []
     with fiona.open(path) as datasetFiona:
         for shapeElement in datasetFiona:
@@ -102,13 +103,12 @@ def getVectorRepresentation(path):
 
 
 
-
+    
 def getCRS(path):
-'''
- gets all the coordinate reference systems from the geopackage (through a database connection)
- input path: type string, file path to geopackage file
- output init[init.rfind(":")+1:]: type int, EPSG number of taken crs
-'''
+    ''' gets all the coordinate reference systems from the geopackage (through a database connection)
+    input path: type string, file path to geopackage file
+    output init[init.rfind(":")+1:]: type int, EPSG number of taken crs
+    '''
     sqliteConnection = sqlite3.connect(path)
     if sqliteConnection is not None:
         c = sqliteConnection.cursor()

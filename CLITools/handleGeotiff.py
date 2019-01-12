@@ -6,12 +6,12 @@ import convex_hull
 
 
 
-'''
- method to extract geotiff content from a file by using its filepath
- input filepath: type string, path to file which shall be extracted
- output gtiffContent: type string,  returns  geotiff content of filepath 
-'''
+
 def extractContentFromPath(filePath):
+    ''' method to extract geotiff content from a file by using its filepath
+    input filepath: type string, path to file which shall be extracted
+    output gtiffContent: type string,  returns  geotiff content of filepath 
+    '''
     gdal.UseExceptions()
     
     #zip https://rasterio.readthedocs.io/en/latest/quickstart.html
@@ -22,38 +22,39 @@ def extractContentFromPath(filePath):
         raise Exception("geotiff file cannot be opened, read or is empty.")
     return gtiffContent
 
-'''
- extracts bounding box from geotiff
- input filepath: type string, file path to geotiff file
- output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
-'''
-def getBoundingBox(filePath):
-        gtiffContent = extractContentFromPath(filePath)
-        boundingBox = []
-        geoTransform = gtiffContent.GetGeoTransform()
-        minx = geoTransform[0]
-        maxy = geoTransform[3]        
-        maxx = minx + geoTransform[1] * gtiffContent.RasterXSize
-        miny = maxy + geoTransform[5] * gtiffContent.RasterYSize
-        
-        minx = format(float(minx), '.2f')
-        maxy = format(float(maxy), '.2f')
-        maxx = format(float(maxx), '.2f')
-        miny = format(float(miny), '.2f')
 
-        boundingBox= [miny, minx, maxy, maxx]
-        if not boundingBox:
-            raise Exception("Bounding box could not be extracted")
+
+
+def getBoundingBox(filePath):
+    ''' extracts bounding box from geotiff
+    input filepath: type string, file path to geotiff file
+    output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    '''
+    gtiffContent = extractContentFromPath(filePath)
+    boundingBox = []
+    geoTransform = gtiffContent.GetGeoTransform()
+    minx = geoTransform[0]
+    maxy = geoTransform[3]        
+    maxx = minx + geoTransform[1] * gtiffContent.RasterXSize
+    miny = maxy + geoTransform[5] * gtiffContent.RasterYSize
+     
+    minx = format(float(minx), '.2f')
+    maxy = format(float(maxy), '.2f')
+    maxx = format(float(maxx), '.2f')
+    miny = format(float(miny), '.2f')
+
+    boundingBox= [miny, minx, maxy, maxx]
+    if not boundingBox:
+        raise Exception("Bounding box could not be extracted")
         return boundingBox
 
 
 
-'''
- gets the coordinate reference systems from the geotiff file
- input filepath: type string, file path to geotiff file
- output crsCode: type int, EPSG number of taken crs
-'''
 def getCRS(filePath):
+    ''' gets the coordinate reference systems from the geotiff file
+    input filepath: type string, file path to geotiff file
+    output crsCode: type int, EPSG number of taken crs
+    '''
 
     gtiffContent = extractContentFromPath(filePath)
     crsCode = None
@@ -65,12 +66,12 @@ def getCRS(filePath):
 
 
 
-'''
- extracts coordinates from geotiff File (for vector representation)
- input filepath: type string, file path to geotiff file
- output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geotiff file
-'''
+
 def getVectorRepresentation(filePath):
+    ''' extracts coordinates from geotiff File (for vector representation)
+    input filepath: type string, file path to geotiff file
+    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geotiff file
+    '''
     gtiffContent = extractContentFromPath(filePath)
     vectorRepresentation = []
     geoTransform = gtiffContent.GetGeoTransform()
@@ -88,12 +89,12 @@ def getVectorRepresentation(filePath):
 
 
 
-'''
- extracts temporal extent of the geotiff
- input filepath: type string, file path to geotiff file
- output timeExtent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-'''
 def getTemporalExtent(filePath):
+    ''' extracts temporal extent of the geotiff
+    input filepath: type string, file path to geotiff file
+    output timeExtent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    '''
+
     gtiffContent = extractContentFromPath(filePath)
 
     temporalExtent = []

@@ -10,13 +10,13 @@ from pyproj import Proj, transform
 import convex_hull
 
 
-'''
- Function name: printObject
- Function purpose: output of metadata object
- Input: object
- Output: print("/n")
-'''
+
 def printObject(object):
+    ''' Function name: printObject
+    Function purpose: output of metadata object
+    Input: object
+    Output: print("/n")
+    '''
     print("\n")
     for a,b in object.items():
         print(str(a) + ": " + str(b))
@@ -24,14 +24,14 @@ def printObject(object):
 
 
 
-'''
- Does a file with the relative path 'filename' exist locally?
- Function name: extists
- Function purpose: checks whether the filename exists
- Input: filename
- Output: boolean true or false
-'''
+
 def exists(filename):
+    ''' Does a file with the relative path 'filename' exist locally?
+    Function name: extists
+    Function purpose: checks whether the filename exists
+    Input: filename
+    Output: boolean true or false
+    '''
     if os.path.isfile(filename):
         return True
     else:
@@ -39,15 +39,16 @@ def exists(filename):
 
 
 
-'''
- Function name: computeBboxOfMultiple
- Function purpose:  compute an overall bbox from an array of bounding boxes
+
+def computeBboxOfMultiple(bboxes):
+    '''
+    Function name: computeBboxOfMultiple
+    Function purpose:  compute an overall bbox from an array of bounding boxes
                     required format of parameter 'bboxes': [ bbox1, bbox2, ..., bboxn ]
                     while earch bbox has the format: [ min(longs), min(lats), max(longs), max(lats) ]
- Input: bboxes
- Output: array of coordinates
-'''
-def computeBboxOfMultiple(bboxes):
+    Input: bboxes
+    Output: array of coordinates
+    '''
     coordinate0 = 200
     coordinate1 = 200
     coordinate2 = -200
@@ -65,15 +66,15 @@ def computeBboxOfMultiple(bboxes):
 
 
 
-'''
- Function name: computeTempExtentOfMultiple
- Function purpose:  get multiple temporal extents in the schema [ temp1, temp2, ..., tempn ]
+
+def computeTempExtentOfMultiple(temporal_extents):
+    ''' Function name: computeTempExtentOfMultiple
+    Function purpose:  get multiple temporal extents in the schema [ temp1, temp2, ..., tempn ]
                     with the schema of each temporal extent being: [ 'yyyy-mm-dd hh:mm:ss', 'yyyy-mm-dd hh:mm:ss' ]
                     returning the overall temporal extent in ISO format
- Input: temporal_extents
- Output: array tempExtent (if startingpoint and endpoint follow given rules), None (if they don't)
-'''
-def computeTempExtentOfMultiple(temporal_extents):
+    Input: temporal_extents
+    Output: array tempExtent (if startingpoint and endpoint follow given rules), None (if they don't)
+    '''
     if len(temporal_extents) > 0:
         startPoint = dtime.strptime(temporal_extents[0][0] ,'%Y-%m-%d %H:%M:%S')
         endPoint = dtime.strptime(temporal_extents[0][1] ,'%Y-%m-%d %H:%M:%S')
@@ -90,13 +91,13 @@ def computeTempExtentOfMultiple(temporal_extents):
 
 
 
-'''
- Function name: countElements
- Function purpose: return the occurancies of all values in the array
- Input: array
- Output: array list
-'''
+
 def countElements(array):
+    ''' Function name: countElements
+    Function purpose: return the occurancies of all values in the array
+    Input: array
+    Output: array list
+    '''
     list = []
     for x in array:
             if [x, array.count(x)] not in list:
@@ -105,13 +106,13 @@ def countElements(array):
 
 
 
-'''
- Function name: getAllRowElements
- Function purpose: help-function to get all row elements for a specific string
- Input: rowname, elements
- Output: array values
-'''
+
 def getAllRowElements(rowname,elements):
+    ''' Function name: getAllRowElements
+    Function purpose: help-function to get all row elements for a specific string
+    Input: rowname, elements
+    Output: array values
+    '''
     for idx, val in enumerate(elements[0]):
         if  rowname in val:
             indexOf = idx
@@ -123,13 +124,13 @@ def getAllRowElements(rowname,elements):
 
 
 
-'''
- Function name: searchForParameters
- Function purpose: ?
- Input: paramArray, elements
- Output: getAllRowElements(x,elements)
-'''
+
 def searchForParameters(elements, paramArray):
+    ''' Function name: searchForParameters
+    Function purpose: ?
+    Input: paramArray, elements
+    Output: getAllRowElements(x,elements)
+    '''
     for x in paramArray:
         for row in elements[0]:
             if x in row:
@@ -137,13 +138,13 @@ def searchForParameters(elements, paramArray):
 
 
 
-'''
- Function name: transformingIntoWGS84
- Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system)
- Input: crs, point
- Output: retPoint constisting of x2, y2 (transformed points)
-'''
+
 def transformingIntoWGS84 (crs, point):
+    ''' Function name: transformingIntoWGS84
+    Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system)
+    Input: crs, point
+    Output: retPoint constisting of x2, y2 (transformed points)
+    '''
     inProj = Proj(init = crs)
     outProj = Proj(init ='epsg:4978')
     x1, y1 = point
@@ -154,30 +155,28 @@ def transformingIntoWGS84 (crs, point):
 
 
 
-'''
- Disable Prints
-'''
+
 def disablePrint():
+    ''' Disable Prints '''
     sys.stdout = open(os.devnull, 'w')
 
 
 
-'''
- Restore Prints
-'''
+
 def enablePrint():
+    ''' Restore Prints'''
     sys.stdout = sys.__stdout__
 
 
 
-'''
- transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
- Function name: transformingIntoWGS84
- Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
- Input: crs, pointArray
- Output: array array
-'''
+
 def transformingArrayIntoWGS84(crs, pointArray):
+    ''' transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
+    Function name: transformingIntoWGS84
+    Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
+    Input: crs, pointArray
+    Output: array array
+    '''
     array = []
     for x in pointArray:
         array.append(transformingIntoWGS84(crs, x))

@@ -3,12 +3,12 @@ import helpfunctions as hf
 import convex_hull
 
 
-'''
- Function purpose: extracts the spatial extent (bounding box) from a csv-file
- input filepath: type string, file path to csv file
- output SpatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
-'''
+
 def getBoundingBox(filePath):
+    ''' Function purpose: extracts the spatial extent (bounding box) from a csv-file
+    input filepath: type string, file path to csv file
+    output SpatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    '''
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
@@ -40,12 +40,13 @@ def getBoundingBox(filePath):
 
 
 
-'''
- extracts temporal extent of the csv
- input filepath: type string, file path to csv file
- output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-'''
+
 def getTemporalExtent(filePath):
+    ''' extracts temporal extent of the csv
+    input filepath: type string, file path to csv file
+    output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    '''
+
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
@@ -63,13 +64,13 @@ def getTemporalExtent(filePath):
 
 
 
-'''
- extracts coordinates from csv File (for vector representation)
- input filepath: type string, file path to csv file
- output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from csv file
-'''
+
 def getVectorRepresentation(filePath):
-   with open(filePath) as csv_file:
+    ''' extracts coordinates from csv File (for vector representation)
+    input filepath: type string, file path to csv file
+    output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from csv file
+    '''
+    with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
@@ -97,12 +98,14 @@ def getVectorRepresentation(filePath):
                 VectorArray = convex_hull.graham_scan(VectorArray)
                 return VectorArray
 
-'''
- extracts coordinatesystem from csv File 
- input filepath: type string, file path to csv file
- output properties: type list, contains extracted coordinate system of content from csv file
-'''
+
+
+
 def getCRS(filePath):
+    ''' extracts coordinatesystem from csv File 
+    input filepath: type string, file path to csv file
+    output properties: type list, contains extracted coordinate system of content from csv file
+    '''
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
