@@ -1,16 +1,16 @@
 #The functions expects coordinates in a 2-dimensional list of the form [[x,y]...]
 #It returns a list containing the sorted points of the convex hull of the original points
 import math
-''' Graham Scan 
-This function calculates the convex hull of 2-dimensional coordinates
-Input:
-    points  List of 2-dimensional points
 
-Output:   
-    Sorted list of points in convex hull
-'''
 def graham_scan(points):
-    
+    ''' Graham Scan 
+    This function calculates the convex hull of 2-dimensional coordinates
+    Input:
+        points  List of 2-dimensional points
+
+    Output:   
+        Sorted list of points in convex hull
+    '''    
     # If less than two coordinates are in the list, the Algorithm will not be called
     if len(points)<3:
         return points
@@ -42,18 +42,19 @@ def graham_scan(points):
 
 
 
-    ''' Triangle Calculation
-    Determines whether a given point C is left (return value 1) or right (return value 0) of a vector AB
-    Input:
-        a : 2D point as List
-        b : 2D point as List
-        c : 2D point as List
-
-    Output: 
-        true : if c is left of AB
-        false : if c is right of AB
-    '''
+   
     def calcTriangle(a, b, c):
+        ''' Triangle Calculation
+        Determines whether a given point C is left (return value 1) or right (return value 0) of a vector AB
+        Input:
+            a : 2D point as List
+            b : 2D point as List
+            c : 2D point as List
+
+        Output: 
+            true : if c is left of AB
+            false : if c is right of AB
+        '''
         res = (b[0]-a[0])*(c[1]-a[1])-(c[0]-a[0])*(b[1]-a[1])
         if res > 0:
             return True
@@ -63,13 +64,14 @@ def graham_scan(points):
 
 
             
-    ''' Angle Calculation
-    Calculates the angle of a vector between two points and the x-axis
-    Input:
-        p0: 2D point as List
-        p1: 2D point as List
-    '''
+    
     def calcAngle(p0, p1):
+        ''' Angle Calculation
+        Calculates the angle of a vector between two points and the x-axis
+        Input:
+            p0: 2D point as List
+            p1: 2D point as List
+        '''
         if (p1[0]-p0[0])==0:
             return 90
 
