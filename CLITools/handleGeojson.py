@@ -80,8 +80,8 @@ def divideCoordinatesForBbox(coordsList):
     global foundCoordsLat
     global foundCoordsLon
     if type(coordsList) == list and len(coordsList) == 2 and (type(coordsList[0]) == float or type(coordsList[0]) == int) and (type(coordsList[1]) == float or type(coordsList[1]) == int):   
-        foundCoordsLat.append(format(float(coordsList[1]), '.2f'))
-        foundCoordsLon.append(format(float(coordsList[0]), '.2f'))
+        foundCoordsLat.append(float(coordsList[1]))
+        foundCoordsLon.append(float(coordsList[0]))
     elif type(coordsList) == list and len(coordsList) != 0:
         for value in coordsList:
             divideCoordinatesForBbox(value)

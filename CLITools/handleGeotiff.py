@@ -38,15 +38,15 @@ def getBoundingBox(filePath):
     maxx = minx + geoTransform[1] * gtiffContent.RasterXSize
     miny = maxy + geoTransform[5] * gtiffContent.RasterYSize
      
-    minx = format(float(minx), '.2f')
-    maxy = format(float(maxy), '.2f')
-    maxx = format(float(maxx), '.2f')
-    miny = format(float(miny), '.2f')
+    minx = float(minx)
+    maxy = float(maxy)
+    maxx = float(maxx)
+    miny = float(miny)
 
     boundingBox= [miny, minx, maxy, maxx]
     if not boundingBox:
         raise Exception("Bounding box could not be extracted")
-        return boundingBox
+    return boundingBox
 
 
 
