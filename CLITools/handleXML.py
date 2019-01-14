@@ -145,7 +145,9 @@ def getCRS(filePath):
             if x.find('crs') is not None:  
                 crs = x.find('crs').text
                 coordinatesystem.append(crs)
-        if(len(coordinatesystem) > 0):
-            return coordinatesystem
+        if hf.searchForParameters(coordinatesystem, ["crs"]) is None:
+            raise Exception('The csv file from ' + filePath + ' has no CRS')
+        if hf.searchForParameters(coordinatesystem, ["crs"]) == "WGS84":
+            return "4978"
         else:
-            raise Exception('The xml file from ' + filePath + ' has no CRS')
+            raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')

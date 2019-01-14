@@ -100,9 +100,9 @@ def getCRS(filePath):
         elements = []
         for x in daten:
             elements.append(x)
-        CoordinateSystem={}
-        CoordinateSystem= hf.searchForParameters(elements, ["crs"])
         if hf.searchForParameters(elements, ["crs"]) is None:
             raise Exception('The csv file from ' + filePath + ' has no CRS')
+        if hf.searchForParameters(elements, ["crs"]) == "WGS84":
+            return "4978"
         else:
-            return CoordinateSystem
+            raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
