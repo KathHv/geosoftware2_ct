@@ -23,6 +23,12 @@ def getBoundingBox(filePath):
         raise Exception('The gml file from ' + filePath + ' has no BoundingBox')
 
 
+
+'''
+ extracts temporal extent of the gml
+ input filepath: type string, file path to gml file
+ output temporal_extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
 def getTemporalExtent(filePath):
     '''
     extracts temporal extent of the gml
@@ -47,7 +53,11 @@ def getTemporalExtent(filePath):
     else: 
         raise Exception('The gml file from ' + filePath + ' has no TemporalExtent') 
 
-
+'''
+ extracts coordinates from gml File (for vector representation)
+ input filepath: type string, file path to gml file
+ output properties: type list, list of lists with length = 2, contains extracted coordinates of content from gml file
+'''
 def getVectorRepresentation(filePath):
     '''
     extracts coordinates from gml File (for vector representation)
@@ -63,7 +73,11 @@ def getVectorRepresentation(filePath):
     else:
         return properties
 
-
+'''
+ extracts coordinatesystem from gml File 
+ input filepath: type string, file path to gml file
+ output properties: type list, contains extracted coordinate system of content from gml file
+'''
 def getCRS(filePath):
     '''
     extracts coordinatesystem from gml File 

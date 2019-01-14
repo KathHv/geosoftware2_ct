@@ -47,6 +47,12 @@ def getBoundingBox(filePath):
             raise Exception('The xml file from ' + filePath + ' has no BoundingBox')
 
 
+
+'''
+ extracts temporal extent of the xml
+ input filepath: type string, file path to xml file
+ output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+'''
 def getTemporalExtent(filePath):
     '''
     extracts temporal extent of the xml
@@ -73,7 +79,11 @@ def getTemporalExtent(filePath):
         else:
             raise Exception('The xml file from ' + filePath + ' has no TemporalExtent')
 
-
+'''
+ extracts coordinates from xml File (for vector representation)
+ input filepath: type string, file path to xml file
+ output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from xml file
+'''
 def getVectorRepresentation(filePath):
     '''
     extracts coordinates from xml File (for vector representation)
@@ -116,7 +126,11 @@ def getVectorRepresentation(filePath):
                     counter=counter+1
             return vectorArray
 
-
+'''
+ extracts coordinatesystem from xml File 
+ input filepath: type string, file path to xml file
+ output properties: type list, contains extracted coordinate system of content from xml file
+'''
 def getCRS(filePath):
     '''
     extracts coordinatesystem from xml File 

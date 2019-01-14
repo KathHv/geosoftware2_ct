@@ -43,11 +43,6 @@ def getBoundingBox(filePath):
 
 
 def getTemporalExtent(filePath):
-    '''
-    extracts temporal extent of the csv
-    input filepath: type string, file path to csv file
-    output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-    '''
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
@@ -67,12 +62,7 @@ def getTemporalExtent(filePath):
 
 
 def getVectorRepresentation(filePath):
-    '''
-    extracts coordinates from csv File (for vector representation)
-    input filepath: type string, file path to csv file
-    output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from csv file
-    '''
-    with open(filePath) as csv_file:
+   with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
@@ -99,13 +89,12 @@ def getVectorRepresentation(filePath):
                     counter=counter+1
                 return vectorArray
 
-
+'''
+ extracts coordinatesystem from csv File 
+ input filepath: type string, file path to csv file
+ output properties: type list, contains extracted coordinate system of content from csv file
+'''
 def getCRS(filePath):
-    '''
-    extracts coordinatesystem from csv File 
-    input filepath: type string, file path to csv file
-    output properties: type list, contains extracted coordinate system of content from csv file
-    '''
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
