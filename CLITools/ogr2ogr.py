@@ -38,6 +38,7 @@
 import sys
 import os
 import stat
+import helpfunctions as hf
 
 from osgeo import gdal
 from osgeo import ogr
@@ -864,7 +865,6 @@ def main(args = None, progress_func = TermProgress, progress_data = None):
                         print(
                                 "Terminating translation prematurely after failed\n" + \
                                 "translation of layer " + poLayer.GetName() + " (use -skipfailures to skip errors)")
-
                         return False
                 else:
                     # No matching target layer : just consumes the features

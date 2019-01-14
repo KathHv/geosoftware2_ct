@@ -1,10 +1,8 @@
 import sys, os, getopt, datetime, errno, sqlite3, subprocess, uuid # important
 from six.moves import configparser
-#from pathlib import Path
 from os import walk
 import helpfunctions as hf
 import dicttoxml, xml, subprocess
-from lxml import etree
 import threading 
 
 
@@ -151,13 +149,13 @@ def extractMetadataFromFile(filePath, whatMetadata):
         usedModule = handleGeotiff
     elif fileFormat == 'gml':
         import handleGML
-        usedModule = handleGMl
+        usedModule = handleGML
     elif fileFormat =='xml':
         import handleXML
-        usedModule = handleXMl
+        usedModule = handleXML
     elif fileFormat == 'kml':
         import handleKML
-        usedModule = handelKMl
+        usedModule = handelKML
     else: 
         # file format is not supported
         return None
@@ -215,10 +213,11 @@ def extractMetadataFromFile(filePath, whatMetadata):
     if whatMetadata == "e":
         # none of the metadata field is required 
         # so the system does not crash even if it does not find anything
-        barrier = threading.Barrier(4)
+        barrier = threading.Barrier(5)
         thread_bbox_except.start() 
         thread_temp_except.start() 
         thread_vector_except.start() 
+        thread_crs_except.start()
 
         barrier.wait() 
         barrier.reset() 
