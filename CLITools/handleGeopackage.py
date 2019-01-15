@@ -13,7 +13,7 @@ def getTemporalExtent(path):
     ''' extracts temporal extent of the geopackage
     input path: type string, file path to geopackage file
     '''
-    raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
+    raise Exception("The temporal extent cannot be extracted from geopackage files")
     #return 1
 
 
@@ -122,7 +122,8 @@ def getCRS(path):
             if len(countElements) == 1:
                 return countElements[0][0]
             else:
-                return crsid
+                if len(crsid) > 0:
+                    return crsid[0]
     with fiona.open(path) as datasetFiona:
         if 'crs' in datasetFiona.meta:
             if 'init' in datasetFiona.meta["crs"]:

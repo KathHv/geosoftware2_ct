@@ -1,5 +1,5 @@
 '''
-@author: Katharina Hovestadt, Niklas Aßelmann, Benjamin Dietz
+@author: Katharina Hovestadt, Niklas Asselmann, Benjamin Dietz
 '''
 
 import sys, os, getopt, datetime, errno, sqlite3, subprocess, uuid # important
@@ -38,12 +38,12 @@ def usage():
             Supported formats:
 
                     .dbf     |
-                    .shp     |
+                    .shp     | temporal extent is not available
                     .csv     |
                     .nc      |
                     .geojson |
                     .json    |
-                    .gpkg    |
+                    .gpkg    | temporal extent is not vaialable
                     .geotiff |
                     .tif     |
                     .gml     |
@@ -54,17 +54,7 @@ def usage():
             -e    Extract all metadata of a geospatial file
             -s    Extract all spatial metadata of a geospatial file
             -t    Extract all temporal metadata of a geospatial file
-
-
-            Possible metadata for formats:
-
-                .shp and .dbf    :   bbox, shapetype, number of shape elements
-                .csv             :   
-                .nc              :   bbox (with differnet ellipsoid?), temporal extent (not always given)
-                .geojson | .json :   
-                .gpkg            :   bbox (with different ellipsoid?), temp extent still missing
-                .geotiff | .tif  :   
-                .gml             :   
+  
             
             Available temporal metadata:
             
@@ -113,7 +103,7 @@ def computeBbox(module, path):
         print(bbox_in_orig_crs)
         for x in bbox_in_orig_crs:
             print(type(x))
-            bbox_transformed = hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs))
+            bbox_transformed = hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs)
             return bbox_transformed
     else:
         return bbox_in_orig_crs
@@ -396,10 +386,10 @@ if 'OPTS' not in globals():
     raise Exception("An Argument is required")
 
 for o, a in OPTS:
-'''
- tells the program what to do with certain tags and their attributes that are
- inserted over the command line
-'''
+    '''
+    tells the program what to do with certain tags and their attributes that are
+    inserted over the command line
+    '''
     ending = a
     if "/" in a:
         ending = a[a.rfind("/")+1:]

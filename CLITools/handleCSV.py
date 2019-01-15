@@ -95,6 +95,9 @@ def getVectorRepresentation(filePath):
                     SingleArray.append(SpatialLatExtent[counter])
                     VectorArray.append(SingleArray)
                     counter=counter+1
+                for index, x in enumerate(VectorArray):
+                    for i, coor in enumerate(x):
+                        VectorArray[index][i] = float(coor)
                 VectorArray = convex_hull.graham_scan(VectorArray)
                 return VectorArray
 
