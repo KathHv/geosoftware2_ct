@@ -1,3 +1,7 @@
+'''
+@author: Benjamin Dietz
+'''
+
 import shapefile, fiona
 import helpfunctions as hf
 import gdal
