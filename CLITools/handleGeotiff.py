@@ -2,128 +2,107 @@ import helpfunctions as hf
 import gdal, gdalconst
 import os
 import osgeo.osr as osr
-
-
-# Function name: getBoundingBox
-# Function purpose: returns bounding box of submitted geotiff
-# Input: gtiffContent
-# Output: array boundingBox
-def getBoundingBox(gtiffContent):
-    boundingBox = []
-
-    geoTransform = gtiffContent.GetGeoTransform()
-    minx = geoTransform[0]
-    maxy = geoTransform[3]
-    maxx = minx + geoTransform[1] * gtiffContent.RasterXSize
-    miny = maxy + geoTransform[5] * gtiffContent.RasterYSize
-
-    boundingBox= [miny, minx, maxy, maxx]
+import convex_hull
 
 
 
-    return boundingBox
 
-# Function name: getCRS
-# Function purpose: returns the ID of the CRS of the submitted geotiff
-# Input: gtiffContent
-# Output: crsId
-def getCRS(gtiffContent):
-    crsId = None
-    crsId = format(gtiffContent.GetProjection())
-    return crsId
-
-# Function name: getVectorRepresentation
-# Function purpose: returns vector representation of submitted geotiff
-# Input: gtiffContent
-# Output: array vectorRepresentation
-def getVectorRepresentation(gtiffContent):
-    vectorRepresentation = []
-    
-    geoTransform = gtiffContent.GetGeoTransform()
-    minx = geoTransform[0]
-    maxy = geoTransform[3]
-    maxx = minx + geoTransform[1] * gtiffContent.RasterXSize
-    miny = maxy + geoTransform[5] * gtiffContent.RasterYSize
-
-    vectorRepresentation= [miny, minx, maxy, maxx]
-
-
-
-    return vectorRepresentation
-
-# Function name: getTemporalExtent
-# Function purpose: returns temporal extent of submitted geotiff
-# Input: gtiffContent
-# Output: array temporalExtent
-def getTemporalExtent(gtiffContent):
-    temporalExtent = []
-    
-    return temporalExtent
-
-# Function name: getAdditionalMetadata
-# Function purpose: returns addditional metadata of submitted geotiff
-# Input: gtiffContent, fileFormat, filePath
-# Output: object additionalMetadata
-def getAdditionalMetadata(gtiffContent, fileFormat, filePath):
-    additionalMetadata = {}
-    # extract other metadata
-        
-    #additionalMetadata["crs"] = gtiffContent.GetAttrValue("AUTHORITY", 1)
-    additionalMetadata["driver"] =  format(gtiffContent.GetDriver().LongName)
-    
-    additionalMetadata["description"] = gtiffContent.GetDescription()
-
-    additionalMetadata["fileformat"] = "text/" + fileFormat
-    additionalMetadata["filename"] = filePath[filePath.rfind("/")+1:filePath.rfind(".")]
- 
-    return additionalMetadata
-
-# Function name: extractMetadata
-# Function purpose: gets called when the argument of the command request is a GeoTIFF
-# Input: whatMetadata, fileFormat, filePath
-# Output: object metadata
-def extractMetadata(fileFormat, filePath, whatMetadata):
-    metadata = {}
-    
+def extractContentFromPath(filePath):
+    ''' method to extract geotiff content from a file by using its filepath
+    input filepath: type string, path to file which shall be extracted
+    output gtiffContent: type string,  returns  geotiff content of filepath 
+    '''
     gdal.UseExceptions()
     
     #zip https://rasterio.readthedocs.io/en/latest/quickstart.html
     #GDAL error handler
     #from: https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html#get-raster-metadata
-    try:
-        gtiffContent = gdal.Open(filePath)
-        #if gtiffContent is None:
-            #raise FileNotFoundError, e
-    
-
-        #extract bbox and geometry
-        if whatMetadata == 's':
-            metadata["bbox"] = getBoundingBox(gtiffContent)   
-            metadata["crs"] = getCRS(gtiffContent)
-            metadata["coordinates"] = metadata["bbox"]
-        #extract temporal extend
-        if whatMetadata == 't':
-            metadata["temporal_extent"] = getTemporalExtent(gtiffContent)
-        #extract bbox, temporal extend and additional metadata
-        if whatMetadata == 'e':
-            #extract bbox and geometry
-            metadata["bbox"] = getBoundingBox(gtiffContent)
-            metadata["crs"] = getCRS(gtiffContent)
-            #extract time extent
-            metadata["temporal_extent"] = getTemporalExtent(gtiffContent)
-            #extract other metadata
-            addMetadata = getAdditionalMetadata(gtiffContent, fileFormat, filePath)       
-            for key, value in addMetadata.items():
-                metadata[key] = value
+    gtiffContent = gdal.Open(filePath)
+    if not gtiffContent:
+        raise Exception("geotiff file cannot be opened, read or is empty.")
+    return gtiffContent
 
 
-    #except FileNotFoundError, e:
-    #    print("Could not open " + filePath)
-    #    print e
 
-    except Exception as e:
-        print ('RuntimeError')
-        print (e)
-    print (metadata)
-    return metadata
+
+def getBoundingBox(filePath):
+    ''' extracts bounding box from geotiff
+    input filepath: type string, file path to geotiff file
+    output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    '''
+    gtiffContent = extractContentFromPath(filePath)
+    boundingBox = []
+    geoTransform = gtiffContent.GetGeoTransform()
+    minx = geoTransform[0]
+    maxy = geoTransform[3]        
+    maxx = minx + geoTransform[1] * gtiffContent.RasterXSize
+    miny = maxy + geoTransform[5] * gtiffContent.RasterYSize
+     
+    minx = format(float(minx), '.2f')
+    maxy = format(float(maxy), '.2f')
+    maxx = format(float(maxx), '.2f')
+    miny = format(float(miny), '.2f')
+
+    boundingBox= [miny, minx, maxy, maxx]
+    if not boundingBox:
+        raise Exception("Bounding box could not be extracted")
+        return boundingBox
+
+
+
+def getCRS(filePath):
+    ''' gets the coordinate reference systems from the geotiff file
+    input filepath: type string, file path to geotiff file
+    output crsCode: type int, EPSG number of taken crs
+    '''
+
+    gtiffContent = extractContentFromPath(filePath)
+    crsCode = None
+    proj = osr.SpatialReference(wkt=gtiffContent.GetProjection())
+    crsCode = proj.GetAttrValue('AUTHORITY',1)
+    if not crsCode :
+        raise Exception("Crs could not be extracted. WGS84 will be taken as standard.")
+    return crsCode
+
+
+
+
+def getVectorRepresentation(filePath):
+    ''' extracts coordinates from geotiff File (for vector representation)
+    input filepath: type string, file path to geotiff file
+    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geotiff file
+    '''
+    gtiffContent = extractContentFromPath(filePath)
+    vectorRepresentation = []
+    geoTransform = gtiffContent.GetGeoTransform()
+    minx = geoTransform[0]
+    maxy = geoTransform[3]
+    maxx = minx + geoTransform[1] * gtiffContent.RasterXSize
+    miny = maxy + geoTransform[5] * gtiffContent.RasterYSize
+    vectorRepresentation = [miny, minx, maxy, maxx]
+
+    #raise Exception("Vector representation could not be extracted" + str(e))
+    if not vectorRepresentation:
+        raise Exception("No coordinates found in file. Vector Representation could not be extracted.")
+    vectorRepresentation = convex_hull.graham_scan(vectorRepresentation)
+    return vectorRepresentation
+
+
+
+def getTemporalExtent(filePath):
+    ''' extracts temporal extent of the geotiff
+    input filepath: type string, file path to geotiff file
+    output timeExtent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    '''
+
+    gtiffContent = extractContentFromPath(filePath)
+
+    temporalExtent = []
+    temporalExtent = gtiffContent.GetMetadataItem("TIFFTAG_DATETIME")
+
+    if not temporalExtent:
+        raise Exception("Geotiff has no temporal extent")
+
+    temporalExtent = [temporalExtent, temporalExtent]
+    return temporalExtent
 

@@ -1,11 +1,12 @@
-'''
+import os,sys,inspect
+sys.path.insert(1, os.path.join(sys.path[0], '..') + "/CLITools")
+
 import helpfunctions
 import pytest
 import FileForTestOr
 from handleCSV import extractMetadata
 from handleGeopackage import extractMetadata
 from handleGeojson import extractMetadata
-
 
 #testet, ob die Datei nicht existiert
 def test_exists_FileNotFound():
