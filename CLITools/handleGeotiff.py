@@ -10,7 +10,7 @@ import convex_hull
 def extractContentFromPath(filePath):
     ''' method to extract geotiff content from a file by using its filepath
     input filepath: type string, path to file which shall be extracted
-    output gtiffContent: type string,  returns  geotiff content of filepath 
+    returns geotiff content of the filepath: type string
     '''
     gdal.UseExceptions()
     
@@ -28,7 +28,7 @@ def extractContentFromPath(filePath):
 def getBoundingBox(filePath):
     ''' extracts bounding box from geotiff
     input filepath: type string, file path to geotiff file
-    output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     gtiffContent = extractContentFromPath(filePath)
     boundingBox = []
@@ -53,7 +53,7 @@ def getBoundingBox(filePath):
 def getCRS(filePath):
     ''' gets the coordinate reference systems from the geotiff file
     input filepath: type string, file path to geotiff file
-    output crsCode: type int, EPSG number of taken crs
+    return epsg code of the used coordiante reference system: type int
     '''
 
     gtiffContent = extractContentFromPath(filePath)
@@ -70,7 +70,7 @@ def getCRS(filePath):
 def getVectorRepresentation(filePath):
     ''' extracts coordinates from geotiff File (for vector representation)
     input filepath: type string, file path to geotiff file
-    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geotiff file
+    returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     gtiffContent = extractContentFromPath(filePath)
     vectorRepresentation = []
@@ -92,7 +92,7 @@ def getVectorRepresentation(filePath):
 def getTemporalExtent(filePath):
     ''' extracts temporal extent of the geotiff
     input filepath: type string, file path to geotiff file
-    output timeExtent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    returns the temporal extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
 
     gtiffContent = extractContentFromPath(filePath)

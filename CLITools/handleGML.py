@@ -12,7 +12,7 @@ def getBoundingBox(filePath):
     '''         
     extract bounding box from gml
     input filepath: type string, file path to gml file
-    output myGeojson.bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+    returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
     '''
     ogr2ogr.main(["","-f", "GeoJSON", "outputBBox.json", filePath])
     myGeojson = pygeoj.load(filepath="outputBBox.json")
@@ -24,16 +24,12 @@ def getBoundingBox(filePath):
 
 
 
-'''
- extracts temporal extent of the gml
- input filepath: type string, file path to gml file
- output temporal_extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-'''
+
 def getTemporalExtent(filePath):
     '''
     extracts temporal extent of the gml
     input filepath: type string, file path to gml file
-    output temporal_extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    returns temporal extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     dateArray= []
     ogr2ogr.main(["","-f", "GeoJSON", "outputTemporal.json", filePath])
@@ -53,16 +49,14 @@ def getTemporalExtent(filePath):
     else: 
         raise Exception('The gml file from ' + filePath + ' has no TemporalExtent') 
 
-'''
- extracts coordinates from gml File (for vector representation)
- input filepath: type string, file path to gml file
- output properties: type list, list of lists with length = 2, contains extracted coordinates of content from gml file
-'''
+
+
+
 def getVectorRepresentation(filePath):
     '''
     extracts coordinates from gml File (for vector representation)
     input filepath: type string, file path to gml file
-    output properties: type list, list of lists with length = 2, contains extracted coordinates of content from gml file
+    returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     ogr2ogr.main(["","-f", "GeoJSON", "outputVector.json", filePath])
     myGeojson = pygeoj.load(filepath="outputVector.json")
@@ -73,30 +67,28 @@ def getVectorRepresentation(filePath):
     else:
         return properties
 
-'''
- extracts coordinatesystem from gml File 
- input filepath: type string, file path to gml file
- output properties: type list, contains extracted coordinate system of content from gml file
-'''
+
+
+
 def getCRS(filePath):
     '''
     extracts coordinatesystem from gml File 
     input filepath: type string, file path to gml file
-    output properties: type list, contains extracted coordinate system of content from gml file
+    returns epsg code of used coordinate reference system: type list
     '''
     coordinatesystem= []
     ogr2ogr.main(["","-f", "GeoJSON", "outputCRS.json", filePath])
     myGeojson = pygeoj.load(filepath="outputCRS.json")
     properties= (myGeojson.get_feature(0).properties)
     for key, value in properties.items():     
-            if key=="crs":
-                coordinatesystem.append(value)
-            else:
-                pass
+        if key=="crs":
+            coordinatesystem.append(value)
+        else:
+            pass
     os.remove("outputCRS.json")
     if hf.searchForParameters(coordinatesystem, ["crs"]) is None:
-            raise Exception('The csv file from ' + filePath + ' has no CRS')
+            raise Exception('The gml file from ' + filePath + ' has no CRS')
     if hf.searchForParameters(coordinatesystem, ["crs"]) == "WGS84":
         return "4978"
     else:
-        raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
+        raise Exception('The gml file from ' + filePath + ' has no WGS84 CRS')
