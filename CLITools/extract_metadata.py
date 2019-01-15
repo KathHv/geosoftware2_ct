@@ -1,3 +1,7 @@
+'''
+@author: Katharina Hovestadt, Niklas Aßelmann, Benjamin Dietz
+'''
+
 import sys, os, getopt, datetime, errno, sqlite3, subprocess, uuid # important
 from six.moves import configparser
 from os import walk
@@ -396,9 +400,11 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 if 'OPTS' not in globals():
     raise Exception("An Argument is required")
 
-#tells the program what to do with certain tags and their attributes that are
-#inserted over the command line
 for o, a in OPTS:
+'''
+ tells the program what to do with certain tags and their attributes that are
+ inserted over the command line
+'''
     ending = a
     if "/" in a:
         ending = a[a.rfind("/")+1:]
