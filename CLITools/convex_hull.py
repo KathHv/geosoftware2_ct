@@ -1,5 +1,3 @@
-#The functions expects coordinates in a 2-dimensional list of the form [[x,y]...]
-#It returns a list containing the sorted points of the convex hull of the original points
 import math
 
 def graham_scan(points):
@@ -39,7 +37,6 @@ def graham_scan(points):
     # sorts the coordinates based on the y value and, if those are equal, on the x value
     coords = sorted(points, key = lambda x: x[0])
     coords = sorted(coords, key = lambda x: x[1])
-
 
 
    
@@ -133,6 +130,8 @@ def graham_scan(points):
         i=0
         while i>len(points):
             points[i][1]=points[i][1]+minY
-            
+
+    if not points:
+        raise Exception("The vector representation could not be build.")
     return points
     
