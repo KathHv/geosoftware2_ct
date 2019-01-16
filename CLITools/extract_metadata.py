@@ -401,10 +401,10 @@ if 'OPTS' not in globals():
     raise Exception("An Argument is required")
 
 for o, a in OPTS:
-'''
- tells the program what to do with certain tags and their attributes that are
- inserted over the command line
-'''
+    '''
+    tells the program what to do with certain tags and their attributes that are
+    inserted over the command line
+    '''
     ending = a
     if "/" in a:
         ending = a[a.rfind("/")+1:]

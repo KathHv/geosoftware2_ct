@@ -16,13 +16,17 @@ def getCRS(path):
     input path: type string, file path to shapefile
     returns epsg code of the used coordinate reference system
     '''
-    file = fiona.open(path)
-    spatialRef = file.crs
-    spatialRef = spatialRef["init"].split(,)
-    if not spatialRef[1]:
-        raise Exception("The CRS cannot be extracted from shapefiles")
-    return spatialRef[1]
-
+    with fiona.open(path) as fileShape:
+        if not fileShape:
+            raise Exception("The shapefile is not valid")
+        
+        if hasattr(fileShape, "crs"):
+            spatialRef = fileShape.crs  
+            if "init" in spatialRef:
+                spatialRef = spatialRef["init"].split(",")
+                if spatialRef[1] is not None:
+                    return spatialRef[1]
+        raise Exception("The crs cannot be extracted from the shapefile.")
 
 
 def getTemporalExtent(path):
@@ -115,3 +119,10 @@ def getBoundingBox(path):
 
     raise Exception("The bounding box could not be extracted from the file")
 
+print(getBoundingBox('/home/kathy/Documents/testdata/shapefile/pol/simplified_land_polygons.shp'))
+
+def getBboxInWGS84(bbox, epsg):
+    return hf.transformingArrayIntoWGS84(epsg, bbox)
+
+
+print(getBboxInWGS84([[-20037508.342789248, -20037508.36884705], [20037508.342789248, 18461504.100101978]], 3857))
