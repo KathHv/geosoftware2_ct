@@ -10,7 +10,7 @@ def getBoundingBox(filePath):
     '''
     extract bounding box from xml
     input filepath: type string, file path to xml file
-    output s: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+    returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
     '''
     with open(filePath) as XML_file:
         lat = []
@@ -48,16 +48,13 @@ def getBoundingBox(filePath):
 
 
 
-'''
- extracts temporal extent of the xml
- input filepath: type string, file path to xml file
- output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-'''
+
+
 def getTemporalExtent(filePath):
     '''
     extracts temporal extent of the xml
     input filepath: type string, file path to xml file
-    output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    returns temporal extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     with open(filePath) as XML_File:
         tree = ET.parse(XML_File)
@@ -79,16 +76,14 @@ def getTemporalExtent(filePath):
         else:
             raise Exception('The xml file from ' + filePath + ' has no TemporalExtent')
 
-'''
- extracts coordinates from xml File (for vector representation)
- input filepath: type string, file path to xml file
- output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from xml file
-'''
+
+
+
 def getVectorRepresentation(filePath):
     '''
     extracts coordinates from xml File (for vector representation)
     input filepath: type string, file path to xml file
-    output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from xml file
+    returns extracted coordinates of content from xml file: type list, list of lists with length = 2
     '''
     with open(filePath) as XML_file:
         lat = []
@@ -126,16 +121,14 @@ def getVectorRepresentation(filePath):
                     counter=counter+1
             return vectorArray
 
-'''
- extracts coordinatesystem from xml File 
- input filepath: type string, file path to xml file
- output properties: type list, contains extracted coordinate system of content from xml file
-'''
+
+
+
 def getCRS(filePath):
     '''
     extracts coordinatesystem from xml File 
     input filepath: type string, file path to xml file
-    output properties: type list, contains extracted coordinate system of content from xml file
+    returns epsg code of the used coordiante references system: type list, contains extracted coordinate system of content from xml file
     '''
     with open(filePath) as XML_File:
         tree = ET.parse(XML_File)

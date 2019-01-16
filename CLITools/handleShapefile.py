@@ -1,3 +1,7 @@
+'''
+@author: Benjamin Dietz
+'''
+
 import shapefile, fiona
 import helpfunctions as hf
 import gdal
@@ -10,8 +14,14 @@ import convex_hull
 def getCRS(path):
     ''' gets the coordinate reference systems from the shapefile
     input path: type string, file path to shapefile
+    returns epsg code of the used coordinate reference system
     '''
-    raise Exception("The CRS cannot be extracted from shapefiles")
+    file = fiona.open(path)
+    spatialRef = file.crs
+    spatialRef = spatialRef["init"].split(,)
+    if not spatialRef[1]:
+        raise Exception("The CRS cannot be extracted from shapefiles")
+    return spatialRef[1]
 
 
 
@@ -30,7 +40,7 @@ def getVectorRepresentation(path):
     first: collects all the points of the file
     then: call the function that computes the polygon of it
     input path: type string, file path to shapefile
-    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from shapefile
+    returns extracted coordinates of content from shapefiletype list, list of lists with length = 2, 
     '''
     if not '.shp' in path:
         shpPath = path[:path.rfind(".")+1]
@@ -73,23 +83,19 @@ def getVectorRepresentation(path):
 def getBoundingBox(path):
     ''' extracts bounding box from shapfile
     input filepath: type string, file path to shapefile
-    output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     # try to get the bounding box with fiona
     with fiona.open(path) as datasetFiona:
-        if hasattr(datasetFiona, "crs"):
-            if 'init' in datasetFiona.crs:
-                initField = datasetFiona.crs["init"]
-                crs = initField[initField.rfind(":") + 1 : ]
-                if hasattr(datasetFiona, "bounds"):
-                    if len(datasetFiona.bounds) > 3:
-                        bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]
-                        if crs == "4326":
-                            return bboxInOriginalCRS
-                        else:
-                            # TO DO: first transform into WGS 84
-                            return "BBOX liegt in anderem Format vor (" + str(crs) + "): " + str(bboxInOriginalCRS)
+        if hasattr(datasetFiona, "bounds") and len(datasetFiona.bounds) > 3:
+            bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]       
+            if not bboxInOriginalCRS:
+                raise Exception("Bounding Box could not be extracted.")
+            return bboxInOriginalCRS
+                   
 
+
+                
     # if fiona is not working (on this file), try to get the bbox with the module 'shapefile'
     pathWithoutEnding = path[:len(path)-4]
     if '.shp' in path:
@@ -103,6 +109,8 @@ def getBoundingBox(path):
     if 'myshp' in locals():
         if 'mydbf' in locals():
             r = shapefile.Reader(shp=myshp, dbf=mydbf)
+            if not r.bbox:
+                raise Exception("The bounding box could not be extracted from the file")
             return r.bbox
 
     raise Exception("The bounding box could not be extracted from the file")

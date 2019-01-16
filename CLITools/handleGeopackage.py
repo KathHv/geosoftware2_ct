@@ -1,4 +1,8 @@
-import fiona, sqlite3
+'''
+@author: Benjamin Dietz
+'''
+
+import fiona, xarray, sqlite3
 import helpfunctions as hf
 import convex_hull
     
@@ -10,14 +14,14 @@ def getTemporalExtent(path):
     input path: type string, file path to geopackage file
     '''
     raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
-    #return 1
+
 
 
 
 def getBoundingBox(path):
     ''' extract bounding box from geopackage
     input path: type string, file path to geopackage file
-    output [min(longs), min(lats), max(longs), max(lats)]: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    returns the bounding box of the file, type list: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
 
     # try to get the bbox with fiona
@@ -55,7 +59,7 @@ def getVectorRepresentation(path):
     first: collects all the points of the file
     then: call the function that computes the polygon of it
     input path: type string, file path to geopackage file
-    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geopackage file
+    returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     coordinates = []
     with fiona.open(path) as datasetFiona:
@@ -103,7 +107,7 @@ def getVectorRepresentation(path):
 def getCRS(path):
     ''' gets all the coordinate reference systems from the geopackage (through a database connection)
     input path: type string, file path to geopackage file
-    output init[init.rfind(":")+1:]: type int, EPSG number of taken crs
+    returns the epsg code of the used coordinate reference system: type int, EPSG number of taken crs
     '''
     sqliteConnection = sqlite3.connect(path)
     if sqliteConnection is not None:
@@ -125,3 +129,4 @@ def getCRS(path):
                if ':' in  datasetFiona.meta["crs"]["init"]:
                     init = datasetFiona.meta["crs"]["init"]
                     return init[init.rfind(":")+1:]
+    raise Exception("Crs could not be extracted.")
