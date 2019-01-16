@@ -81,14 +81,14 @@ def getCRS(filePath):
     myGeojson = pygeoj.load(filepath="outputCRS.json")
     properties= (myGeojson.get_feature(0).properties)
     for key, value in properties.items():     
-        if key=="crs":
+        if key=="srsID":
             coordinatesystem.append(value)
         else:
             pass
     os.remove("outputCRS.json")
-    if hf.searchForParameters(coordinatesystem, ["crs"]) is None:
-            raise Exception('The gml file from ' + filePath + ' has no CRS')
-    if hf.searchForParameters(coordinatesystem, ["crs"]) == "WGS84":
+    if hf.searchForParameters(coordinatesystem, ["srsID"]) is None:
+        raise Exception('The gml file from ' + filePath + ' has no CRS')
+    if hf.searchForParameters(coordinatesystem, ["srsID"]) == "4326":
         return "4978"
     else:
         raise Exception('The gml file from ' + filePath + ' has no WGS84 CRS')
