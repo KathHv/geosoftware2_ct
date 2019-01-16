@@ -65,7 +65,7 @@ def getBoundingBox (filePath):
         gjsonFeatureCollection = {"type": "FeatureCollection", "features": []}
         gjsonFeatureCollection.get("features").append(gjsonContent)
         gjsonContent_FeatureColl = pygeoj.load(data=gjsonFeatureCollection)
-        bbox = gjsonContent_FeatureColl.bbox)
+        bbox = gjsonContent_FeatureColl.bbox
     
     if not bbox:
         raise Exception("Bounding box could not be extracted")

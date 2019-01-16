@@ -5,10 +5,12 @@ from netCDF4 import Dataset as NCDataset
 import netCDF4
 import getopt
 from os import walk
+from osgeo import ogr
+from osgeo import osr
 from pyproj import Proj, transform
 import convex_hull
 
-
+WGS84_EPSG_ID = 4326
 
 def printObject(object):
     ''' Function name: printObject
@@ -138,19 +140,27 @@ def searchForParameters(elements, paramArray):
 
 
 
-def transformingIntoWGS84 (crs, point):
+def transformingIntoWGS84 (crs, coordinate):
     ''' Function name: transformingIntoWGS84
     Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system)
     Input: crs, point
     Output: retPoint constisting of x2, y2 (transformed points)
     '''
-    inProj = Proj(init = crs)
-    outProj = Proj(init ='epsg:4978')
-    x1, y1 = point
-    x2, y2 = transform(inProj,outProj,x1,y1)
-    print (x2,y2)
-    retPoint = x2, y2
-    return retPoint
+
+    source = osr.SpatialReference()
+    source.ImportFromEPSG(crs)
+
+    target = osr.SpatialReference()
+    target.ImportFromEPSG(4326)
+
+    transform = osr.CoordinateTransformation(source, target)
+        
+    point = ogr.Geometry(ogr.wkbPoint)
+    point.AddPoint(coordinate[0], coordinate[1])
+    point = point.ExportToWkt()
+    point = ogr.CreateGeometryFromWkt(point)
+    point.Transform(transform)
+    return [point.GetX(), point.GetY()]
 
 
 
@@ -177,6 +187,10 @@ def transformingArrayIntoWGS84(crs, pointArray):
     Output: array array
     '''
     array = []
-    for x in pointArray:
-        array.append(transformingIntoWGS84(crs, x))
-    return array
+    if type(pointArray[0]) == list:
+        for x in pointArray:
+            array.append(transformingIntoWGS84(crs, x))
+        return array
+    elif len(pointArray) == 4:
+        bbox = [[pointArray[0], pointArray[1]],[pointArray[3], pointArray[4]]]
+        transformingArrayIntoWGS84(crs, bbox)
