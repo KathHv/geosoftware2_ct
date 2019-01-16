@@ -6,7 +6,20 @@ import fiona, xarray, sqlite3
 import helpfunctions as hf
 import convex_hull
     
-
+def isValid(path):
+    try:
+        with fiona.open(path) as datasetFiona:
+            sqliteConnection = sqlite3.connect(path)
+            if sqliteConnection is not None:
+                c = sqliteConnection.cursor()
+                if c is None:
+                    return False
+            else:
+                return False
+    except:
+        return False
+    return True
+    
 
 
 def getTemporalExtent(path):

@@ -2,13 +2,23 @@
 @author: Benjamin Dietz
 '''
 
-import datetime, xarray, gdal
+import datetime, xarray
+import gdal
 from datetime import datetime as dtime
 from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 import convex_hull
 
-
+def isvValid(path):
+    try:
+        file = xarray.open_dataset(path)
+        ncDataset = NCDataset(path)
+        datasetGDAL = gdal.Open(path)
+        if file is None or ncDataset is None or datasetGDAL is None:
+            return False
+    except:
+        return False
+    return True
 
 def getVectorRepresentation(path):
     ''' abstracts the geometry of the file with a polygon
@@ -38,7 +48,13 @@ def getVectorRepresentation(path):
                 lons.append(x)
     if 'lats' in locals()  and 'lons' in locals():
         coordinates = { 'lat': lats, 'lon': lons }
-        coordinates = convex_hull.graham_scan(coordinates)
+        if len(lats) == len(lons):
+            referenced_coordinates = []
+            for index, val in enumerate(lats):
+                referenced_coordinates.append([lons[index], val])
+                coordinates = convex_hull.graham_scan(coordinates)
+        else: 
+            raise Exception("The numer auf lat-points and lon-points is not equal, thus a  vector representation cannot be computed.")
         return coordinates
     raise Exception("The vector representaton could not be extracted from the file")
 
@@ -82,17 +98,7 @@ def getCRS(path):
     input path: type string, file path to NetCDF file
     output crs: type list, list with two elements: 1. Crs of lats and 2. Crs of lons
     '''
-    xarrayForNetCDF = xarray.open_dataset(path)
-    if xarrayForNetCDF is not None:
-            if 'coords' in xarrayForNetCDF.to_dict():
-                if all (x in xarrayForNetCDF.to_dict()["coords"] for x in ['lat', 'lon']):
-                    if xarrayForNetCDF.to_dict()["coords"]["lat"] is not None and xarrayForNetCDF.to_dict()["coords"]["lon"] is not None:
-                        lats = xarrayForNetCDF.to_dict()["coords"]["lat"]
-                        lons = xarrayForNetCDF.to_dict()["coords"]["lon"]
-                        crs = [ lats["attrs"], lons["attrs"] ]
-                        return crs
-                        # HERE: CRS is in a different format
-    return "No CRS found"
+    return hf.WGS84_EPSG_ID
 
 
 

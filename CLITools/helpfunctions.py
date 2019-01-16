@@ -9,7 +9,7 @@ from os import walk
 from pyproj import Proj, transform
 import convex_hull
 
-
+WGS84_EPSG_ID = 4326
 
 def printObject(object):
     ''' Function name: printObject

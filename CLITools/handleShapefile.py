@@ -9,7 +9,19 @@ from osgeo import ogr
 import sys
 import convex_hull
 
-
+def isValid(path):
+    pathWithoutEnding = path[:len(path)-4]
+    if not (hf.exists(pathWithoutEnding + ".dbf") and hf.exists(pathWithoutEnding + ".shp") and \
+        hf.exists(pathWithoutEnding + ".shx")):
+        return False
+    try:
+        mydbf = open(pathWithoutEnding + ".dbf", "rb")
+        myshp = open(pathWithoutEnding + ".shp", "rb")
+        myshx = open(pathWithoutEnding + ".shx", "rb")
+        r = shapefile.Reader(shp=myshp, dbf=mydbf, shx=myshx)
+    except:
+        return False
+    return True
 
 def getCRS(path):
     ''' gets the coordinate reference systems from the shapefile
