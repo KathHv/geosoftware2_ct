@@ -26,6 +26,7 @@ def isValid(path):
 def getCRS(path):
     ''' gets the coordinate reference systems from the shapefile
     input path: type string, file path to shapefile
+    returns epsg code of the used coordinate reference system
     '''
     try:
         with fiona.open(path) as datasetFiona:
@@ -44,7 +45,6 @@ def getCRS(path):
     raise Exception("The CRS cannot be extracted from shapefiles")
 
 
-
 def getTemporalExtent(path):
     ''' extracts temporal extent of the shapefile
     input path: type string, file path to shapefile file
@@ -60,7 +60,7 @@ def getVectorRepresentation(path):
     first: collects all the points of the file
     then: call the function that computes the polygon of it
     input path: type string, file path to shapefile
-    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from shapefile
+    returns extracted coordinates of content from shapefiletype list, list of lists with length = 2, 
     '''
     try:
         if not '.shp' in path:
@@ -111,7 +111,7 @@ def getVectorRepresentation(path):
 def getBoundingBox(path):
     ''' extracts bounding box from shapfile
     input filepath: type string, file path to shapefile
-    output bbox: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     # try to get the bounding box with fiona
     try:
@@ -131,6 +131,13 @@ def getBoundingBox(path):
                                 print([bboxInOriginalCRS[0], bboxInOriginalCRS[1]])
                                 #print(hf.transformingIntoWGS84(crs, [bboxInOriginalCRS[0], bboxInOriginalCRS[1]]))
                                 return "BBOX liegt in anderem Format vor (" + str(crs) + "): " + str(bboxInOriginalCRS)
+    with fiona.open(path) as datasetFiona:
+        if hasattr(datasetFiona, "bounds") and len(datasetFiona.bounds) > 3:
+            bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]       
+            if not bboxInOriginalCRS:
+                raise Exception("Bounding Box could not be extracted.")
+            return bboxInOriginalCRS
+                   
 
         # if fiona is not working (on this file), try to get the bbox with the module 'shapefile'
         pathWithoutEnding = path[:len(path)-4]

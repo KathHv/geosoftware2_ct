@@ -4,11 +4,9 @@
 
 import sys, os, getopt, datetime, errno, sqlite3, subprocess, uuid # important
 from six.moves import configparser
-#from pathlib import Path
 from os import walk
 import helpfunctions as hf
 import dicttoxml, xml, subprocess
-from lxml import etree
 import threading 
 
 
@@ -90,7 +88,7 @@ if 'OPTS' in globals():
 def computeBbox(module, path):
     ''' input module: type module, module from which methods shall be used
     input path: type string, path to file
-    output bbox_in_orig_crs or bbox_transformed, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
+    returns a bounding box, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
     '''
     
     bbox_in_orig_crs = module.getBoundingBox(path)
@@ -114,6 +112,8 @@ def computeBbox(module, path):
 def extractMetadataFromFile(filePath, whatMetadata):
     ''' function is called when filePath is included in commanline (with tag 'e', 't' or 's')
     how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
+    input filePath: type string, path to file from which the metadata shall be extracted
+    input whatMetadata: type string, specifices which metadata should be extracted 
     returns None if the format is not supported, else returns the metadata of the file as a dict 
     (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
     '''
@@ -145,17 +145,18 @@ def extractMetadataFromFile(filePath, whatMetadata):
         usedModule = handleGeotiff
     elif fileFormat == 'gml':
         import handleGML
-        usedModule = handleGMl
+        usedModule = handleGML
     elif fileFormat =='xml':
         import handleXML
-        usedModule = handleXMl
+        usedModule = handleXML
     elif fileFormat == 'kml':
         import handleKML
-        usedModule = handelKMl
+        usedModule = handleKML
     else: 
         # file format is not supported
         return None
     
+    #get Bbox, Temporal Extent, Vector representation and crs parallel with threads
     class thread(threading.Thread): 
         def __init__(self, thread_ID): 
             threading.Thread.__init__(self) 
@@ -167,17 +168,17 @@ def extractMetadataFromFile(filePath, whatMetadata):
                 try:
                     metadata["bbox"] = computeBbox(usedModule, filePath)
                 except Exception as e:
-                    print("Warning: " + str(e)) 
+                    print("Warning for " + filePath + ": " + str(e)) 
             elif self.thread_ID == 101:
                 try:
                     metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
                 except Exception as e:
-                    print("Warning: " + str(e))
+                    print("Warning for " + filePath + ": " + str(e))
             elif self.thread_ID == 102:
                 try:
                     metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
                 except Exception as e:
-                    print("Warning: " + str(e))
+                    print("Warning for " + filePath + ": " + str(e))
             elif self.thread_ID == 200:
                 metadata["bbox"] = computeBbox(usedModule, filePath)
             elif self.thread_ID == 201:
@@ -191,13 +192,15 @@ def extractMetadataFromFile(filePath, whatMetadata):
                         metadata["crs"] = usedModule.getCRS(filePath)
                     else: print ("Warning: The CRS cannot be extracted from the file")
                 except Exception as e:
-                    print("Warning: " + str(e))
+                    print("Warning for " + filePath + ": " + str(e))
             try:
                 barrier.wait() 
             except Exception as e:
                 print(e)
+                barrier.abort()
             
-    
+    #thread id 100+ -> metadata extraction with exceptions from methods (raise Exception)
+    #thread id 200+ -> metadata extraction without exceptions from methods ( only standard exceptions are raised (e.g. ValueError, AttributeError))
     thread_bbox_except = thread(100) 
     thread_temp_except = thread(101) 
     thread_vector_except = thread(102)
@@ -209,10 +212,11 @@ def extractMetadataFromFile(filePath, whatMetadata):
     if whatMetadata == "e":
         # none of the metadata field is required 
         # so the system does not crash even if it does not find anything
-        barrier = threading.Barrier(4)
+        barrier = threading.Barrier(5)
         thread_bbox_except.start() 
         thread_temp_except.start() 
         thread_vector_except.start() 
+        thread_crs_except.start()
 
         barrier.wait() 
         barrier.reset() 
@@ -297,7 +301,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
             ''' computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents'
             uses helpfunction
             input mult_temp_extents: type list, list of list with temporal extent with length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-            output hf.computeBboxOfMultiple(mult_temp_extents): type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] one bbox out of of multiple bboxes
+            returns temporal extent of all files, type list with two datetime
             '''
             print(str(len(mult_temp_extents)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a temporal extent.")
 
@@ -313,6 +317,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
             ''' computes boundingbox from multiple bounding boxes stored in the array 'mult_bboxes'
             uses helpfunction
             input mult_bboxes: type list, list with bounding boxes, one bbox has the following format:  length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+            returns bounding box of the files in the folder, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
             '''
             print(str(len(mult_bboxes)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a bbox.")
             
@@ -329,7 +334,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
             computes vector representation from multiple vector representations stored in the array 'mult_vec_rep'
             uses helpfunction
             input mult_vec_rep: type list, all vector representations from the files in the folder
-            output mult_vec_rep: type list, one vector representation of the files from folder
+            returns the vector representation of the files in the folder: type list, one vector representation of the files from folder
             '''
             print(str(len(mult_vec_rep)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
             if len(mult_vec_rep) > 0: # TO DO: helpfunction and here catch is if result is None (Handle union of multiple vector representations)
@@ -363,7 +368,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
             metadata["bbox"] = bbox
             metadata["vector_representation"] = vector_rep
 
-        else: raise Exception("A spatial extent cannot be computed out any file in this folder")
+        else: raise Exception("A spatial extent cannot be computed out of any file in this folder")
 
     if whatMetadata == "t":
         # raise exception if the temporal extent could not be extracted from the folder

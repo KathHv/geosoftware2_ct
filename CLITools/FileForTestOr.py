@@ -1,7 +1,7 @@
 import sys, os, getopt, datetime # important
 from os import walk
 import helpfunctions as hf
-import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleISO
+import handleShapefile, handleNetCDF, handleCSV, handleGeopackage, handleGeojson, handleXML, handleGML, handleKML
 from lxml import etree
 #handleGeotiff
 

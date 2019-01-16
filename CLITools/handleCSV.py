@@ -5,61 +5,63 @@ import convex_hull
 
 
 def getBoundingBox(filePath):
-    ''' Function purpose: extracts the spatial extent (bounding box) from a csv-file
+    '''
+    Function purpose: extracts the spatial extent (bounding box) from a csv-file
     input filepath: type string, file path to csv file
-    output SpatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    returns spatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
             elements.append(x)
-        SpatialExtent= {}
-        SpatialLatExtent=[]
-        SpatialLonExtent=[]
-        SpatialLatExtent= hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
+        spatialExtent= []
+        spatialLatExtent=[]
+        spatialLonExtent=[]
+        spatialLatExtent= hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
         minlat= None
         maxlat= None
         if hf.searchForParameters(elements, ["lat", "latitude","Latitude"]) is None:
             pass
         else:
-            SpatialLatExtent.pop(0)
-            minlat= (min(SpatialLatExtent))
-            maxlat= (max(SpatialLatExtent))
-        SpatialLonExtent= hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
+            spatialLatExtent.pop(0)
+            minlat= (min(spatialLatExtent))
+            maxlat= (max(spatialLatExtent))
+        spatialLonExtent= hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
         minlon= None
         maxlon= None
         if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
             raise Exception('The csv file from ' + filePath + ' has no BoundingBox')
         else:
-            SpatialLonExtent.pop(0)
-            minlon= (min(SpatialLonExtent))
-            maxlon= (max(SpatialLonExtent))
-        SpatialExtent= [minlon,minlat,maxlon,maxlat]
-        return SpatialExtent
+            spatialLonExtent.pop(0)
+            minlon= (min(spatialLonExtent))
+            maxlon= (max(spatialLonExtent))
+        spatialExtent= [minlon,minlat,maxlon,maxlat]
+        if not spatialExtent:
+            raise Exception("Bounding box could not be extracted")
+        return spatialExtent
 
 
 
 
 def getTemporalExtent(filePath):
-    ''' extracts temporal extent of the csv
-    input filepath: type string, file path to csv file
-    output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    ''' extract time extent from csv string
+    input filePath: type string, file path to csv File
+    returns temporal extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
-
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
             elements.append(x)
-        AllSpatialExtent= []
-        AllSpatialExtent.append(hf.searchForParameters(elements, ["time", "timestamp"]))
+        allspatialExtent= []
+        allspatialExtent.append(hf.searchForParameters(elements, ["time", "timestamp"]))
         if hf.searchForParameters(elements, ["time", "timestamp"] ) is None:
             raise Exception('The csv file from ' + filePath + ' has no TemporalExtent')
         else:
             time=[]
-            time.append(min(AllSpatialExtent))
-            time.append(max(AllSpatialExtent))
+            time.append(min(allspatialExtent))
+            time.append(max(allspatialExtent))
             return time
 
 
@@ -67,56 +69,54 @@ def getTemporalExtent(filePath):
 
 def getVectorRepresentation(filePath):
     ''' extracts coordinates from csv File (for vector representation)
-    input filepath: type string, file path to csv file
-    output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from csv file
+    input filePath: type string, file path to csv File
+    returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
             elements.append(x)
-        VectorArray= []
-        SpatialLatExtent=[]
-        SpatialLonExtent=[]
-        SpatialLatExtent= hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
-        SpatialLonExtent= hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
+        vectorArray= []
+        spatialLatExtent=[]
+        spatialLonExtent=[]
+        spatialLatExtent= hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
+        spatialLonExtent= hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
         if hf.searchForParameters(elements, ["lat", "latitude","Latitude"]) is None:
-            return None
+            raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
         else:
-            SpatialLatExtent.pop(0)
+            spatialLatExtent.pop(0)
             if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
                 raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
             else:
-                SpatialLonExtent.pop(0)
+                spatialLonExtent.pop(0)
                 counter=0
-                for x in SpatialLatExtent:
-                    SingleArray=[]
-                    SingleArray.append(SpatialLonExtent[counter])
-                    SingleArray.append(SpatialLatExtent[counter])
-                    VectorArray.append(SingleArray)
+                for x in spatialLatExtent:
+                    singleArray=[]
+                    singleArray.append(spatialLonExtent[counter])
+                    singleArray.append(spatialLatExtent[counter])
+                    vectorArray.append(singleArray)
                     counter=counter+1
-                for index, x in enumerate(VectorArray):
-                    for i, coor in enumerate(x):
-                        VectorArray[index][i] = float(coor)
-                VectorArray = convex_hull.graham_scan(VectorArray)
-                return VectorArray
-
-
+                if not vectorArray:
+                    raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
+                return vectorArray
 
 
 def getCRS(filePath):
-    ''' extracts coordinatesystem from csv File 
+    '''extracts coordinatesystem from csv File 
     input filepath: type string, file path to csv file
-    output properties: type list, contains extracted coordinate system of content from csv file
-    '''
+    returns the epsg code of the used coordinate reference system, type list, contains extracted coordinate system of content from csv file
+    ''' 
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
             elements.append(x)
-        CoordinateSystem={}
-        CoordinateSystem= hf.searchForParameters(elements, ["crs"])
         if hf.searchForParameters(elements, ["crs"]) is None:
             raise Exception('The csv file from ' + filePath + ' has no CRS')
+        if hf.searchForParameters(elements, ["crs"]) == "WGS84":
+            return "4978"
+        if hf.searchForParameters(elements, ["EPSG"]):
+            return hf.searchForParameters(elements, ["EPSG"])
         else:
-            return CoordinateSystem
+            raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
