@@ -9,7 +9,11 @@ from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 import convex_hull
 
-def isvValid(path):
+def isValid(path):
+    '''Checks whether it is valid netCDF or not.
+    input path: type string, path to file which shall be extracted
+    output true if file is valid, false if not
+    '''
     try:
         file = xarray.open_dataset(path)
         ncDataset = NCDataset(path)
