@@ -26,7 +26,7 @@ def getTemporalExtent(path):
     ''' extracts temporal extent of the geopackage
     input path: type string, file path to geopackage file
     '''
-    raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
+    raise Exception("The temporal extent cannot be extracted from geopackage files")
 
 
 

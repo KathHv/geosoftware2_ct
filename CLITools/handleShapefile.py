@@ -94,7 +94,7 @@ def getVectorRepresentation(path):
                     coordinates[index][1] = float(value[1].replace("(", "").replace(")", ""))
                 except:
                     print("Error: Value cannot be converted into float" + value[0])
-            #coordinates = convex_hull.graham_scan(coordinates)
+            coordinates = convex_hull.graham_scan(coordinates)
             return coordinates
     except Exception as e:
         pathWithoutEnding = path[:len(path)-4]
@@ -116,28 +116,10 @@ def getBoundingBox(path):
     # try to get the bounding box with fiona
     try:
         with fiona.open(path) as datasetFiona:
-            if hasattr(datasetFiona, "crs"):
-                if 'init' in datasetFiona.crs:
-                    initField = datasetFiona.crs["init"]
-                    crs = initField[initField.rfind(":") + 1 : ]
-                    if hasattr(datasetFiona, "bounds"):
-                        if len(datasetFiona.bounds) > 3:
-                            bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]
-                            if crs == "4326":
-                                return bboxInOriginalCRS
-                            else:
-                                # TO DO: first transform into WGS 84
-                                print(crs)
-                                print([bboxInOriginalCRS[0], bboxInOriginalCRS[1]])
-                                #print(hf.transformingIntoWGS84(crs, [bboxInOriginalCRS[0], bboxInOriginalCRS[1]]))
-                                return "BBOX liegt in anderem Format vor (" + str(crs) + "): " + str(bboxInOriginalCRS)
-    with fiona.open(path) as datasetFiona:
-        if hasattr(datasetFiona, "bounds") and len(datasetFiona.bounds) > 3:
-            bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]       
-            if not bboxInOriginalCRS:
-                raise Exception("Bounding Box could not be extracted.")
-            return bboxInOriginalCRS
-                   
+            if hasattr(datasetFiona, "bounds"):
+                if len(datasetFiona.bounds) > 3:
+                    bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]
+                    return bboxInOriginalCRS
 
         # if fiona is not working (on this file), try to get the bbox with the module 'shapefile'
         pathWithoutEnding = path[:len(path)-4]

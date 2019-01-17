@@ -8,6 +8,7 @@ from os import walk
 import helpfunctions as hf
 import dicttoxml, xml, subprocess
 import threading 
+import convex_hull
 
 
 COMMAND = None
@@ -85,7 +86,7 @@ if 'OPTS' in globals():
 
 
 
-def computeBbox(module, path):
+def computeBboxInWGS84(module, path):
     ''' input module: type module, module from which methods shall be used
     input path: type string, path to file
     returns a bounding box, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
@@ -94,17 +95,35 @@ def computeBbox(module, path):
     bbox_in_orig_crs = module.getBoundingBox(path)
     try:
         crs = module.getCRS(path)
-    except:
-        print("Exception in module.getCRS(path) in computeBbox(module, path). Exception will be passed.")
+    except Exception as e:
+        print("Exception in module.getCRS(path) in computeBboxInWGS84(%s, %s): %s" % (module, path, e))
         pass
     if 'crs' in locals() and crs is not None:
-        print(bbox_in_orig_crs)
         for x in bbox_in_orig_crs:
-            print(type(x))
-            bbox_transformed = hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs)
+            print(crs, bbox_in_orig_crs)
+            bbox_transformed = hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs) # transformBboxIntoWGS84 ?
             return bbox_transformed
     else:
-        return bbox_in_orig_crs
+        raise Exception("The bounding box could not be related to a CRS")
+
+def computeVectorRepresentationInWGS84(module, path):
+    ''' input module: type module, module from which methods shall be used
+    input path: type string, path to file
+    returns a vector representation, type list, schema = [[lon1, lon2], [lon2, lon2], ...], that is in its original crs.
+    '''
+    
+    vector_rep_in_orig_crs = module.getVectorRepresentation(path)
+    try:
+        crs = module.getCRS(path)
+    except Exception as e:
+        print("Exception in module.getCRS(path) in computeVectorRepresentationInWGS84(%s, %s): %s" % (module, path, e))
+    if 'crs' in locals() and crs is not None:
+        for x in vector_rep_in_orig_crs:
+            print(crs, vector_rep_in_orig_crs)
+            vector_rep_transformed = hf.transformingArrayIntoWGS84(crs, vector_rep_in_orig_crs)
+            return vector_rep_transformed
+    else:
+        raise Exception("The vector representation could not be related to a CRS")
 
 
 
@@ -155,7 +174,6 @@ def extractMetadataFromFile(filePath, whatMetadata):
     else: 
         # file format is not supported
         return None
-    
     #get Bbox, Temporal Extent, Vector representation and crs parallel with threads
     class thread(threading.Thread): 
         def __init__(self, thread_ID): 
@@ -163,10 +181,9 @@ def extractMetadataFromFile(filePath, whatMetadata):
             self.thread_ID = thread_ID
         def run(self):
             print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
-            #metadata[self.thread_ID] = self.thread_ID
             if self.thread_ID == 100:
                 try:
-                    metadata["bbox"] = computeBbox(usedModule, filePath)
+                    metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
                 except Exception as e:
                     print("Warning for " + filePath + ": " + str(e)) 
             elif self.thread_ID == 101:
@@ -176,15 +193,15 @@ def extractMetadataFromFile(filePath, whatMetadata):
                     print("Warning for " + filePath + ": " + str(e))
             elif self.thread_ID == 102:
                 try:
-                    metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+                    metadata["vector_representation"] = computeVectorRepresentationInWGS84(usedModule, filePath)
                 except Exception as e:
                     print("Warning for " + filePath + ": " + str(e))
             elif self.thread_ID == 200:
-                metadata["bbox"] = computeBbox(usedModule, filePath)
+                metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
             elif self.thread_ID == 201:
                 metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
             elif self.thread_ID == 202:
-                metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+                metadata["vector_representation"] = computeVectorRepresentationInWGS84(usedModule, filePath)
             elif self.thread_ID == 103:
                 try:
                     # the CRS is not neccessarily required
@@ -194,7 +211,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
                 except Exception as e:
                     print("Warning for " + filePath + ": " + str(e))
             try:
-                barrier.wait() 
+                barrier.wait()
             except Exception as e:
                 print(e)
                 barrier.abort()
@@ -261,9 +278,23 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 
         files_in_folder = []
 
+        # get all files from the folder
         for (dirpath, dirnames, filenames) in walk(folderPath):
             files_in_folder.extend(filenames)
-        
+        # for shapefile: ignore all .prj-, .dbf-, .shx- and cpg-files where a related .shp-file exists
+        # so that the same shapefile is only executed once
+        i = 0
+        while (i < len(files_in_folder)):
+            pathWithoutEnding = files_in_folder[i][:len(files_in_folder[i])-4]
+            if '.cpg' in files_in_folder[i] or '.prj' in files_in_folder[i] \
+                or '.shx' in files_in_folder[i] or '.dbf' in files_in_folder[i]:
+                if pathWithoutEnding + ".shp" in files_in_folder:
+                    files_in_folder.remove(files_in_folder[i])
+                else:
+                    i += 1
+            else:
+                i += 1
+        print(files_in_folder)
         metadataElements = []
         fullPaths = []
 
@@ -295,58 +326,48 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
                 filesSkiped += 1
 
 
+    def getTemporalExtentFromFolder(mult_temp_extents):
+        ''' computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents'
+        uses helpfunction
+        input mult_temp_extents: type list, list of list with temporal extent with length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+        returns temporal extent of all files, type list with two datetime
+        '''
+        print(str(len(mult_temp_extents)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a temporal extent.")
 
+        if len(mult_temp_extents) > 0 and hf.computeTempExtentOfMultiple(mult_temp_extents) is not None:
+            return hf.computeTempExtentOfMultiple(mult_temp_extents)
+
+        else: return None
+
+    def getBboxFromFolder(mult_bboxes):
+        ''' computes boundingbox from multiple bounding boxes stored in the array 'mult_bboxes'
+        uses helpfunction
+        input mult_bboxes: type list, list with bounding boxes, one bbox has the following format:  length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+        returns bounding box of the files in the folder, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
+        '''
+        print(str(len(mult_bboxes)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a bbox.")
         
-        def getTemporalExtentFromFolder(mult_temp_extents):
-            ''' computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents'
-            uses helpfunction
-            input mult_temp_extents: type list, list of list with temporal extent with length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-            returns temporal extent of all files, type list with two datetime
-            '''
-            print(str(len(mult_temp_extents)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a temporal extent.")
+        if len(mult_bboxes) > 0 and hf.computeBboxOfMultiple(mult_bboxes) is not None:
+            return hf.computeBboxOfMultiple(mult_bboxes)
 
-            if len(mult_temp_extents) > 0 and hf.computeTempExtentOfMultiple(mult_temp_extents) is not None:
-                return hf.computeTempExtentOfMultiple(mult_temp_extents)
+        else: return None
 
-            else: return None
+    def getVectorRepFromFolder(mult_vec_rep):
+        '''
+        computes vector representation from multiple vector representations stored in the array 'mult_vec_rep'
+        uses helpfunction
+        input mult_vec_rep: type list, all vector representations from the files in the folder
+        returns the vector representation of the files in the folder: type list, one vector representation of the files from folder
+        '''
+        print(str(len(mult_vec_rep)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
+        if type(mult_vec_rep) == list:
+            if len(mult_vec_rep) > 0:
+                return convex_hull.graham_scan(mult_vec_rep)
 
-
-
-
-        def getBboxFromFolder(mult_bboxes):
-            ''' computes boundingbox from multiple bounding boxes stored in the array 'mult_bboxes'
-            uses helpfunction
-            input mult_bboxes: type list, list with bounding boxes, one bbox has the following format:  length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
-            returns bounding box of the files in the folder, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
-            '''
-            print(str(len(mult_bboxes)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a bbox.")
-            
-            if len(mult_bboxes) > 0 and hf.computeBboxOfMultiple(mult_bboxes) is not None:
-                return hf.computeBboxOfMultiple(mult_bboxes)
-
-            else: return None
-
-        
-
-
-        def getVectorRepFromFile(mult_vec_rep):
-            '''
-            computes vector representation from multiple vector representations stored in the array 'mult_vec_rep'
-            uses helpfunction
-            input mult_vec_rep: type list, all vector representations from the files in the folder
-            returns the vector representation of the files in the folder: type list, one vector representation of the files from folder
-            '''
-            print(str(len(mult_vec_rep)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
-            if len(mult_vec_rep) > 0: # TO DO: helpfunction and here catch is if result is None (Handle union of multiple vector representations)
-                return mult_vec_rep
-
-            return None
-
-
-
+        return None
 
     bbox = getBboxFromFolder(bboxes)
-    vector_rep = getVectorRepFromFile(vector_representations)
+    vector_rep = getVectorRepFromFolder(vector_representations)
     temp_ext = getTemporalExtentFromFolder(temporal_extents)
 
     if whatMetadata == "e":
