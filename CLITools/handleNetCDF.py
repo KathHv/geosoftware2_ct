@@ -115,40 +115,44 @@ def getTemporalExtent(path):
     ncDataset = NCDataset(path)
     datasetGDAL = gdal.Open(path)
     metadataGDAL = datasetGDAL.GetMetadata()
-    if 'time' in ncDataset.variables:
-        times = ncDataset.variables["time"][:]
-        temporal_extent =  str([min(times), max(times)]) + " Warning: Unit not absolute" 
-        def getAbsoulteTimestamp(plusdays, steps, origin):
-            origin = dtime.strptime(origin ,'%Y-%m-%d %H:%M:%S')
-            if "days" in steps:
-                return origin + datetime.timedelta(days=plusdays)
-            elif "hours" in steps:
-                return origin + datetime.timedelta(hours=plusdays)
-            elif "minutes" in steps:
-                return origin + datetime.timedelta(minutes=plusdays)
-            elif "seconds" in steps:
-                return origin + datetime.timedelta(seconds=plusdays)       
-        if hasattr(ncDataset.variables["time"], 'units'):
-            unit = ncDataset.variables["time"].units
-            steps = unit[:unit.rfind(" since")]
-            origin = unit[unit.rfind("since ")+6:]
-            if origin[:4] == "0000":
-                origin = "2000" + origin[4:]
-            if len(origin) < 11:
-                origin += " 00:00:00"
-
-        elif "time#units" in metadataGDAL:
-                unit = metadataGDAL["time#units"]
+    try:
+        if 'time' in ncDataset.variables:
+            times = ncDataset.variables["time"][:]
+            temporal_extent =  str([min(times), max(times)]) + " Warning: Unit not absolute" 
+            def getAbsoulteTimestamp(plusdays, steps, origin):
+                origin = dtime.strptime(origin ,'%Y-%m-%d %H:%M:%S')
+                if "days" in steps:
+                    return origin + datetime.timedelta(days=plusdays)
+                elif "hours" in steps:
+                    return origin + datetime.timedelta(hours=plusdays)
+                elif "minutes" in steps:
+                    return origin + datetime.timedelta(minutes=plusdays)
+                elif "seconds" in steps:
+                    return origin + datetime.timedelta(seconds=plusdays)       
+            if hasattr(ncDataset.variables["time"], 'units'):
+                unit = ncDataset.variables["time"].units
                 steps = unit[:unit.rfind(" since")]
                 origin = unit[unit.rfind("since ")+6:]
-        if times is not None:
-            if len(times) > 0:
-                if 'steps' in locals():
-                    temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
-                    if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
-                        print("temporal extent of " + path + " is not valid! (" + str(temporal_extent) + ")")
-                    else:
-                        return temporal_extent
+                if origin[:4] == "0000":
+                    origin = "2000" + origin[4:]
+                if len(origin) < 11:
+                    origin += " 00:00:00"
+
+            elif "time#units" in metadataGDAL:
+                    unit = metadataGDAL["time#units"]
+                    steps = unit[:unit.rfind(" since")]
+                    origin = unit[unit.rfind("since ")+6:]
+            if times is not None:
+                if len(times) > 0:
+                    if 'steps' in locals():
+                        temporal_extent = [str(getAbsoulteTimestamp(min(times), steps, origin)), str(getAbsoulteTimestamp(max(times), steps, origin))]
+                        if getAbsoulteTimestamp(min(times), steps, origin) > datetime.datetime.now() or getAbsoulteTimestamp(max(times), steps, origin) > datetime.datetime.now():
+                            print("temporal extent of " + path + " is not valid! (" + str(temporal_extent) + ")")
+                        else:
+                            return temporal_extent
+    except:
+        raise Exception("The temporal extent could not be extracted from the file")
+    
     # raises exception when 1) no time variable could be found OR 2) no time unit could be found
 
     raise Exception("The temporal extent could not be extracted from the file")
