@@ -191,5 +191,6 @@ def transformingArrayIntoWGS84(crs, pointArray):
             array.append(transformingIntoWGS84(crs, x))
         return array
     elif len(pointArray) == 4:
-        bbox = [[pointArray[0], pointArray[1]],[pointArray[3], pointArray[4]]]
-        transformingArrayIntoWGS84(crs, bbox)
+        bbox = [[pointArray[0], pointArray[1]],[pointArray[2], pointArray[3]]]
+        transf_bbox = transformingArrayIntoWGS84(crs, bbox)
+        return [transf_bbox[0][0],transf_bbox[0][1], transf_bbox[1][0], transf_bbox[1][1]]

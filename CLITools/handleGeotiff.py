@@ -13,6 +13,21 @@ def extractContentFromPath(filePath):
     returns geotiff content of the filepath: type string
     '''
     gdal.UseExceptions()
+    #zip https://rasterio.readthedocs.io/en/latest/quickstart.html
+    #GDAL error handler
+    #from: https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html#get-raster-metadata
+    gtiffContent = gdal.Open(filePath)
+    return gtiffContent
+
+
+
+
+def isValid(filePath):
+    '''Checks whether it is valid geotiff or not.
+    input filepath: type string, path to file which shall be extracted
+    output true if file is valid, false if not
+    '''
+    gdal.UseExceptions()
     
     #zip https://rasterio.readthedocs.io/en/latest/quickstart.html
     #GDAL error handler
