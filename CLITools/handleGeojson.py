@@ -29,8 +29,8 @@ def extractContentFromPath(filePath):
 
 
 def isValid(filePath):
-    '''Checks whether it is valid geojson or not.
-    input filepath: type string, path to file which shall be extracted
+    '''Checks whether it is valid geojson or not. \n
+    input "filepath": type string, path to file which shall be extracted \n
     output true if file is valid, false if not
     '''
     try :   
@@ -49,16 +49,16 @@ def isValid(filePath):
  
    
 def convert3dto2d(filePath):
-    '''transforms 3d to 2d coordinates in a geojson file.
-    input filepath: type string, path to file which shall be extracted
+    '''transforms 3d to 2d coordinates in a geojson file. \n
+    input "filepath": type string, path to file which shall be extracted \n
     returns geojson with 2d coordinates
     '''
     gjsonContent = extractContentFromPath(filePath)
 
     def extractAfterKeyword(searchParam, content):
-        ''' searches for the value fo the dict entry with keyword which is given as input
-        input searchParam: type string, keyword for which is searched in the dict
-        input gjsonContent: type dict, Content of geojson File
+        ''' searches for the value fo the dict entry with keyword which is given as input \n
+        input "searchParam": type string, keyword for which is searched in the dict \n
+        input "gjsonContent": type dict, Content of geojson File
         '''
         if type(content) == dict:
             for keyContent, valueContent in content.items():
@@ -72,8 +72,8 @@ def convert3dto2d(filePath):
 
 
     def extractCoordinates(coordsList):
-        ''' extract coordinates out of a some more lists (e.g. with Multipolygons), cuts the height from 3d coordinates
-        input coordsList: type list, value of dict entry with key "coordinates"
+        ''' extract coordinates out of a some more lists (e.g. with Multipolygons), cuts the height from 3d coordinates \n
+        input "coordsList": type list, value of dict entry with key "coordinates" \n
         returns list with 2 coordinates or list with list with 2 coordinates
         '''
         if type(coordsList) == list and len(coordsList) == 3 and (type(coordsList[0]) == float or type(coordsList[0]) == int) and (type(coordsList[1]) == float or type(coordsList[1]) == int) and (type(coordsList[2]) == float or type(coordsList[2]) == int):
@@ -128,9 +128,9 @@ def getCRS(filePath):
 
 
     def extractAfterKeyword(searchParam, gjsonContent):
-        ''' searches for the value fo the dict entry with keyword which is given as input
-        input searchParam: type string, keyword for which is searched in the dict
-        input gjsonContent: type dict, Content of geojson File
+        ''' searches for the value fo the dict entry with keyword which is given as input \n
+        input "searchParam": type string, keyword for which is searched in the dict \n
+        input "gjsonContent": type dict, Content of geojson File
         '''
         if type(gjsonContent) == dict:
             for keyContent, valueContent in gjsonContent.items():

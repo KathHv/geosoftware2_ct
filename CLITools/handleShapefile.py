@@ -138,7 +138,12 @@ def getBoundingBox(path):
         if 'myshp' in locals():
             if 'mydbf' in locals():
                 r = shapefile.Reader(shp=myshp, dbf=mydbf)
-                return r.bbox
+                boundingbox = r.bbox
+                if type(boundingbox) == list:
+                    if len(boundingbox) == 6:
+                        boundingbox.pop(2)
+                        boundingbox.pop(len(boundingbox)-1)
+                return boundingbox
     except Exception as e:
         pathWithoutEnding = path[:len(path)-4]
         if not (hf.exists(pathWithoutEnding + ".dbf") and hf.exists(pathWithoutEnding + ".shp") and \
