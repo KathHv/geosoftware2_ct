@@ -87,8 +87,8 @@ if 'OPTS' in globals():
 
 
 def computeBboxInWGS84(module, path):
-    ''' input module: type module, module from which methods shall be used
-    input path: type string, path to file
+    ''' input "module": type module, module from which methods shall be used \n
+    input "path": type string, path to file \n
     returns a bounding box, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
     '''
     
@@ -107,8 +107,8 @@ def computeBboxInWGS84(module, path):
         raise Exception("The bounding box could not be related to a CRS")
 
 def computeVectorRepresentationInWGS84(module, path):
-    ''' input module: type module, module from which methods shall be used
-    input path: type string, path to file
+    ''' input "module": type module, module from which methods shall be used \n
+    input "path": type string, path to file \n
     returns a vector representation, type list, schema = [[lon1, lon2], [lon2, lon2], ...], that is in its original crs.
     '''
     
@@ -130,9 +130,9 @@ def computeVectorRepresentationInWGS84(module, path):
 
 def extractMetadataFromFile(filePath, whatMetadata):
     ''' function is called when filePath is included in commanline (with tag 'e', 't' or 's')
-    how this is done depends on the file format - the function calls the extractMetadataFrom<format>() - function
-    input filePath: type string, path to file from which the metadata shall be extracted
-    input whatMetadata: type string, specifices which metadata should be extracted 
+    how this is done depends on the file format - the function calls the extractMetadataFrom<format>()-function \n
+    input "filePath": type string, path to file from which the metadata shall be extracted \n
+    input "whatMetadata": type string, specifices which metadata should be extracted  \n
     returns None if the format is not supported, else returns the metadata of the file as a dict 
     (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
     '''
@@ -265,10 +265,12 @@ def extractMetadataFromFile(filePath, whatMetadata):
 
 
 def extractMetadataFromFolder(folderPath, whatMetadata):
-    '''function is called when path of directory is included in commanline (with tag 'e', 't' or 's')
-    returns the metadata of the folder as a dict
+    '''function is called when path of directory is included in commanline (with tag 'e', 't' or 's') \n
     calls the extractMetadataFromFile-function and computes the average for the metadata fields
-    (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations'
+    (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations' \n
+    input "folderPath": type string, path to folder from which the metadata shall be extracted \n
+    input "whatMetadata": type string, specifices which metadata should be extracted  \n
+    returns the metadata of the folder as a dict \n
     '''
     if not os.path.isdir(folderPath):
         raise FileNotFoundError("This directory could not be found")
@@ -327,9 +329,8 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 
 
     def getTemporalExtentFromFolder(mult_temp_extents):
-        ''' computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents'
-        uses helpfunction
-        input mult_temp_extents: type list, list of list with temporal extent with length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+        ''' computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents' (uses helpfunction) \n
+        input "mult_temp_extents": type list, list of list with temporal extent with length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1] \n
         returns temporal extent of all files, type list with two datetime
         '''
         print(str(len(mult_temp_extents)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a temporal extent.")
@@ -340,9 +341,8 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         else: return None
 
     def getBboxFromFolder(mult_bboxes):
-        ''' computes boundingbox from multiple bounding boxes stored in the array 'mult_bboxes'
-        uses helpfunction
-        input mult_bboxes: type list, list with bounding boxes, one bbox has the following format:  length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+        ''' computes boundingbox from multiple bounding boxes stored in the array 'mult_bboxes' (uses helpfunction) \n
+        input "mult_bboxes": type list, list with bounding boxes, one bbox has the following format:  length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] \n
         returns bounding box of the files in the folder, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
         '''
         print(str(len(mult_bboxes)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a bbox.")
@@ -354,9 +354,8 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 
     def getVectorRepFromFolder(mult_vec_rep):
         '''
-        computes vector representation from multiple vector representations stored in the array 'mult_vec_rep'
-        uses helpfunction
-        input mult_vec_rep: type list, all vector representations from the files in the folder
+        computes vector representation from multiple vector representations stored in the array 'mult_vec_rep' (uses helpfunction) \n
+        input "mult_vec_rep": type list, all vector representations from the files in the folder \n
         returns the vector representation of the files in the folder: type list, one vector representation of the files from folder
         '''
         print(str(len(mult_vec_rep)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
