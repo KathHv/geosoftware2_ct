@@ -10,8 +10,8 @@ import convex_hull
 
 def getBoundingBox(filePath):
     '''         
-    extract bounding box from gml
-    input filepath: type string, file path to gml file
+    extract bounding box from gml \n
+    input "filepath": type string, file path to gml file \n
     returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
     '''
     ogr2ogr.main(["","-f", "GeoJSON", "outputBBox.json", filePath])
@@ -27,8 +27,8 @@ def getBoundingBox(filePath):
 
 def getTemporalExtent(filePath):
     '''
-    extracts temporal extent of the gml
-    input filepath: type string, file path to gml file
+    extracts temporal extent of the gml \n
+    input "filepath": type string, file path to gml file \n
     returns temporal extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     dateArray= []
@@ -54,8 +54,8 @@ def getTemporalExtent(filePath):
 
 def getVectorRepresentation(filePath):
     '''
-    extracts coordinates from gml File (for vector representation)
-    input filepath: type string, file path to gml file
+    extracts coordinates from gml File (for vector representation) \n
+    input "filepath": type string, file path to gml file \n
     returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     ogr2ogr.main(["","-f", "GeoJSON", "outputVector.json", filePath])
@@ -72,8 +72,8 @@ def getVectorRepresentation(filePath):
 
 def getCRS(filePath):
     '''
-    extracts coordinatesystem from gml File 
-    input filepath: type string, file path to gml file
+    extracts coordinatesystem from gml File \n
+    input "filepath": type string, file path to gml file \n
     returns epsg code of used coordinate reference system: type list
     '''
     coordinatesystem= []
@@ -89,6 +89,6 @@ def getCRS(filePath):
     if hf.searchForParameters(coordinatesystem, ["crs"]) is None:
             raise Exception('The gml file from ' + filePath + ' has no CRS')
     if hf.searchForParameters(coordinatesystem, ["crs"]) == "WGS84":
-        return "4978"
+        return hf.WGS84_EPSG_ID
     else:
         raise Exception('The gml file from ' + filePath + ' has no WGS84 CRS')

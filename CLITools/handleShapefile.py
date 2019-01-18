@@ -10,8 +10,8 @@ import sys
 import convex_hull
 
 def isValid(path):
-    '''Checks whether it is valid shapefile or not.
-    input path: type string, path to file which shall be extracted
+    '''Checks whether it is valid shapefile or not. \n
+    input "path": type string, path to file which shall be extracted \n
     output true if file is valid, false if not
     '''
     pathWithoutEnding = path[:len(path)-4]
@@ -28,8 +28,8 @@ def isValid(path):
     return True
 
 def getCRS(path):
-    ''' gets the coordinate reference systems from the shapefile
-    input path: type string, file path to shapefile
+    ''' gets the coordinate reference systems from the shapefile \n
+    input "path": type string, file path to shapefile \n
     returns epsg code of the used coordinate reference system
     '''
     try:
@@ -50,8 +50,8 @@ def getCRS(path):
 
 
 def getTemporalExtent(path):
-    ''' extracts temporal extent of the shapefile
-    input path: type string, file path to shapefile file
+    ''' extracts temporal extent of the shapefile \n
+    input "path": type string, file path to shapefile file
     '''
 
     raise Exception("The temporal extent cannot be extracted of a shapefile")
@@ -62,8 +62,8 @@ def getTemporalExtent(path):
 def getVectorRepresentation(path):
     ''' abstract the geometry of the file with a polygon
     first: collects all the points of the file
-    then: call the function that computes the polygon of it
-    input path: type string, file path to shapefile
+    then: call the function that computes the polygon of it \n
+    input "path": type string, file path to shapefile \n
     returns extracted coordinates of content from shapefiletype list, list of lists with length = 2, 
     '''
     try:
@@ -113,8 +113,8 @@ def getVectorRepresentation(path):
 
 
 def getBoundingBox(path):
-    ''' extracts bounding box from shapfile
-    input filepath: type string, file path to shapefile
+    ''' extracts bounding box from shapfile \n
+    input "path": type string, file path to shapefile \n
     returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     # try to get the bounding box with fiona

@@ -10,8 +10,8 @@ import helpfunctions as hf
 import convex_hull
 
 def isValid(path):
-    '''Checks whether it is valid netCDF or not.
-    input path: type string, path to file which shall be extracted
+    '''Checks whether it is valid netCDF or not. \n
+    input "path": type string, path to file which shall be extracted \n
     output true if file is valid, false if not
     '''
     try:
@@ -27,8 +27,8 @@ def isValid(path):
 def getVectorRepresentation(path):
     ''' abstracts the geometry of the file with a polygon
     first: collects all the points of the file
-    then: call the function that computes the polygon of it
-    input path: type string, file path to NetCDF file
+    then: call the function that computes the polygon of it \n
+    input "path": type string, path to file which shall be extracted \n
     returns extracted coordinates of content: type list, list of lists with length = 2: type list
     '''
     file = xarray.open_dataset(path)
@@ -66,8 +66,8 @@ def getVectorRepresentation(path):
 
 
 def getBoundingBox(path):
-    ''' extracts bounding box from NetCDF
-    input path: type string, file path to NetCDF file
+    ''' extracts bounding box from NetCDF \n
+    input "path": type string, path to file which shall be extracted \n
     returns bounding box: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     ncDataset = NCDataset(path)
@@ -98,8 +98,8 @@ def getBoundingBox(path):
 
 
 def getCRS(path):
-    ''' gets the coordinate reference systems from the NetCDF file
-    input path: type string, file path to NetCDF file
+    ''' gets the coordinate reference systems from the NetCDF file \n
+    input "path": type string, path to file which shall be extracted \n
     returns epsg code of the used coordiante reference system: type list, list with two elements: 1. Crs of lats and 2. Crs of lons
     '''
     return hf.WGS84_EPSG_ID
@@ -108,8 +108,8 @@ def getCRS(path):
 
 
 def getTemporalExtent(path):
-    ''' extracts the temporal extent of the netCDF file
-    input path: type string, file path to geotiff file
+    ''' extracts the temporal extent of the netCDF file \n
+    input "path": type string, path to file which shall be extracted \n
     reutrns temporal  extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     ncDataset = NCDataset(path)
