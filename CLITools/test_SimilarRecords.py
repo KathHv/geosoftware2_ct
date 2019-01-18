@@ -13,16 +13,14 @@ dasEntry3 = {"id" : 3,"wkt_geometry" : [20,25,4,8],"vector" : [[10,50],[3,54]],"
 dasEntry4 = {"id" : 4,"wkt_geometry" : [20,22,23,28],"vector" : [[2,1],[3,5],[4,20]],"time" : ["1997-07-16T19:20:30+01:00", "1998-07-16T19:20:30+01:00"],"raster" : False}
 dasDict = [dasEntry1,dasEntry2,dasEntry3,dasEntry4]
 
-#testet, ob die richtigen Resultate beim Vergleichen zweier Datentypen geografischer
-#Informationen ausgegeben werden
-#Ausgaben:
-    #1: gleicher Typ und beide Vektor oder Raster
-    #0.8: ungleicher Typ und beide Vektor oder Raster
-    #0: ungleicher Typ und nur ein Vektor oder Raster
-        #Typ = Punkt || Linie || Polygon
-# dict1: Liste aller Einträge
-# entry1, eintry2: Zu Vergleichende Einträge aus einem Dictionary
-
+'''
+ Function purpose: tests whether the correct results are put out
+ when comparing two data types of geographic information
+ input: -
+ output:    1: same type and both vector or raster
+            0.8: unequal type and both vector or raster
+            0: unequal type and only a vector or raster
+'''
 def test_getGeoDatSim():
     entry1 = dasEntry1
     entry2 = dasEntry3
@@ -37,8 +35,12 @@ def test_getGeoDatSim():
             ans = 0.8
     assert ans == geoSimilarity
 
-#testet, ob die richtigen Resultate beim Vergleichen zweier Datentypen zeitlicher
-#Informationen ausgegeben werden getTempDatSim(dict, entry1, entry2):
+'''
+ Function purpose: Tests whether the correct results are output when comparing two types of temporal information
+ input: arrays, entry1, entry2
+ output: 
+'''
+
 def test_getTempDatSim():
     entry1 = dasEntry2
     entry2 = dasEntry4
@@ -51,13 +53,20 @@ def test_getTempDatSim():
         ans = 1
     assert ans == tempSimilarity
 
-#testet, ob die Dateintypen zweier Eingaben die gleichen sind
-#pip install pytest-datafiles
+'''
+ Function purpose: Tests whether the file types of two inputs are the same
+ input: 
+ output: 
+'''
 #TODO
-#def test_DatatypeSim(dict, entry1, entry2):
-    
-#testet, die Eingaben in Bezug auf Größenähnlichkeit
+# def test_DatatypeSim(dict, entry1, entry2):
 
+
+'''
+ Function purpose: Tests the inputs for size-similarity
+ input: arrays, entry1, entry2 ?????????????
+ output: boolean true/false
+'''
 def test_getGeoExtSim():
     entry1 = dasEntry2
     entry2 = dasEntry4
@@ -68,8 +77,11 @@ def test_getGeoExtSim():
         ans = True
     assert ans == True
 
-#testet, die Eingaben in Bezug auf Zeitähnlichkeit
-
+'''
+ Function purpose: Tests the inputs for time-similarity
+ input: arrays, entry1, entry2 ?????????????
+ output: boolean true/false
+'''
 def test_getTempExtSim():
     entry1 = dasEntry2
     entry2 = dasEntry4
@@ -80,14 +92,18 @@ def test_getTempExtSim():
         ans = True
     assert ans == True
 
-#testet, calculates ratio between intersection of both bounding boxes and first zwei entries entry,
-#0 if disjunct, given two entries as dicts
-#Fallunterscheidung:
-    #1. Schnitt: Berechnung der Schnittfläche der Bboxes mit getAr, dann Verhältnis Schnittfläche/FlächeA
-    #2. A liegt in B: Ähnlichkeit 1
-    #3. B liegt in A: Berechnung Verhältnis FlächeB/FlächeA
-    #4. Kein Schnitt: Ähnlichkeit 0
 
+'''
+ Function purpose: Calculates ratio between intersection of both bounding boxes and first zwei entries entry,
+ 0 if disjunct, given two entries as dicts
+  Case distinction:
+    1. Cut: Calculation of the cut surface of the bboxes with getAr, then ratio cut-surface / areaA
+    2. A lies in B: Similarity 1
+    3. B lies in A: Calculation Ratio AreaB / AreaA
+    4. No cut: Similarity 0
+ input: arrays, entry1, entry2 ?????????????
+ output: boolean true/false
+'''
 def test_getInterGeoSim():
     entry1 = dasEntry2
     entry2 = dasEntry4
@@ -101,24 +117,29 @@ def test_getInterGeoSim():
     maxLatB=entry2["wkt_geometry"][1]
     minLonB=entry2["wkt_geometry"][2]
     maxLonB=entry2["wkt_geometry"][3]
-    #A in B
+
+    # A in B
     # ans = False
-    # das andere steht hier nur, damit keine Warnung passiert 
+    # The other one stands here only, so that no warning happens 
     ans = 0
     ans = ans +1
     if((minLonA > minLonB) and (maxLonA < maxLonB) and (minLatA > minLatB) and (maxLatA < maxLatB)):
         ans = True
-    #TODO
 
-#
+#TODO
 
-#def test_getInterTempSim(entry1, entry2):
+
+# def test_getInterTempSim(entry1, entry2):
    # InterTempSimilarity = SimScore.getInterTempSim(entry1, entry2)
    # print (InterTempSimilarity)
   
 
-#testet, ob der Unterschied zwischen den Bounding Boxes von Entry1 und Entry2 der selbe ist wie zwischen Entry2 und Entry1
-
+'''
+ Function purpose: Tests whether the difference between the bounding boxes of Entry1 and Entry2 is the same
+ as between Entry2 and Entry1
+ input: arrays, entry1, entry2 ?????????????
+ output: boolean true/false
+'''
 def test_getCenterGeoSim():
     entry1 = dasEntry2
     entry2 = dasEntry4
@@ -131,9 +152,12 @@ def test_getCenterGeoSim():
         ans = True
     assert ans == True   
 
-
-#testet, ob der Unterschied zwischen den Intervallen von Entry1 und Entry2 der selbe ist wie zwischen Entry2 und Entry1
-
+'''
+ Function purpose: Tests whether the difference between the Intervals of Entry1 and Entry2 is the same
+ as between Entry2 and Entry1
+ input: arrays, entry1, entry2 ?????????????
+ output: boolean true/false
+'''
 def test_getCenterTempSim():
     entry1 = dasEntry2
     entry2 = dasEntry4
@@ -147,17 +171,19 @@ def test_getCenterTempSim():
     assert ans == True   
 
 
-#Helpfunction:
-    #1. Validity-Check
-    #2. Errechnet Länge der Diagonalen
-    #3.
-    #4.
+# Helpfunction:
 
 def intBetween(x, bottom, top):
     if(x>=bottom and x<=top and math.floor(x) == x):
         return True
     else:
         return False 
+
+'''
+ Function purpose: Tests whether the validity for getSimilarityScores inputs is correct
+ input: dict, entries
+ output: boolean true/false
+'''
 
 def test_checkValidity():
     entries = dasDict
@@ -171,7 +197,8 @@ def test_checkValidity():
     Validity = SimScore.checkValidity(entries, cmps, n, e, d, l, g, t)
     print(Validity)
     ans = False
-    #entries ein Dict
+
+    #entries a Dict
     if type (entries) is dict:
         #cmps ein int >= 0
         if (cmps >= 0 and math.floor(cmps) == cmps):
@@ -188,19 +215,28 @@ def test_checkValidity():
                     ans = True
     assert ans == True                    
                
-
+'''
+ Function purpose: Tests whether the diagonal length of bounding box (from entry as dict) is correct
+ input: dict, entry
+ output: boolean true/false
+'''
 def test_getDiagonal():
     entry = dasEntry2
     Diagonale = SimScore.getDiagonal(entry)
     print (Diagonale)
     # ans = False
-    # das andere steht hier nur, damit keine Warnung passiert     
+    # The other one stands here only, so that no warning happens    
     ans = 0
     ans = ans +1 
     if ():
         ans = 9
         #TODO                                                                                                    
 
+'''
+ Function purpose: Tests whether the length of temporal interval (from entry as dict) is correct
+ input: dict, entry
+ output: boolean true/false
+'''
 def test_getInterv():
     entry = dasEntry2
     Intervall = SimScore.getInterv(entry)
@@ -210,6 +246,11 @@ def test_getInterv():
         ans = True
     assert ans == True
     
+'''
+ Function purpose: Tests whether the calculates area of bouunding box on earth surface is correct
+ input: dict, entry
+ output: boolean true/false
+'''
 def test_getAr():
     points = dasEntry2["wkt_geometry"]
     Ar = SimScore.getAr(points)

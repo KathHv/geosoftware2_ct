@@ -7,6 +7,10 @@ import helpfunctions as hf
 import convex_hull
     
 def isValid(path):
+    '''Checks whether it is valid geopackage or not.
+    input path: type string, path to file which shall be extracted
+    output true if file is valid, false if not
+    '''
     try:
         with fiona.open(path) as datasetFiona:
             sqliteConnection = sqlite3.connect(path)

@@ -95,14 +95,12 @@ def computeBboxInWGS84(module, path):
     bbox_in_orig_crs = module.getBoundingBox(path)
     try:
         crs = module.getCRS(path)
-    except Exception as e:
-        print("Exception in module.getCRS(path) in computeBboxInWGS84(%s, %s): %s" % (module, path, e))
+    except:
         pass
     if 'crs' in locals() and crs is not None:
-        for x in bbox_in_orig_crs:
-            print(crs, bbox_in_orig_crs)
-            bbox_transformed = hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs) # transformBboxIntoWGS84 ?
-            return bbox_transformed
+        print(bbox_in_orig_crs)
+        bbox_transformed = hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs)
+        return bbox_transformed
     else:
         raise Exception("The bounding box could not be related to a CRS")
 
@@ -180,41 +178,50 @@ def extractMetadataFromFile(filePath, whatMetadata):
             threading.Thread.__init__(self) 
             self.thread_ID = thread_ID
         def run(self):
-            print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
-            if self.thread_ID == 100:
-                try:
-                    metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
-                except Exception as e:
-                    print("Warning for " + filePath + ": " + str(e)) 
-            elif self.thread_ID == 101:
-                try:
+          
+            #only extracts metadata if the file content is valid
+            try:
+                valid = usedModule.isValid(filePath)
+            except Exception as e:
+                print("Error for " + filePath + ": " + str(e)) 
+            if valid:
+                print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
+                #metadata[self.thread_ID] = self.thread_ID
+                if self.thread_ID == 100:
+                    try:
+                        metadata["bbox"] = computeBbox(usedModule, filePath)
+                    except Exception as e:
+                        print("Warning for " + filePath + ": " + str(e)) 
+                elif self.thread_ID == 101:
+                    try:
+                        metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
+                    except Exception as e:
+                        print("Warning for " + filePath + ": " + str(e))
+                elif self.thread_ID == 102:
+                    try:
+                        metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+                    except Exception as e:
+                        print("Warning for " + filePath + ": " + str(e))
+                elif self.thread_ID == 200:
+                    metadata["bbox"] = computeBbox(usedModule, filePath)
+                elif self.thread_ID == 201:
                     metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
-                except Exception as e:
-                    print("Warning for " + filePath + ": " + str(e))
-            elif self.thread_ID == 102:
-                try:
-                    metadata["vector_representation"] = computeVectorRepresentationInWGS84(usedModule, filePath)
-                except Exception as e:
-                    print("Warning for " + filePath + ": " + str(e))
-            elif self.thread_ID == 200:
-                metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
-            elif self.thread_ID == 201:
-                metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
-            elif self.thread_ID == 202:
-                metadata["vector_representation"] = computeVectorRepresentationInWGS84(usedModule, filePath)
-            elif self.thread_ID == 103:
-                try:
-                    # the CRS is not neccessarily required
-                    if hasattr(usedModule, 'getCRS'):
-                        metadata["crs"] = usedModule.getCRS(filePath)
-                    else: print ("Warning: The CRS cannot be extracted from the file")
-                except Exception as e:
-                    print("Warning for " + filePath + ": " + str(e))
+                elif self.thread_ID == 202:
+                    metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+                elif self.thread_ID == 103:
+                    try:
+                        # the CRS is not neccessarily required
+                        if hasattr(usedModule, 'getCRS'):
+                            metadata["crs"] = usedModule.getCRS(filePath)
+                        else: print ("Warning: The CRS cannot be extracted from the file")
+                    except Exception as e:
+                        print("Warning for " + filePath + ": " + str(e))      
             try:
                 barrier.wait()
             except Exception as e:
-                print(e)
+                print("Warning for " + filePath + ": " + str(e))
                 barrier.abort()
+
             
     #thread id 100+ -> metadata extraction with exceptions from methods (raise Exception)
     #thread id 200+ -> metadata extraction without exceptions from methods ( only standard exceptions are raised (e.g. ValueError, AttributeError))
@@ -407,7 +414,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
 
 
 
-
+#process arguemnts from command line
 if 'OPTS' not in globals():
     raise Exception("An Argument is required")
 
@@ -419,6 +426,9 @@ for o, a in OPTS:
     ending = a
     if "/" in a:
         ending = a[a.rfind("/")+1:]
+    
+
+    #extracts spatial and temporal metadata and also the vector representation
     if o == '-e':
         COMMAND = a
         print("Extract all metadata:\n")
@@ -431,6 +441,8 @@ for o, a in OPTS:
             # handle it as a folder
             output = extractMetadataFromFolder(a, 'e')
 
+
+    #extract only temporal metadata
     elif o == '-t':
         print("\n")
         print("Extract Temporal metadata only:\n")
@@ -443,7 +455,9 @@ for o, a in OPTS:
         else:
             # handle it as a folder
             output = extractMetadataFromFolder(a, 't')
-        
+
+
+    #extract only spatial metadata    
     elif o == '-s':
         print("\n")
         print("Extract Spatial metadata only:\n")
