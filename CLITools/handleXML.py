@@ -13,12 +13,12 @@ def isValid(filePath):
     '''
     try:
         with open(filePath) as XML_file:
-        tree = ET.parse(XML_file)
-        root = tree.getroot()
-        if root is None:
-            return False
-        else:
-            return True
+            tree = ET.parse(XML_file)
+            root = tree.getroot()
+            if root is None:
+                return False
+            else:
+                return True
     except:
         return False
 
