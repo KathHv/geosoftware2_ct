@@ -8,8 +8,8 @@ import convex_hull
 
 def getBoundingBox(filePath):
     '''
-    extract bounding box from xml
-    input filepath: type string, file path to xml file
+    extract bounding box from xml \n
+    input "filepath": type string, file path to xml file \n
     returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
     '''
     with open(filePath) as XML_file:
@@ -52,8 +52,8 @@ def getBoundingBox(filePath):
 
 def getTemporalExtent(filePath):
     '''
-    extracts temporal extent of the xml
-    input filepath: type string, file path to xml file
+    extracts temporal extent of the xml \n
+    input "filepath": type string, file path to xml file \n
     returns temporal extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     with open(filePath) as XML_File:
@@ -81,8 +81,8 @@ def getTemporalExtent(filePath):
 
 def getVectorRepresentation(filePath):
     '''
-    extracts coordinates from xml File (for vector representation)
-    input filepath: type string, file path to xml file
+    extracts coordinates from xml File (for vector representation) \n
+    input "filepath": type string, file path to xml file \n
     returns extracted coordinates of content from xml file: type list, list of lists with length = 2
     '''
     with open(filePath) as XML_file:
@@ -126,8 +126,8 @@ def getVectorRepresentation(filePath):
 
 def getCRS(filePath):
     '''
-    extracts coordinatesystem from xml File 
-    input filepath: type string, file path to xml file
+    extracts coordinatesystem from xml File \n
+    input "filepath": type string, file path to xml file \n
     returns epsg code of the used coordiante references system: type list, contains extracted coordinate system of content from xml file
     '''
     with open(filePath) as XML_File:

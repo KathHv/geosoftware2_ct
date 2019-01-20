@@ -10,6 +10,10 @@ import sys
 import convex_hull
 
 def isValid(path):
+    '''Checks whether it is valid shapefile or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
+    '''
     pathWithoutEnding = path[:len(path)-4]
     if not (hf.exists(pathWithoutEnding + ".dbf") and hf.exists(pathWithoutEnding + ".shp") and \
         hf.exists(pathWithoutEnding + ".shx")):
@@ -24,8 +28,8 @@ def isValid(path):
     return True
 
 def getCRS(path):
-    ''' gets the coordinate reference systems from the shapefile
-    input path: type string, file path to shapefile
+    ''' gets the coordinate reference systems from the shapefile \n
+    input "path": type string, file path to shapefile \n
     returns epsg code of the used coordinate reference system
     '''
     try:
@@ -46,8 +50,8 @@ def getCRS(path):
 
 
 def getTemporalExtent(path):
-    ''' extracts temporal extent of the shapefile
-    input path: type string, file path to shapefile file
+    ''' extracts temporal extent of the shapefile \n
+    input "path": type string, file path to shapefile file
     '''
 
     raise Exception("The temporal extent cannot be extracted of a shapefile")
@@ -58,8 +62,8 @@ def getTemporalExtent(path):
 def getVectorRepresentation(path):
     ''' abstract the geometry of the file with a polygon
     first: collects all the points of the file
-    then: call the function that computes the polygon of it
-    input path: type string, file path to shapefile
+    then: call the function that computes the polygon of it \n
+    input "path": type string, file path to shapefile \n
     returns extracted coordinates of content from shapefiletype list, list of lists with length = 2, 
     '''
     try:
@@ -94,7 +98,7 @@ def getVectorRepresentation(path):
                     coordinates[index][1] = float(value[1].replace("(", "").replace(")", ""))
                 except:
                     print("Error: Value cannot be converted into float" + value[0])
-            #coordinates = convex_hull.graham_scan(coordinates)
+            coordinates = convex_hull.graham_scan(coordinates)
             return coordinates
     except Exception as e:
         pathWithoutEnding = path[:len(path)-4]
@@ -109,35 +113,17 @@ def getVectorRepresentation(path):
 
 
 def getBoundingBox(path):
-    ''' extracts bounding box from shapfile
-    input filepath: type string, file path to shapefile
+    ''' extracts bounding box from shapfile \n
+    input "path": type string, file path to shapefile \n
     returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     # try to get the bounding box with fiona
     try:
         with fiona.open(path) as datasetFiona:
-            if hasattr(datasetFiona, "crs"):
-                if 'init' in datasetFiona.crs:
-                    initField = datasetFiona.crs["init"]
-                    crs = initField[initField.rfind(":") + 1 : ]
-                    if hasattr(datasetFiona, "bounds"):
-                        if len(datasetFiona.bounds) > 3:
-                            bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]
-                            if crs == "4326":
-                                return bboxInOriginalCRS
-                            else:
-                                # TO DO: first transform into WGS 84
-                                print(crs)
-                                print([bboxInOriginalCRS[0], bboxInOriginalCRS[1]])
-                                #print(hf.transformingIntoWGS84(crs, [bboxInOriginalCRS[0], bboxInOriginalCRS[1]]))
-                                return "BBOX liegt in anderem Format vor (" + str(crs) + "): " + str(bboxInOriginalCRS)
-    with fiona.open(path) as datasetFiona:
-        if hasattr(datasetFiona, "bounds") and len(datasetFiona.bounds) > 3:
-            bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]       
-            if not bboxInOriginalCRS:
-                raise Exception("Bounding Box could not be extracted.")
-            return bboxInOriginalCRS
-                   
+            if hasattr(datasetFiona, "bounds"):
+                if len(datasetFiona.bounds) > 3:
+                    bboxInOriginalCRS = [datasetFiona.bounds[0], datasetFiona.bounds[1], datasetFiona.bounds[2], datasetFiona.bounds[3]]
+                    return bboxInOriginalCRS
 
         # if fiona is not working (on this file), try to get the bbox with the module 'shapefile'
         pathWithoutEnding = path[:len(path)-4]
@@ -152,7 +138,12 @@ def getBoundingBox(path):
         if 'myshp' in locals():
             if 'mydbf' in locals():
                 r = shapefile.Reader(shp=myshp, dbf=mydbf)
-                return r.bbox
+                boundingbox = r.bbox
+                if type(boundingbox) == list:
+                    if len(boundingbox) == 6:
+                        boundingbox.pop(2)
+                        boundingbox.pop(len(boundingbox)-1)
+                return boundingbox
     except Exception as e:
         pathWithoutEnding = path[:len(path)-4]
         if not (hf.exists(pathWithoutEnding + ".dbf") and hf.exists(pathWithoutEnding + ".shp") and \

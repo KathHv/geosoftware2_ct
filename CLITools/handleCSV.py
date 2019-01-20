@@ -6,8 +6,8 @@ import convex_hull
 
 def getBoundingBox(filePath):
     '''
-    Function purpose: extracts the spatial extent (bounding box) from a csv-file
-    input filepath: type string, file path to csv file
+    Function purpose: extracts the spatial extent (bounding box) from a csv-file \n
+    input "filepath": type string, file path to csv file \n
     returns spatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     with open(filePath) as csv_file:
@@ -45,8 +45,8 @@ def getBoundingBox(filePath):
 
 
 def getTemporalExtent(filePath):
-    ''' extract time extent from csv string
-    input filePath: type string, file path to csv File
+    ''' extract time extent from csv string \n
+    input "filePath": type string, file path to csv File \n
     returns temporal extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     with open(filePath) as csv_file:
@@ -68,8 +68,8 @@ def getTemporalExtent(filePath):
 
 
 def getVectorRepresentation(filePath):
-    ''' extracts coordinates from csv File (for vector representation)
-    input filePath: type string, file path to csv File
+    ''' extracts coordinates from csv File (for vector representation) \n
+    input "filePath": type string, file path to csv File \n
     returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     with open(filePath) as csv_file:
@@ -103,8 +103,8 @@ def getVectorRepresentation(filePath):
 
 
 def getCRS(filePath):
-    '''extracts coordinatesystem from csv File 
-    input filepath: type string, file path to csv file
+    '''extracts coordinatesystem from csv File \n
+    input "filepath": type string, file path to csv file \n
     returns the epsg code of the used coordinate reference system, type list, contains extracted coordinate system of content from csv file
     ''' 
     with open(filePath) as csv_file:

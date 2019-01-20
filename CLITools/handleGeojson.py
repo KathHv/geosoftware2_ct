@@ -15,56 +15,96 @@ import pygeoj
 
 
 def extractContentFromPath(filePath):
-    ''' method to extract geojson content from a file by using its filepath
-    input filepath: type string, path to file which shall be extracted
+    ''' method to extract geojson content from a file by using its filepath \n
+    input "filepath": type string, path to file which shall be extracted \n
     returns geojson content of the filePath: type string,  returns  geojson content of filepath 
+    '''  
+    gjson = open(filePath, "rb")
+    gjsonContent = json.load(gjson)
+    gjson.close()
+    return gjsonContent
+
+   
+
+
+
+def isValid(filePath):
+    '''Checks whether it is valid geojson or not. \n
+    input "filepath": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
     '''
     try :   
         gjson = open(filePath, "rb")
         gjsonContent = json.load(gjson)
-        #gjsonContentString = json.loads(gjson) #throws ValueError if content is invalid json
         gjson.close()
-        return gjsonContent
+        if not gjsonContent:
+            raise Exception('The geojson file from is empty')
+        return True
 
-    except ValueError(json) as e:
-        print ('The geojson file from ' + filePath + ' is not valid.' + str(e)) 
-        print (e)
-        sys.exit(1)
+    except ValueError as e:
+        raise Exception ('The geojson file from ' + filePath + ' is not valid.' + str(e)) 
 
     except RuntimeError as e:
-        print ('(geo)json file cannot be opened or read.' + str(e))
-        sys.exit(1)
+        raise Exception ('(geo)json file cannot be opened or read.' + str(e))
+ 
+   
+def convert3dto2d(filePath):
+    '''transforms 3d to 2d coordinates in a geojson file. \n
+    input "filepath": type string, path to file which shall be extracted \n
+    returns geojson with 2d coordinates
+    '''
+    gjsonContent = extractContentFromPath(filePath)
 
-    try: 
-        if not gjsonContent:
-            raise Exception('The geojson file from ' + filePath + ' is empty' + str(e))
-    
-    except Exception as e:
-        print ('Error: ' + str(e))
-        sys.exit(1)
+    def extractAfterKeyword(searchParam, content):
+        ''' searches for the value fo the dict entry with keyword which is given as input \n
+        input "searchParam": type string, keyword for which is searched in the dict \n
+        input "gjsonContent": type dict, Content of geojson File
+        '''
+        if type(content) == dict:
+            for keyContent, valueContent in content.items():
+                if keyContent == searchParam:   
+                    valueContent = extractCoordinates(valueContent)
+                if type(valueContent) == dict or type(valueContent) == list:
+                    extractAfterKeyword(searchParam, valueContent)
+        if type(content) == list:
+            for element in content:
+                extractAfterKeyword(searchParam, element)
 
 
+    def extractCoordinates(coordsList):
+        ''' extract coordinates out of a some more lists (e.g. with Multipolygons), cuts the height from 3d coordinates \n
+        input "coordsList": type list, value of dict entry with key "coordinates" \n
+        returns list with 2 coordinates or list with list with 2 coordinates
+        '''
+        if type(coordsList) == list and len(coordsList) == 3 and (type(coordsList[0]) == float or type(coordsList[0]) == int) and (type(coordsList[1]) == float or type(coordsList[1]) == int) and (type(coordsList[2]) == float or type(coordsList[2]) == int):
+            coordsList = coordsList.pop()
+        elif type(coordsList) == list and len(coordsList) != 0:
+            for value in coordsList:
+                extractCoordinates(value)
+        return coordsList
+
+    extractAfterKeyword("coordinates", gjsonContent)
+    return gjsonContent
 
 
 def getBoundingBox (filePath):
-    ''' extract bounding box from geojson content
-    input filePath: type string, file path to geojson File
+    ''' extract bounding box from geojson content \n
+    input "filePath": type string, file path to geojson File \n
     returns bounding box: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     bbox = None
     
     #gjsonContent is a FeatureCollection
     try:
-        gjsonContent = pygeoj.load(filepath = filePath)
+        gjsonContent = pygeoj.load(data = convert3dto2d(filePath))
         bbox = gjsonContent.bbox
-    #gjsonContent is a single file and has to be converted to a FeatureCollection
+    #gjsonContent is a single geometrie and has to be converted to a FeatureCollection
     except ValueError:
-        gjson = open(filePath, "rb")
-        gjsonContent = extractContentFromPath(filePath)
+        gjsonContent = convert3dto2d(filePath)
 
-        gjsonFeatureCollection = {"type": "FeatureCollection", "features": []}
-        gjsonFeatureCollection.get("features").append(gjsonContent)
-        gjsonContent_FeatureColl = pygeoj.load(data=gjsonFeatureCollection)
+        gjsonFeatureColl = {"type": "FeatureCollection", "features": []}
+        gjsonFeatureColl["features"].append(gjsonContent)
+        gjsonContent_FeatureColl = pygeoj.load(data=gjsonFeatureColl)
         bbox = gjsonContent_FeatureColl.bbox
     
     if not bbox:
@@ -75,23 +115,50 @@ def getBoundingBox (filePath):
 
 
 def getCRS(filePath):
-    ''' extracts EPSG number of the taken coordinate reference system (short: crs), as standard the crs WGS84 is used.
-    input filePath: type string, file path to geojson File
+    ''' extracts EPSG number of the taken coordinate reference system (short: crs), as standard the crs WGS84 is used. \n
+    input "filePath": type string, file path to geojson File \n
     returns the epsg code of the used coordinate reference system: type int, EPSG number of taken crs
     '''    
     gjsonContent = pygeoj.load(filePath)
     crsCode = gjsonContent.crs
     if not crsCode:
-        return 4978
+        return hf.WGS84_EPSG_ID
     else:
         return crsCode
+
+
+    def extractAfterKeyword(searchParam, gjsonContent):
+        ''' searches for the value fo the dict entry with keyword which is given as input \n
+        input "searchParam": type string, keyword for which is searched in the dict \n
+        input "gjsonContent": type dict, Content of geojson File
+        '''
+        if type(gjsonContent) == dict:
+            for keyContent, valueContent in gjsonContent.items():
+                if keyContent == searchParam:   
+                    extracted.append(valueContent)
+                if type(valueContent) == dict or type(valueContent) == list:
+                    extractAfterKeyword(searchParam, valueContent)
+        if type(gjsonContent) == list:
+            for element in gjsonContent:
+                extractAfterKeyword(searchParam, element)
+
+    gjsonContent = extractContentFromPath(filePath)
+  
+    #4326 is the standard epsg after http://wiki.geojson.org/GeoJSON_draft_version_6#Specification
+    crsCode = hf.WGS84_EPSG_ID
+    extracted = []
+    extractAfterKeyword("crs", gjsonContent)
+    if len(extracted) != 0:
+        if type(extracted[0]) == dict and "properties" in extracted[0] and "code" in extracted[0]["properties"]:
+                    crsCode = extracted[0]["properties"]["code"]
+    return crsCode
 
 
 
  
 def getVectorRepresentation(filePath):
-    ''' extracts coordinates from geojson File (for vector representation)
-    input filePath: type string, file path to geojson File
+    ''' extracts coordinates from geojson File (for vector representation) \n
+    input "filePath": type string, file path to geojson File \n
     returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     #type list, contains all coordinates as tuples
@@ -104,9 +171,9 @@ def getVectorRepresentation(filePath):
 
 
     def extractAfterKeyword(searchParam, gjsonContent):
-        ''' searches for the value fo the dict entry with keyword which is given as input
-        input searchParam: type string, keyword for which is searched in the dict
-        input gjsonContent: type dict, Content of geojson File
+        ''' searches for the value fo the dict entry with keyword which is given as input \n
+        input "searchParam": type string, keyword for which is searched in the dict \n
+        input "gjsonContent": type dict, Content of geojson File
         '''
         if type(gjsonContent) == dict:
             for keyContent, valueContent in gjsonContent.items():
@@ -122,8 +189,8 @@ def getVectorRepresentation(filePath):
 
 
     def extractCoordinates(coordsList):
-        ''' extract coordinates as tuples out of a some more lists (e.g. with Multipolygons)
-        input coordsList: type list, value of dict entry with key "coordinates"
+        ''' extract coordinates as tuples out of a some more lists (e.g. with Multipolygons) \n
+        input "coordsList": type list, value of dict entry with key "coordinates"
         '''
         if type(coordsList) == list and len(coordsList) == 2 and (type(coordsList[0]) == float or type(coordsList[0]) == int) and (type(coordsList[1]) == float or type(coordsList[1]) == int):
             coordinates.append(coordsList)
@@ -134,12 +201,13 @@ def getVectorRepresentation(filePath):
 
 
 
-    gjsonContent = extractContentFromPath(filePath)
+    gjsonContent = convert3dto2d(filePath)
     extracted = []
     extractAfterKeyword("coordinates", gjsonContent)
     extractCoordinates(extracted)
     if not coordinates:
         raise Exception("No coordinates found in File. Vector Representation could not be extracted.")
+    #convex hull is formed out of coordinates
     coordinates = convex_hull.graham_scan(coordinates)
     return coordinates
 
@@ -147,8 +215,8 @@ def getVectorRepresentation(filePath):
 
 
 def getTemporalExtent (filePath):
-    ''' extract time extent from json string
-    input filePath: type string, file path to geojson File
+    ''' extract time extent from json string \n
+    input "filePath": type string, file path to geojson File \n
     returns the temporal extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     #type list, contains all dates
@@ -156,8 +224,8 @@ def getTemporalExtent (filePath):
     
     
     def searchForTimeElements(gjsonContent):
-        ''' searches for time elements in a json
-        input gjsonContent: type dict, Content of geojson File
+        ''' searches for time elements in a json \n
+        input "gjsonContent": type dict, Content of geojson File
         '''
         
         ignore = ["created_at", "closed_at", "created", "closed", "initialize", "init", "last_viewed", "last_change", "change", "last_Change", "lastChange"] 

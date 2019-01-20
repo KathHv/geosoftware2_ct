@@ -7,6 +7,10 @@ import helpfunctions as hf
 import convex_hull
     
 def isValid(path):
+    '''Checks whether it is valid geopackage or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output: true if file is valid, false if not
+    '''
     try:
         with fiona.open(path) as datasetFiona:
             sqliteConnection = sqlite3.connect(path)
@@ -23,17 +27,17 @@ def isValid(path):
 
 
 def getTemporalExtent(path):
-    ''' extracts temporal extent of the geopackage
-    input path: type string, file path to geopackage file
+    ''' extracts temporal extent of the geopackage \n
+    input "path": type string, file path to geopackage file
     '''
-    raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
+    raise Exception("The temporal extent cannot be extracted from geopackage files")
 
 
 
 
 def getBoundingBox(path):
-    ''' extract bounding box from geopackage
-    input path: type string, file path to geopackage file
+    ''' extract bounding box from geopackage \n
+    input "path": type string, file path to geopackage file \n
     returns the bounding box of the file, type list: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
 
@@ -70,8 +74,8 @@ def getBoundingBox(path):
 def getVectorRepresentation(path):
     ''' abstract the geometry of the file with a polygon
     first: collects all the points of the file
-    then: call the function that computes the polygon of it
-    input path: type string, file path to geopackage file
+    then: call the function that computes the polygon of it \n
+    input "path": type string, file path to geopackage file \n
     returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     coordinates = []
@@ -118,8 +122,8 @@ def getVectorRepresentation(path):
 
     
 def getCRS(path):
-    ''' gets all the coordinate reference systems from the geopackage (through a database connection)
-    input path: type string, file path to geopackage file
+    ''' gets all the coordinate reference systems from the geopackage (through a database connection) \n
+    input "path": type string, file path to geopackage file \n
     returns the epsg code of the used coordinate reference system: type int, EPSG number of taken crs
     '''
     sqliteConnection = sqlite3.connect(path)
