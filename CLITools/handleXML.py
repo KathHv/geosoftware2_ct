@@ -6,6 +6,22 @@ from osgeo import gdal, ogr
 import convex_hull
 
 
+def isValid(filePath):
+    '''Checks whether it is valid XML or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
+    '''
+    try:
+        with open(filePath) as XML_file:
+        tree = ET.parse(XML_file)
+        root = tree.getroot()
+        if root is None:
+            return False
+        else:
+            return True
+    except:
+        return False
+
 def getBoundingBox(filePath):
     '''
     extract bounding box from xml \n

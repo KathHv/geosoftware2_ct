@@ -2,7 +2,19 @@ import csv
 import helpfunctions as hf
 import convex_hull
 
-
+def isValid(filePath):
+    '''Checks whether it is valid XML or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
+    '''
+    try:
+        daten = csv.reader(csv_file.readlines())
+        if daten is None:
+            return False
+        else:
+            return True
+    except:
+        return False
 
 def getBoundingBox(filePath):
     '''
@@ -117,8 +129,6 @@ def getCRS(filePath):
                 raise Exception('The csv file from ' + filePath + ' has no CRS')
             if hf.searchForParameters(elements, ["crs","srsID"]) == "WGS84":
                 return "4978"
-            if hf.searchForParameters(elements, ["EPSG"]):
-                return hf.searchForParameters(elements, ["EPSG"])
             else:
                 raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
         else:
