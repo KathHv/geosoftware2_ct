@@ -8,6 +8,22 @@ from osgeo import gdal, ogr
 import convex_hull
 
 
+
+def isValid(filePath):
+    '''Checks whether it is valid GML or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
+    '''
+    try:
+        ogr2ogr.main(["","-f", "GeoJSON", "outputBBox.json", filePath])
+        myGeojson = pygeoj.load(filepath="outputBBox.json")
+        if myGeojson is None:
+            return False
+        else:
+            return True
+    except:
+        return False
+
 def getBoundingBox(filePath):
     '''         
     extract bounding box from gml \n
@@ -81,14 +97,14 @@ def getCRS(filePath):
     myGeojson = pygeoj.load(filepath="outputCRS.json")
     properties= (myGeojson.get_feature(0).properties)
     for key, value in properties.items():     
-        if key=="crs":
+        if key=="srsID":
             coordinatesystem.append(value)
         else:
             pass
     os.remove("outputCRS.json")
-    if hf.searchForParameters(coordinatesystem, ["crs"]) is None:
-            raise Exception('The gml file from ' + filePath + ' has no CRS')
-    if hf.searchForParameters(coordinatesystem, ["crs"]) == "WGS84":
-        return hf.WGS84_EPSG_ID
+    if hf.searchForParameters(coordinatesystem, ["srsID"]) is None:
+        raise Exception('The gml file from ' + filePath + ' has no CRS')
+    if hf.searchForParameters(coordinatesystem, ["srsID"]) == "4326" or "WGS84":
+        return "4978"
     else:
         raise Exception('The gml file from ' + filePath + ' has no WGS84 CRS')

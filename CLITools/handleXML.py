@@ -6,6 +6,22 @@ from osgeo import gdal, ogr
 import convex_hull
 
 
+def isValid(filePath):
+    '''Checks whether it is valid XML or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
+    '''
+    try:
+        with open(filePath) as XML_file:
+            tree = ET.parse(XML_file)
+            root = tree.getroot()
+            if root is None:
+                return False
+            else:
+                return True
+    except:
+        return False
+
 def getBoundingBox(filePath):
     '''
     extract bounding box from xml \n
@@ -138,9 +154,9 @@ def getCRS(filePath):
             if x.find('crs') is not None:  
                 crs = x.find('crs').text
                 coordinatesystem.append(crs)
-        if hf.searchForParameters(coordinatesystem, ["crs"]) is None:
+        if hf.searchForParameters(coordinatesystem, ["crs","srsID"]) is None:
             raise Exception('The csv file from ' + filePath + ' has no CRS')
-        if hf.searchForParameters(coordinatesystem, ["crs"]) == "WGS84":
-            return hf.WGS84_EPSG_ID
+        if hf.searchForParameters(coordinatesystem, ["crs","srsID"]) == "WGS84" or "4326":
+            return "4978"
         else:
             raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
