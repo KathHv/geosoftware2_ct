@@ -99,6 +99,7 @@ def computeBboxInWGS84(module, path):
         pass
     if 'crs' in locals() and crs is not None:
         print(bbox_in_orig_crs)
+
         bbox_transformed = hf.transformingArrayIntoWGS84(crs, bbox_in_orig_crs)
         return bbox_transformed
     else:
@@ -189,7 +190,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
                 #metadata[self.thread_ID] = self.thread_ID
                 if self.thread_ID == 100:
                     try:
-                        metadata["bbox"] = computeBbox(usedModule, filePath)
+                        metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
                     except Exception as e:
                         print("Warning for " + filePath + ": " + str(e)) 
                 elif self.thread_ID == 101:
@@ -199,11 +200,11 @@ def extractMetadataFromFile(filePath, whatMetadata):
                         print("Warning for " + filePath + ": " + str(e))
                 elif self.thread_ID == 102:
                     try:
-                        metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+                        metadata["vector_representation"] = computeVectorRepresentationInWGS84(usedModule, filePath)
                     except Exception as e:
                         print("Warning for " + filePath + ": " + str(e))
                 elif self.thread_ID == 200:
-                    metadata["bbox"] = computeBbox(usedModule, filePath)
+                    metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
                 elif self.thread_ID == 201:
                     metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
                 elif self.thread_ID == 202:
@@ -241,7 +242,6 @@ def extractMetadataFromFile(filePath, whatMetadata):
         thread_temp_except.start() 
         thread_vector_except.start() 
         thread_crs_except.start()
-
         barrier.wait() 
         barrier.reset() 
         barrier.abort() 

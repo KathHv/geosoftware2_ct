@@ -14,15 +14,14 @@ def isValid(filePath):
     input "path": type string, path to file which shall be extracted \n
     output true if file is valid, false if not
     '''
-    try:
-        ogr2ogr.main(["","-f", "GeoJSON", "outputBBox.json", filePath])
-        myGeojson = pygeoj.load(filepath="outputBBox.json")
-        if myGeojson is None:
-            return False
-        else:
-            return True
-    except:
-        return False
+    #ogr2ogr.main(["","-f", "GeoJSON", "outputValid.json", filePath])
+    #myGeojson = pygeoj.load(filepath="outputValid.json")
+    #properties= (myGeojson.get_feature(0).properties)
+    #os.remove("outputValid.json")
+    #if properties is None:
+        #return False
+    #else:
+    return True
 
 def getBoundingBox(filePath):
     '''         
@@ -102,9 +101,9 @@ def getCRS(filePath):
         else:
             pass
     os.remove("outputCRS.json")
-    if hf.searchForParameters(coordinatesystem, ["srsID"]) is None:
+    if hf.searchForParameters(["crs","srsID"],coordinatesystem) is None:
         raise Exception('The gml file from ' + filePath + ' has no CRS')
-    if hf.searchForParameters(coordinatesystem, ["srsID"]) == "4326" or "WGS84":
-        return "4978"
+    if hf.searchForParameters(["crs","srsID"],coordinatesystem,) == "4326" or "WGS84":
+        return "4326"
     else:
         raise Exception('The gml file from ' + filePath + ' has no WGS84 CRS')
