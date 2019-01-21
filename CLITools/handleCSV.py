@@ -2,20 +2,32 @@ import csv
 import helpfunctions as hf
 import convex_hull
 
-
+def isValid(filePath):
+    '''Checks whether it is valid XML or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
+    '''
+    try:
+        daten = csv.reader(csv_file.readlines())
+        if daten is None:
+            return False
+        else:
+            return True
+    except:
+        return False
 
 def getBoundingBox(filePath):
     '''
-    Function purpose: extracts the spatial extent (bounding box) from a csv-file
-    input filepath: type string, file path to csv file
-    output spatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    Function purpose: extracts the spatial extent (bounding box) from a csv-file \n
+    input "filepath": type string, file path to csv file \n
+    returns spatialExtent: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
             elements.append(x)
-        spatialExtent= {}
+        spatialExtent= []
         spatialLatExtent=[]
         spatialLonExtent=[]
         spatialLatExtent= hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
@@ -37,12 +49,18 @@ def getBoundingBox(filePath):
             minlon= (min(spatialLonExtent))
             maxlon= (max(spatialLonExtent))
         spatialExtent= [minlon,minlat,maxlon,maxlat]
+        if not spatialExtent:
+            raise Exception("Bounding box could not be extracted")
         return spatialExtent
 
 
 
 
 def getTemporalExtent(filePath):
+    ''' extract time extent from csv string \n
+    input "filePath": type string, file path to csv File \n
+    returns temporal extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    '''
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
@@ -62,7 +80,11 @@ def getTemporalExtent(filePath):
 
 
 def getVectorRepresentation(filePath):
-   with open(filePath) as csv_file:
+    ''' extracts coordinates from csv File (for vector representation) \n
+    input "filePath": type string, file path to csv File \n
+    returns extracted coordinates of content: type list, list of lists with length = 2
+    '''
+    with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
@@ -73,7 +95,7 @@ def getVectorRepresentation(filePath):
         spatialLatExtent= hf.searchForParameters(elements, ["lat", "latitude","Latitude"])
         spatialLonExtent= hf.searchForParameters(elements, ["lon", "longitude","Longitude"])
         if hf.searchForParameters(elements, ["lat", "latitude","Latitude"]) is None:
-            return None
+            raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
         else:
             spatialLatExtent.pop(0)
             if hf.searchForParameters(elements, ["lon", "longitude","Longitude"]) is None:
@@ -87,22 +109,27 @@ def getVectorRepresentation(filePath):
                     singleArray.append(spatialLatExtent[counter])
                     vectorArray.append(singleArray)
                     counter=counter+1
+                if not vectorArray:
+                    raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
                 return vectorArray
 
-'''
- extracts coordinatesystem from csv File 
- input filepath: type string, file path to csv file
- output properties: type list, contains extracted coordinate system of content from csv file
-'''
+
 def getCRS(filePath):
+    '''extracts coordinatesystem from csv File \n
+    input "filepath": type string, file path to csv file \n
+    returns the epsg code of the used coordinate reference system, type list, contains extracted coordinate system of content from csv file
+    ''' 
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
         elements = []
         for x in daten:
             elements.append(x)
-        if hf.searchForParameters(elements, ["crs"]) is None:
-            raise Exception('The csv file from ' + filePath + ' has no CRS')
-        if hf.searchForParameters(elements, ["crs"]) == "WGS84":
-            return "4978"
+        if hf.searchForParameters(elements,["longitude","Latitude","latitude","Latitude"]) is None:
+            if hf.searchForParameters(elements, ["crs","srsID"]) is None:
+                raise Exception('The csv file from ' + filePath + ' has no CRS')
+            if hf.searchForParameters(elements, ["crs","srsID"]) == "WGS84":
+                return "4978"
+            else:
+                raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
         else:
-            raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
+            return "4978"

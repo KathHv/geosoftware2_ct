@@ -1,23 +1,44 @@
-import fiona, sqlite3
+'''
+@author: Benjamin Dietz
+'''
+
+import fiona, xarray, sqlite3
 import helpfunctions as hf
 import convex_hull
     
-
+def isValid(path):
+    '''Checks whether it is valid geopackage or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output: true if file is valid, false if not
+    '''
+    try:
+        with fiona.open(path) as datasetFiona:
+            sqliteConnection = sqlite3.connect(path)
+            if sqliteConnection is not None:
+                c = sqliteConnection.cursor()
+                if c is None:
+                    return False
+            else:
+                return False
+    except:
+        return False
+    return True
+    
 
 
 def getTemporalExtent(path):
-    ''' extracts temporal extent of the geopackage
-    input path: type string, file path to geopackage file
+    ''' extracts temporal extent of the geopackage \n
+    input "path": type string, file path to geopackage file
     '''
-    raise Exception("The temporal extent cannot (yet) be extracted from geopackage files")
-    #return 1
+    raise Exception("The temporal extent cannot be extracted from geopackage files")
+
 
 
 
 def getBoundingBox(path):
-    ''' extract bounding box from geopackage
-    input path: type string, file path to geopackage file
-    output [min(longs), min(lats), max(longs), max(lats)]: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
+    ''' extract bounding box from geopackage \n
+    input "path": type string, file path to geopackage file \n
+    returns the bounding box of the file, type list: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)] 
     '''
 
     # try to get the bbox with fiona
@@ -53,9 +74,9 @@ def getBoundingBox(path):
 def getVectorRepresentation(path):
     ''' abstract the geometry of the file with a polygon
     first: collects all the points of the file
-    then: call the function that computes the polygon of it
-    input path: type string, file path to geopackage file
-    output coordinates: type list, list of lists with length = 2, contains extracted coordinates of content from geopackage file
+    then: call the function that computes the polygon of it \n
+    input "path": type string, file path to geopackage file \n
+    returns extracted coordinates of content: type list, list of lists with length = 2
     '''
     coordinates = []
     with fiona.open(path) as datasetFiona:
@@ -101,9 +122,9 @@ def getVectorRepresentation(path):
 
     
 def getCRS(path):
-    ''' gets all the coordinate reference systems from the geopackage (through a database connection)
-    input path: type string, file path to geopackage file
-    output init[init.rfind(":")+1:]: type int, EPSG number of taken crs
+    ''' gets all the coordinate reference systems from the geopackage (through a database connection) \n
+    input "path": type string, file path to geopackage file \n
+    returns the epsg code of the used coordinate reference system: type int, EPSG number of taken crs
     '''
     sqliteConnection = sqlite3.connect(path)
     if sqliteConnection is not None:
@@ -118,10 +139,12 @@ def getCRS(path):
             if len(countElements) == 1:
                 return countElements[0][0]
             else:
-                return crsid
+                if len(crsid) > 0:
+                    return crsid[0]
     with fiona.open(path) as datasetFiona:
         if 'crs' in datasetFiona.meta:
             if 'init' in datasetFiona.meta["crs"]:
                if ':' in  datasetFiona.meta["crs"]["init"]:
                     init = datasetFiona.meta["crs"]["init"]
                     return init[init.rfind(":")+1:]
+    raise Exception("Crs could not be extracted.")

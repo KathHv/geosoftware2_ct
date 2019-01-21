@@ -5,15 +5,17 @@ from netCDF4 import Dataset as NCDataset
 import netCDF4
 import getopt
 from os import walk
+from osgeo import ogr
+from osgeo import osr
 from pyproj import Proj, transform
 import convex_hull
 
-
+WGS84_EPSG_ID = 4326
 
 def printObject(object):
-    ''' Function name: printObject
-    Function purpose: output of metadata object
-    Input: object
+    '''
+    Function purpose: output of metadata object \n
+    Input: object \n
     Output: print("/n")
     '''
     print("\n")
@@ -25,11 +27,10 @@ def printObject(object):
 
 
 def exists(filename):
-    ''' Does a file with the relative path 'filename' exist locally?
-    Function name: extists
-    Function purpose: checks whether the filename exists
-    Input: filename
-    Output: boolean true or false
+    '''
+    Function purpose: checks whether the filename exists \n
+    Input: filename \n
+    Output: boolean
     '''
     if os.path.isfile(filename):
         return True
@@ -41,11 +42,11 @@ def exists(filename):
 
 def computeBboxOfMultiple(bboxes):
     '''
-    Function name: computeBboxOfMultiple
-    Function purpose:  compute an overall bbox from an array of bounding boxes
-                    required format of parameter 'bboxes': [ bbox1, bbox2, ..., bboxn ]
-                    while earch bbox has the format: [ min(longs), min(lats), max(longs), max(lats) ]
-    Input: bboxes
+    Function purpose:  
+        compute an overall bbox from an array of bounding boxes
+        required format of parameter 'bboxes': [ bbox1, bbox2, ..., bboxn ]
+        while each bbox has the format: [ min(longs), min(lats), max(longs), max(lats) ]
+    Input: bboxes\n
     Output: array of coordinates
     '''
     coordinate0 = 200
@@ -67,11 +68,12 @@ def computeBboxOfMultiple(bboxes):
 
 
 def computeTempExtentOfMultiple(temporal_extents):
-    ''' Function name: computeTempExtentOfMultiple
-    Function purpose:  get multiple temporal extents in the schema [ temp1, temp2, ..., tempn ]
-                    with the schema of each temporal extent being: [ 'yyyy-mm-dd hh:mm:ss', 'yyyy-mm-dd hh:mm:ss' ]
-                    returning the overall temporal extent in ISO format
-    Input: temporal_extents
+    '''
+    Function purpose: 
+        get multiple temporal extents in the schema [ temp1, temp2, ..., tempn ]
+        with the schema of each temporal extent being: [ 'yyyy-mm-dd hh:mm:ss', 'yyyy-mm-dd hh:mm:ss' ]
+        returning the overall temporal extent in ISO format
+    Input: temporal_extents \n
     Output: array tempExtent (if startingpoint and endpoint follow given rules), None (if they don't)
     '''
     if len(temporal_extents) > 0:
@@ -92,9 +94,9 @@ def computeTempExtentOfMultiple(temporal_extents):
 
 
 def countElements(array):
-    ''' Function name: countElements
-    Function purpose: return the occurancies of all values in the array
-    Input: array
+    '''
+    Function purpose: return the occurancies of all values in the array \n
+    Input: array \n
     Output: array list
     '''
     list = []
@@ -107,9 +109,9 @@ def countElements(array):
 
 
 def getAllRowElements(rowname,elements):
-    ''' Function name: getAllRowElements
-    Function purpose: help-function to get all row elements for a specific string
-    Input: rowname, elements
+    '''
+    Function purpose: help-function to get all row elements for a specific string \n
+    Input: rowname, elements \n
     Output: array values
     '''
     for idx, val in enumerate(elements[0]):
@@ -125,9 +127,9 @@ def getAllRowElements(rowname,elements):
 
 
 def searchForParameters(elements, paramArray):
-    ''' Function name: searchForParameters
-    Function purpose: ?
-    Input: paramArray, elements
+    '''
+    Function purpose: ? \n
+    Input: paramArray, elements \n
     Output: getAllRowElements(x,elements)
     '''
     for x in paramArray:
@@ -138,19 +140,27 @@ def searchForParameters(elements, paramArray):
 
 
 
-def transformingIntoWGS84 (crs, point):
-    ''' Function name: transformingIntoWGS84
-    Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system)
-    Input: crs, point
+def transformingIntoWGS84 (crs, coordinate):
+    '''
+    Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) \n
+    Input: crs, point \n
     Output: retPoint constisting of x2, y2 (transformed points)
     '''
-    inProj = Proj(init = crs)
-    outProj = Proj(init ='epsg:4978')
-    x1, y1 = point
-    x2, y2 = transform(inProj,outProj,x1,y1)
-    print (x2,y2)
-    retPoint = x2, y2
-    return retPoint
+
+    source = osr.SpatialReference()
+    source.ImportFromEPSG(crs)
+
+    target = osr.SpatialReference()
+    target.ImportFromEPSG(4326)
+
+    transform = osr.CoordinateTransformation(source, target)
+        
+    point = ogr.Geometry(ogr.wkbPoint)
+    point.AddPoint(coordinate[0], coordinate[1])
+    point = point.ExportToWkt()
+    point = ogr.CreateGeometryFromWkt(point)
+    point.Transform(transform)
+    return [point.GetX(), point.GetY()]
 
 
 
@@ -170,13 +180,17 @@ def enablePrint():
 
 
 def transformingArrayIntoWGS84(crs, pointArray):
-    ''' transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
-    Function name: transformingIntoWGS84
-    Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array
-    Input: crs, pointArray
+    '''
+    Function purpose: transforming SRS into WGS84 (EPSG:4978; used by the GPS satellite navigation system) from an array \n
+    Input: crs, pointArray \n
     Output: array array
     '''
     array = []
-    for x in pointArray:
-        array.append(transformingIntoWGS84(crs, x))
-    return array
+    if type(pointArray[0]) == list:
+        for x in pointArray:
+            array.append(transformingIntoWGS84(crs, x))
+        return array
+    elif len(pointArray) == 4:
+        bbox = [[pointArray[0], pointArray[1]],[pointArray[2], pointArray[3]]]
+        transf_bbox = transformingArrayIntoWGS84(crs, bbox)
+        return [transf_bbox[0][0],transf_bbox[0][1], transf_bbox[1][0], transf_bbox[1][1]]

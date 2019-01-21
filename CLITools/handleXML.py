@@ -6,11 +6,27 @@ from osgeo import gdal, ogr
 import convex_hull
 
 
+def isValid(filePath):
+    '''Checks whether it is valid XML or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
+    '''
+    try:
+        with open(filePath) as XML_file:
+            tree = ET.parse(XML_file)
+            root = tree.getroot()
+            if root is None:
+                return False
+            else:
+                return True
+    except:
+        return False
+
 def getBoundingBox(filePath):
     '''
-    extract bounding box from xml
-    input filepath: type string, file path to xml file
-    output s: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
+    extract bounding box from xml \n
+    input "filepath": type string, file path to xml file \n
+    returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
     '''
     with open(filePath) as XML_file:
         lat = []
@@ -48,16 +64,13 @@ def getBoundingBox(filePath):
 
 
 
-'''
- extracts temporal extent of the xml
- input filepath: type string, file path to xml file
- output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
-'''
+
+
 def getTemporalExtent(filePath):
     '''
-    extracts temporal extent of the xml
-    input filepath: type string, file path to xml file
-    output time: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
+    extracts temporal extent of the xml \n
+    input "filepath": type string, file path to xml file \n
+    returns temporal extent: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     with open(filePath) as XML_File:
         tree = ET.parse(XML_File)
@@ -79,16 +92,14 @@ def getTemporalExtent(filePath):
         else:
             raise Exception('The xml file from ' + filePath + ' has no TemporalExtent')
 
-'''
- extracts coordinates from xml File (for vector representation)
- input filepath: type string, file path to xml file
- output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from xml file
-'''
+
+
+
 def getVectorRepresentation(filePath):
     '''
-    extracts coordinates from xml File (for vector representation)
-    input filepath: type string, file path to xml file
-    output VectorArray: type list, list of lists with length = 2, contains extracted coordinates of content from xml file
+    extracts coordinates from xml File (for vector representation) \n
+    input "filepath": type string, file path to xml file \n
+    returns extracted coordinates of content from xml file: type list, list of lists with length = 2
     '''
     with open(filePath) as XML_file:
         lat = []
@@ -126,16 +137,14 @@ def getVectorRepresentation(filePath):
                     counter=counter+1
             return vectorArray
 
-'''
- extracts coordinatesystem from xml File 
- input filepath: type string, file path to xml file
- output properties: type list, contains extracted coordinate system of content from xml file
-'''
+
+
+
 def getCRS(filePath):
     '''
-    extracts coordinatesystem from xml File 
-    input filepath: type string, file path to xml file
-    output properties: type list, contains extracted coordinate system of content from xml file
+    extracts coordinatesystem from xml File \n
+    input "filepath": type string, file path to xml file \n
+    returns epsg code of the used coordiante references system: type list, contains extracted coordinate system of content from xml file
     '''
     with open(filePath) as XML_File:
         tree = ET.parse(XML_File)
@@ -145,9 +154,9 @@ def getCRS(filePath):
             if x.find('crs') is not None:  
                 crs = x.find('crs').text
                 coordinatesystem.append(crs)
-        if hf.searchForParameters(coordinatesystem, ["crs"]) is None:
+        if hf.searchForParameters(coordinatesystem, ["crs","srsID"]) is None:
             raise Exception('The csv file from ' + filePath + ' has no CRS')
-        if hf.searchForParameters(coordinatesystem, ["crs"]) == "WGS84":
+        if hf.searchForParameters(coordinatesystem, ["crs","srsID"]) == "WGS84" or "4326":
             return "4978"
         else:
             raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
