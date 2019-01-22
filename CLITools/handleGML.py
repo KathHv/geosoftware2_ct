@@ -1,3 +1,7 @@
+'''
+@author: Niklas Aßelmann
+'''
+
 import xml.etree.ElementTree as ET  
 import jgraph as ig
 import helpfunctions as hf
@@ -9,15 +13,29 @@ import convex_hull
 
 DATATYPE = "application/gml"
 
+def isValid(filePath):
+    '''
+    Checks whether it is valid GML or not. \n
+    input "path": type string, path to file which shall be extracted \n
+    output true if file is valid, false if not
+    '''
+    try:
+        ogr2ogr.main(["","-f", "GeoJSON", "outputV.json", filePath])
+        myGeojson = pygeoj.load(filepath="outputV.json")
+        return True
+    except:
+        raise Exception('The gml file from ' + filePath + ' has no valid gml Attributes')
+
+
 def getBoundingBox(filePath):
     '''         
     extract bounding box from gml \n
     input "filepath": type string, file path to gml file \n
     returns bounding box of the file: type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)]
     '''
-    ogr2ogr.main(["","-f", "GeoJSON", "outputBBox.json", filePath])
-    myGeojson = pygeoj.load(filepath="outputBBox.json")
-    os.remove("outputBBox.json")
+    ogr2ogr.main(["","-f", "GeoJSON", "outputB.json", filePath])
+    myGeojson = pygeoj.load(filepath="outputB.json")
+    os.remove("outputB.json")
     if myGeojson.bbox is not None:    
         return (myGeojson.bbox)
     else:
@@ -33,8 +51,8 @@ def getTemporalExtent(filePath):
     returns temporal extent of the file: type list, length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1]
     '''
     dateArray= []
-    ogr2ogr.main(["","-f", "GeoJSON", "outputTemporal.json", filePath])
-    myGeojson = pygeoj.load(filepath="outputTemporal.json")
+    ogr2ogr.main(["","-f", "GeoJSON", "outputT.json", filePath])
+    myGeojson = pygeoj.load(filepath="outputT.json")
     properties= (myGeojson.get_feature(0).properties)
     for key, value in properties.items():     
             if key=="beginLifespanVersion" or key=="date" or key=="endLifespanVersion" or key=="Start_Date" or key=="End_Date":
@@ -42,7 +60,7 @@ def getTemporalExtent(filePath):
             else:
                 pass
     temporal_extent= []
-    os.remove("outputTemporal.json")
+    os.remove("outputT.json")
     if(len(dateArray) > 0):
         temporal_extent.append(min(dateArray))
         temporal_extent.append(max(dateArray))
@@ -59,10 +77,10 @@ def getVectorRepresentation(filePath):
     input "filepath": type string, file path to gml file \n
     returns extracted coordinates of content: type list, list of lists with length = 2
     '''
-    ogr2ogr.main(["","-f", "GeoJSON", "outputVector.json", filePath])
-    myGeojson = pygeoj.load(filepath="outputVector.json")
+    ogr2ogr.main(["","-f", "GeoJSON", "outputV.json", filePath])
+    myGeojson = pygeoj.load(filepath="outputV.json")
     properties= (myGeojson.get_feature(0).geometry.coordinates[0])
-    os.remove("outputVector.json")
+    os.remove("outputV.json")
     if properties is None:
         raise Exception('The gml file from ' + filePath + ' has no VectorRepresentation')
     else:
@@ -76,20 +94,23 @@ def getCRS(filePath):
     extracts coordinatesystem from gml File \n
     input "filepath": type string, file path to gml file \n
     returns epsg code of used coordinate reference system: type list
-    '''
+    
     coordinatesystem= []
     ogr2ogr.main(["","-f", "GeoJSON", "outputCRS.json", filePath])
     myGeojson = pygeoj.load(filepath="outputCRS.json")
     properties= (myGeojson.get_feature(0).properties)
     for key, value in properties.items():     
-        if key=="crs":
+        if key=="srsID":
             coordinatesystem.append(value)
         else:
             pass
     os.remove("outputCRS.json")
-    if hf.searchForParameters(coordinatesystem, ["crs"]) is None:
-            raise Exception('The gml file from ' + filePath + ' has no CRS')
-    if hf.searchForParameters(coordinatesystem, ["crs"]) == "WGS84":
-        return hf.WGS84_EPSG_ID
+    if hf.searchForParameters(["crs","srsID"],coordinatesystem) is None:
+        raise Exception('The gml file from ' + filePath + ' has no CRS')
+    if hf.searchForParameters(["crs","srsID"],coordinatesystem,) == "4326" or "WGS84":
+        return "4326"
     else:
         raise Exception('The gml file from ' + filePath + ' has no WGS84 CRS')
+        '''
+    return "4326"
+

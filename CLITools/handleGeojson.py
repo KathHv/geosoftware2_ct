@@ -1,3 +1,7 @@
+'''
+@author: Katharina Hovestadt
+'''
+
 import helpfunctions as hf
 import json, gdal
 from osgeo import ogr
@@ -9,6 +13,7 @@ import django, pytz
 import unicodedata
 import convex_hull
 import pygeoj
+import iso8601
 
 DATATYPE = "application/geojson"
 
@@ -116,15 +121,8 @@ def getCRS(filePath):
     ''' extracts EPSG number of the taken coordinate reference system (short: crs), as standard the crs WGS84 is used. \n
     input "filePath": type string, file path to geojson File \n
     returns the epsg code of the used coordinate reference system: type int, EPSG number of taken crs
-    '''    
-    gjsonContent = pygeoj.load(filePath)
-    crsCode = gjsonContent.crs
-    if not crsCode:
-        return hf.WGS84_EPSG_ID
-    else:
-        return crsCode
-
-
+    ''' 
+    
     def extractAfterKeyword(searchParam, gjsonContent):
         ''' searches for the value fo the dict entry with keyword which is given as input \n
         input "searchParam": type string, keyword for which is searched in the dict \n
@@ -140,16 +138,43 @@ def getCRS(filePath):
             for element in gjsonContent:
                 extractAfterKeyword(searchParam, element)
 
-    gjsonContent = extractContentFromPath(filePath)
-  
-    #4326 is the standard epsg after http://wiki.geojson.org/GeoJSON_draft_version_6#Specification
-    crsCode = hf.WGS84_EPSG_ID
-    extracted = []
-    extractAfterKeyword("crs", gjsonContent)
-    if len(extracted) != 0:
-        if type(extracted[0]) == dict and "properties" in extracted[0] and "code" in extracted[0]["properties"]:
-                    crsCode = extracted[0]["properties"]["code"]
-    return crsCode
+
+    try:
+        gjsonContent = pygeoj.load(filePath)
+        crsCode = gjsonContent.crs    
+        if not crsCode:
+            return hf.WGS84_EPSG_ID
+        else: 
+            for key, value in crsCode.items():
+                if key == "properties":
+                    try:
+                        if value["name"] == "urn:ogc:def:crs:OGC:2:84":
+                            return hf.WGS84_EPSG_ID
+                        elif value["name"]:
+                            splittedCrs = value["name"].split(":")
+                            for elem in splittedCrs:
+                                try:
+                                    if int(elem) is not None:
+                                        crsCode = int(elem)
+                                        return crsCode
+                                except:
+                                    pass
+                    except:
+                        pass
+                #formats like urn:ogc:def:crs:EPSG::25832
+                
+        return hf.WGS84_EPSG_ID
+    except:
+        gjsonContent = extractContentFromPath(filePath)
+    
+        #4326 is the standard epsg after http://wiki.geojson.org/GeoJSON_draft_version_6#Specification
+        crsCode = hf.WGS84_EPSG_ID
+        extracted = []
+        extractAfterKeyword("crs", gjsonContent)
+        if len(extracted) != 0:
+            if type(extracted[0]) == dict and "properties" in extracted[0] and "code" in extracted[0]["properties"]:
+                        crsCode = extracted[0]["properties"]["code"]
+        return crsCode
 
 
 
@@ -239,6 +264,11 @@ def getTemporalExtent (filePath):
         elif type(gjsonContent) == str:
             datetime_object = None
             datetime_object = parse_datetime(gjsonContent)
+            if datetime_object == None:
+                try:
+                    datetime_object = iso8601.parse_date(gjsonContent)
+                except:
+                    pass
             if type(datetime_object) == datetime.datetime:
                 dateArray.append(gjsonContent)
 

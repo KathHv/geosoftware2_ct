@@ -1,3 +1,7 @@
+'''
+@author: Katharina Hovestadt
+'''
+
 import helpfunctions as hf
 import gdal, gdalconst
 import os
@@ -86,20 +90,24 @@ def getVectorRepresentation(filePath):
     ''' extracts coordinates from geotiff File (for vector representation) \n
     input "filepath": type string, file path to geotiff file \n
     returns extracted coordinates of content: type list, list of lists with length = 2
+    See bbox (doubled for threading (getBoundingBox is locked))
     '''
     gtiffContent = extractContentFromPath(filePath)
     vectorRepresentation = []
     geoTransform = gtiffContent.GetGeoTransform()
     minx = geoTransform[0]
-    maxy = geoTransform[3]
+    maxy = geoTransform[3]        
     maxx = minx + geoTransform[1] * gtiffContent.RasterXSize
     miny = maxy + geoTransform[5] * gtiffContent.RasterYSize
-    vectorRepresentation = [miny, minx, maxy, maxx]
+     
+    minx = float(minx)
+    maxy = float(maxy)
+    maxx = float(maxx)
+    miny = float(miny)
 
-    #raise Exception("Vector representation could not be extracted" + str(e))
+    vectorRepresentation= [[minx, miny], [maxx, maxy]]
     if not vectorRepresentation:
-        raise Exception("No coordinates found in file. Vector Representation could not be extracted.")
-    vectorRepresentation = convex_hull.graham_scan(vectorRepresentation)
+        raise Exception("Bounding box could not be extracted")
     return vectorRepresentation
 
 

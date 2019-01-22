@@ -128,7 +128,7 @@ def getAllRowElements(rowname,elements):
 
 def searchForParameters(elements, paramArray):
     '''
-    Function purpose: ? \n
+    Function purpose: return all attributes of a elements in the first row of a file \n
     Input: paramArray, elements \n
     Output: getAllRowElements(x,elements)
     '''
@@ -146,9 +146,8 @@ def transformingIntoWGS84 (crs, coordinate):
     Input: crs, point \n
     Output: retPoint constisting of x2, y2 (transformed points)
     '''
-
     source = osr.SpatialReference()
-    source.ImportFromEPSG(crs)
+    source.ImportFromEPSG(int(crs))
 
     target = osr.SpatialReference()
     target.ImportFromEPSG(4326)
@@ -156,9 +155,10 @@ def transformingIntoWGS84 (crs, coordinate):
     transform = osr.CoordinateTransformation(source, target)
         
     point = ogr.Geometry(ogr.wkbPoint)
-    point.AddPoint(coordinate[0], coordinate[1])
+    point.AddPoint(float(coordinate[0]), float(coordinate[1]))
     point = point.ExportToWkt()
     point = ogr.CreateGeometryFromWkt(point)
+  
     point.Transform(transform)
     return [point.GetX(), point.GetY()]
 

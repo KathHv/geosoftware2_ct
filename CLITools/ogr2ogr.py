@@ -1005,10 +1005,11 @@ def main(args = None, progress_func = TermProgress, progress_data = None):
                                     nSrcFileSize, None, \
                                     pfnProgress, pProgressArg )) \
                 and not bSkipFailures:
+                '''
                 print(
                         "Terminating translation prematurely after failed\n" + \
                         "translation of layer " + poLayer.GetLayerDefn().GetName() + " (use -skipfailures to skip errors)")
-
+                '''
                 return False
 
 # --------------------------------------------------------------------
@@ -1308,7 +1309,7 @@ def SetupTargetLayer( poSrcDS, poSrcLayer, poDstDS, papszLCO, pszNewLayerName, \
             eGType = eGType | ogr.wkb25DBit
 
         if poDstDS.TestCapability( ogr.ODsCCreateLayer ) == False:
-            print("Layer " + pszNewLayerName + "not found, and CreateLayer not supported by driver.")
+            #print("Layer " + pszNewLayerName + "not found, and CreateLayer not supported by driver.")
             return None
 
         gdal.ErrorReset()
