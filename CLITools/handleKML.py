@@ -1,3 +1,7 @@
+'''
+@author: Niklas Aßelmann
+'''
+
 import xml.etree.ElementTree as ET  
 import jgraph as ig
 import helpfunctions as hf
