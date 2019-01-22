@@ -1,3 +1,8 @@
+'''
+@author: Niklas Aßelmann,Katharina Hovestadt,Benjamin Dietz,Ilka Pleiser
+'''
+
+
 import sys, os, platform, datetime, math, shapefile, fiona 
 from datetime import datetime as dtime
 from six.moves import configparser
