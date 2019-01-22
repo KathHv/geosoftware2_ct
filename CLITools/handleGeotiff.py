@@ -5,7 +5,7 @@ import osgeo.osr as osr
 import convex_hull
 
 
-
+DATATYPE = "image/tiff"
 
 def extractContentFromPath(filePath):
     ''' method to extract geotiff content from a file by using its filepath \n

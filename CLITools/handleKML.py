@@ -7,7 +7,7 @@ import sys, os
 from osgeo import gdal, ogr
 import convex_hull
 
-
+DATATYPE = "application/kml"
 
 
 def getBoundingBoxFromKML(filePath):

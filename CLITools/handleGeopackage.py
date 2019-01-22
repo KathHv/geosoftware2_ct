@@ -6,6 +6,8 @@ import fiona, xarray, sqlite3
 import helpfunctions as hf
 import convex_hull
     
+DATATYPE = "application/gpkg"
+
 def isValid(path):
     '''Checks whether it is valid geopackage or not. \n
     input "path": type string, path to file which shall be extracted \n
@@ -113,6 +115,11 @@ def getVectorRepresentation(path):
                                     coordinates.append([element[0], element[1]])
                         getCoordinatesFromArray(element)
     if len(coordinates) > 0:
+        # pop the last dimension in case the coordinates are 3D
+        for index, points in enumerate(coordinates):
+            if type(points) == list:
+                if len(points) == 3:
+                    coordinates[index] = [points[0], points[1]]
         coordinates = convex_hull.graham_scan(coordinates)
         return coordinates
     else:

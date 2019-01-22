@@ -7,6 +7,7 @@ import sys, os
 from osgeo import gdal, ogr
 import convex_hull
 
+DATATYPE = "application/gml"
 
 def getBoundingBox(filePath):
     '''         

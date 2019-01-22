@@ -6,6 +6,8 @@ from osgeo import gdal, ogr
 import convex_hull
 
 
+DATATYPE = "application/xml"
+
 def getBoundingBox(filePath):
     '''
     extract bounding box from xml \n

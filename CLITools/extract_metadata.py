@@ -132,7 +132,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
     input "filePath": type string, path to file from which the metadata shall be extracted \n
     input "whatMetadata": type string, specifices which metadata should be extracted  \n
     returns None if the format is not supported, else returns the metadata of the file as a dict 
-    (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_representations', 'crs'
+    (possible) keys of the dict: 'temporal_extent', 'bbox', 'vector_reps', 'crs'
     '''
     
     fileFormat = filePath[filePath.rfind('.')+1:]
@@ -163,7 +163,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
     elif fileFormat == 'gml':
         import handleGML
         usedModule = handleGML
-    elif fileFormat =='xml':
+    elif fileFormat == 'xml':
         import handleXML
         usedModule = handleXML
     elif fileFormat == 'kml':
@@ -172,6 +172,8 @@ def extractMetadataFromFile(filePath, whatMetadata):
     else: 
         # file format is not supported
         return None
+    # datatype
+    metadata["format"] = usedModule.DATATYPE
     #get Bbox, Temporal Extent, Vector representation and crs parallel with threads
     class thread(threading.Thread): 
         def __init__(self, thread_ID): 
@@ -199,7 +201,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
                         print("Warning for " + filePath + ": " + str(e))
                 elif self.thread_ID == 102:
                     try:
-                        metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+                        metadata["vector_rep"] = usedModule.getVectorRepresentation(filePath)
                     except Exception as e:
                         print("Warning for " + filePath + ": " + str(e))
                 elif self.thread_ID == 200:
@@ -207,7 +209,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
                 elif self.thread_ID == 201:
                     metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
                 elif self.thread_ID == 202:
-                    metadata["vector_representation"] = usedModule.getVectorRepresentation(filePath)
+                    metadata["vector_rep"] = usedModule.getVectorRepresentation(filePath)
                 elif self.thread_ID == 103:
                     try:
                         # the CRS is not neccessarily required
@@ -274,7 +276,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
 def extractMetadataFromFolder(folderPath, whatMetadata):
     '''function is called when path of directory is included in commanline (with tag 'e', 't' or 's') \n
     calls the extractMetadataFromFile-function and computes the average for the metadata fields
-    (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_representations' \n
+    (possible) keys of the returning dict: 'temporal_extent', 'bbox', 'vector_reps' \n
     input "folderPath": type string, path to folder from which the metadata shall be extracted \n
     input "whatMetadata": type string, specifices which metadata should be extracted  \n
     returns the metadata of the folder as a dict \n
@@ -313,10 +315,10 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         filesSkiped = 0
         bboxes = []
         temporal_extents = []
-        vector_representations = []
+        vector_reps = []
 
         # handle each of the files in the folder seperately
-        # get metadata fields 'bbox', 'vector_representation', 'temporal_extent' of all supported files
+        # get metadata fields 'bbox', 'vector_rep', 'temporal_extent' of all supported files
         for x in fullPaths:
             metadataOfFile = extractMetadataFromFile(x, "e")
             if metadataOfFile is not None:
@@ -324,9 +326,9 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
                 if 'bbox' in metadataOfFile:
                     if metadataOfFile["bbox"] is not None:
                         bboxes.append(metadataOfFile["bbox"])
-                if 'vector_representation' in metadataOfFile:
-                    if metadataOfFile["vector_representation"] is not None:
-                        vector_representations.append(len(metadataOfFile["vector_representation"])) # TO DO: here all the coors should be appended later
+                if 'vector_rep' in metadataOfFile:
+                    if metadataOfFile["vector_rep"] is not None:
+                        vector_reps.append(len(metadataOfFile["vector_rep"])) # TO DO: here all the coors should be appended later
                 if 'temporal_extent' in metadataOfFile:
                     if metadataOfFile["temporal_extent"] is not None:
                         temporal_extents.append(metadataOfFile["temporal_extent"]) 
@@ -373,7 +375,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         return None
 
     bbox = getBboxFromFolder(bboxes)
-    vector_rep = getVectorRepFromFolder(vector_representations)
+    vector_rep = getVectorRepFromFolder(vector_reps)
     temp_ext = getTemporalExtentFromFolder(temporal_extents)
 
     if whatMetadata == "e":
@@ -382,7 +384,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
             metadata["bbox"] = bbox
         
         if vector_rep is not None:
-            metadata["vector_representation"] = vector_rep
+            metadata["vector_rep"] = vector_rep
         
         if temp_ext is not None:
             metadata["temporal_extent"] = temp_ext
@@ -393,7 +395,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         # raise exception if one of the metadata fields 'bbox' or 'vector_represenation' could not be extracted from the folder    
         if bbox is not None and vector_rep is not None:
             metadata["bbox"] = bbox
-            metadata["vector_representation"] = vector_rep
+            metadata["vector_rep"] = vector_rep
 
         else: raise Exception("A spatial extent cannot be computed out of any file in this folder")
 

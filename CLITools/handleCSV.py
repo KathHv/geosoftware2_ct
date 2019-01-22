@@ -2,7 +2,7 @@ import csv
 import helpfunctions as hf
 import convex_hull
 
-
+DATATYPE = "text/csv"
 
 def getBoundingBox(filePath):
     '''
