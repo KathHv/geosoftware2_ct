@@ -1,3 +1,7 @@
+'''
+@author: Katharina Hovestadt
+'''
+
 import helpfunctions as hf
 import json, gdal
 from osgeo import ogr
