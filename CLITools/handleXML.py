@@ -16,11 +16,11 @@ def isValid(filePath):
             tree = ET.parse(XML_file)
             root = tree.getroot()
             if root is None:
-                return False
+                raise Exception('The xml file from ' + filePath + ' has no valid xml Attributes')
             else:
                 return True
     except:
-        return False
+        raise Exception('The xml file from ' + filePath + ' has no valid xml Attributes')
 
 def getBoundingBox(filePath):
     '''
@@ -154,9 +154,9 @@ def getCRS(filePath):
             if x.find('crs') is not None:  
                 crs = x.find('crs').text
                 coordinatesystem.append(crs)
-        if hf.searchForParameters(coordinatesystem, ["crs","srsID"]) is None:
-            raise Exception('The csv file from ' + filePath + ' has no CRS')
-        if hf.searchForParameters(coordinatesystem, ["crs","srsID"]) == "WGS84" or "4326":
-            return "4978"
+        if coordinatesystem is None:
+            raise Exception('The XML file from ' + filePath + ' has no CRS')
+        if hf.searchForParameters(["crs","srsID"],coordinatesystem) == "WGS84" or "4326":
+            return "4326"
         else:
-            raise Exception('The csv file from ' + filePath + ' has no WGS84 CRS')
+            raise Exception('The XML file from ' + filePath + ' has no WGS84 CRS')

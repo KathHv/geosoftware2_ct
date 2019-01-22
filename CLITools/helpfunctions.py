@@ -128,7 +128,7 @@ def getAllRowElements(rowname,elements):
 
 def searchForParameters(elements, paramArray):
     '''
-    Function purpose: ? \n
+    Function purpose: return all attributes of a elements in the first row of a file \n
     Input: paramArray, elements \n
     Output: getAllRowElements(x,elements)
     '''
