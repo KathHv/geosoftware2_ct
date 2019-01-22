@@ -146,7 +146,6 @@ def transformingIntoWGS84 (crs, coordinate):
     Input: crs, point \n
     Output: retPoint constisting of x2, y2 (transformed points)
     '''
-
     source = osr.SpatialReference()
     source.ImportFromEPSG(int(crs))
 
@@ -159,6 +158,7 @@ def transformingIntoWGS84 (crs, coordinate):
     point.AddPoint(float(coordinate[0]), float(coordinate[1]))
     point = point.ExportToWkt()
     point = ogr.CreateGeometryFromWkt(point)
+  
     point.Transform(transform)
     return [point.GetX(), point.GetY()]
 
