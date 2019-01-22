@@ -16,11 +16,11 @@ def isValid(filePath):
             tree = ET.parse(XML_file)
             root = tree.getroot()
             if root is None:
-                return False
+                raise Exception('The xml file from ' + filePath + ' has no valid xml Attributes')
             else:
                 return True
     except:
-        return False
+        raise Exception('The xml file from ' + filePath + ' has no valid xml Attributes')
 
 def getBoundingBox(filePath):
     '''

@@ -11,11 +11,11 @@ def isValid(filePath):
         with open(filePath) as csv_file:
             daten = csv.reader(csv_file.readlines())
             if daten is None:
-                return False
+                raise Exception('The csv file from ' + filePath + ' has no valid csv Attributes')
             else:
                 return True
     except:
-        return False
+        raise Exception('The csv file from ' + filePath + ' has no valid csv Attributes')
 
 def getBoundingBox(filePath):
     '''
