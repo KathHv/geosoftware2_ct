@@ -170,7 +170,6 @@ def extractMetadataFromFile(filePath, whatMetadata):
     else: 
         # file format is not supported
         return None
-    urn:uuid:784e2afd-a9fd-44a6-9a92-a3848371c8ecz
     #only extracts metadata if the file content is valid
     try:
         valid = usedModule.isValid(filePath)
@@ -184,6 +183,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
             self.thread_ID = thread_ID
         def run(self):
             if valid:
+                metadata["format"] = usedModule.DATATYPE
                 print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
                 #metadata[self.thread_ID] = self.thread_ID
                 if self.thread_ID == 100:
@@ -198,7 +198,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
                         print("Warning for " + filePath + ": " + str(e))
                 elif self.thread_ID == 102:
                     try:
-                        metadata["vector_representation"] = computeVectorRepresentationInWGS84(usedModule, filePath)
+                        metadata["vector_rep"] = computeVectorRepresentationInWGS84(usedModule, filePath)
                     except Exception as e:
                         print("Warning for " + filePath + ": " + str(e))
                 
@@ -207,7 +207,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
                 elif self.thread_ID == 201:
                     metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
                 elif self.thread_ID == 202:
-                    metadata["vector_representation"] = computeVectorRepresentationInWGS84(usedModule, filePath)
+                    metadata["vector_rep"] = computeVectorRepresentationInWGS84(usedModule, filePath)
                 
                 elif self.thread_ID == 103:
                     try:
