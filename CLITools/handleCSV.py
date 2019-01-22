@@ -1,3 +1,8 @@
+'''
+@author: Niklas Aßelmann
+'''
+
+
 import csv
 import helpfunctions as hf
 import convex_hull
