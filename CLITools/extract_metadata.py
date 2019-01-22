@@ -184,7 +184,8 @@ def extractMetadataFromFile(filePath, whatMetadata):
             try:
                 valid = usedModule.isValid(filePath)
             except Exception as e:
-                print("Error for " + filePath + ": " + str(e)) 
+                print("Error for " + filePath + ": " + str(e))
+                valid = False 
             if valid:
                 print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
                 #metadata[self.thread_ID] = self.thread_ID
