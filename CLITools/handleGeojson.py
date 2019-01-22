@@ -15,9 +15,7 @@ import convex_hull
 import pygeoj
 import iso8601
 
-
-
-
+DATATYPE = "application/geojson"
 
 def extractContentFromPath(filePath):
     ''' method to extract geojson content from a file by using its filepath \n

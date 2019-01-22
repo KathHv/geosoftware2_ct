@@ -9,6 +9,8 @@ from netCDF4 import Dataset as NCDataset
 import helpfunctions as hf
 import convex_hull
 
+DATATYPE = "application/x-netcdf"
+
 def isValid(path):
     '''Checks whether it is valid netCDF or not. \n
     input "path": type string, path to file which shall be extracted \n

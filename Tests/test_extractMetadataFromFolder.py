@@ -71,9 +71,9 @@ def test_temporalextent():
 
 def test_vectorrepresentation():
     metadata = extractMetadataFromFolder(testfolder1, "e") 
-    if 'vector_representation' in metadata:
-        if len(metadata["vector_representation"]) < 1:
-            for x in metadata["vector_representation"]:
+    if 'vector_rep' in metadata:
+        if len(metadata["vector_rep"]) < 1:
+            for x in metadata["vector_rep"]:
                 try:
                     float(x)
                 except Exception as e:

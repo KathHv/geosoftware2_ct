@@ -11,6 +11,8 @@ from osgeo import gdal, ogr
 import convex_hull
 
 
+DATATYPE = "application/xml"
+
 def isValid(filePath):
     '''Checks whether it is valid XML or not. \n
     input "path": type string, path to file which shall be extracted \n

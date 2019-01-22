@@ -9,6 +9,8 @@ from osgeo import ogr
 import sys
 import convex_hull
 
+DATATYPE = "application/shp"
+
 def isValid(path):
     '''Checks whether it is valid shapefile or not. \n
     input "path": type string, path to file which shall be extracted \n

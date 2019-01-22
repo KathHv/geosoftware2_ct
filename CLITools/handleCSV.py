@@ -21,6 +21,8 @@ def isValid(filePath):
                 return True
     except:
         raise Exception('The csv file from ' + filePath + ' has no valid csv Attributes')
+        
+DATATYPE = "text/csv"
 
 def getBoundingBox(filePath):
     '''
