@@ -170,26 +170,26 @@ def extractMetadataFromFile(filePath, whatMetadata):
     else: 
         # file format is not supported
         return None
+    #only extracts metadata if the file content is valid
+    try:
+        valid = usedModule.isValid(filePath)
+    except Exception as e:
+        print("Error for " + filePath + ": " + str(e))
+        valid = False 
     #get Bbox, Temporal Extent, Vector representation and crs parallel with threads
     class thread(threading.Thread): 
         def __init__(self, thread_ID): 
             threading.Thread.__init__(self) 
             self.thread_ID = thread_ID
         def run(self):
-          
-            #only extracts metadata if the file content is valid
-            try:
-                valid = usedModule.isValid(filePath)
-            except Exception as e:
-                print("Error for " + filePath + ": " + str(e)) 
             if valid:
                 print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
                 #metadata[self.thread_ID] = self.thread_ID
                 if self.thread_ID == 100:
-                    #try:
-                    metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
-                    #except Exception as e:
-                    #    print("Warning for " + filePath + ": " + str(e)) 
+                    try:
+                        metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
+                    except Exception as e:
+                        print("Warning for " + filePath + ": " + str(e)) 
                 elif self.thread_ID == 101:
                     try:
                         metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
@@ -213,14 +213,12 @@ def extractMetadataFromFile(filePath, whatMetadata):
                         # the CRS is not neccessarily required
                         if hasattr(usedModule, 'getCRS'):
                             metadata["crs"] = usedModule.getCRS(filePath)
-                            print(metadata["crs"])
                         else: print ("Warning: The CRS cannot be extracted from the file")
                     except Exception as e:
                         print("Warning for " + filePath + ": " + str(e))      
             try:
                 barrier.wait()
             except Exception as e:
-                print("Warning for " + filePath + ": " + str(e))
                 barrier.abort()
 
             
@@ -229,7 +227,7 @@ def extractMetadataFromFile(filePath, whatMetadata):
     thread_bbox_except = thread(100) 
     thread_temp_except = thread(101) 
     thread_vector_except = thread(102)
-    thread_crs_except = thread(10)
+    thread_crs_except = thread(103)
     thread_bbox = thread(200) 
     thread_temp = thread(201) 
     thread_vector = thread(202) 
@@ -242,7 +240,6 @@ def extractMetadataFromFile(filePath, whatMetadata):
         thread_temp_except.start() 
         thread_vector_except.start() 
         thread_crs_except.start()
-
         barrier.wait() 
         barrier.reset() 
         barrier.abort() 
