@@ -95,6 +95,7 @@ def computeBboxInWGS84(module, path):
     bbox_in_orig_crs = module.getBoundingBox(path)
     try:
         crs = module.getCRS(path)
+        print(crs)
     except:
         pass
     if 'crs' in locals() and crs and bbox_in_orig_crs:
