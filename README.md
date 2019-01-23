@@ -21,7 +21,7 @@ To install our CLI-Tools the required packages to install are [pip](https://pip.
     - `./connect`
     - `make` (may take a while)
     - `sudo make install`
-3. type `python3 extract_metadata.py -h` to get all the command that are supported in our CLI-tool
+3. `python3 extract_metadata.py -h` to get all the command that are supported in our CLI-tool
 
 ### **Make the CLI-tools work with one command:**
 (assuming [GDAL](https://www.gdal.org) is installed):
