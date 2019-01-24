@@ -95,8 +95,16 @@ if not insertXml:
     raise Exception("The argument -m is missing. Please give a source path to the insert xml file. Format:-m \"[sourceOfInsertXMLFile]\"  ")
 
 
-#tree = etree.parse(open(insertXml))
-tree = etree.parse(urlopen(insertXml).read())
+
+#it is a url
+try:
+    xmlContent = urlopen(insertXml).read()
+#it is a local path
+except ValueError:
+    xmlContent = open(insertXml)
+
+
+tree = etree.parse(xmlContent)
 root = tree.getroot()
 
 #insert with typename "md:MD_Metadata"
@@ -104,7 +112,7 @@ if(root.tag == "{http://www.opengis.net/cat/csw/2.0.2}Transaction"):
     uuid = root[0][0][0][0].text
     try:
         # sends transaction-insert request as xml to pycsw server
-        insert = requests.post(port, data = open(insertXml))
+        insert = requests.post(port, data = xmlContent)
         print(insert.content)
     except Exception as e:
         print("Error while inserting db entry. "+ str(e))
@@ -118,7 +126,7 @@ else:
 
         #print(urlopen(insertXml))
         #print(urlopen(insertXml).read())
-        csw.transaction(ttype='insert', typename='csw:Record', record = open(insertXml))
+        csw.transaction(ttype='insert', typename='csw:Record', record = xmlContent)
         #insert = requests.post(port, data = open(insertXml))
         #print(insert.content)
     except Exception as e:
