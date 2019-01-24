@@ -1,4 +1,6 @@
-
+'''
+@author: Katharina Hovestadt
+'''
 from osgeo import ogr
 
 def createXmlTree(metadata, uuid):

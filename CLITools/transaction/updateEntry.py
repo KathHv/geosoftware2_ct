@@ -1,3 +1,7 @@
+
+'''
+@author: Katharina Hovestadt
+'''
 from owslib.util import http_post
 import requests
 from owslib.csw import CatalogueServiceWeb

@@ -1,3 +1,6 @@
+'''
+@author: Katahrina Hovestadt
+'''
 import lxml.etree as etree
 from owslib.util import http_post
 import requests
