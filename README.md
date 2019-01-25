@@ -8,12 +8,20 @@ To install our CLI-Tools the required packages to install are [pip](https://pip.
 
 ### **HOW TO MAKE THE CLI-TOOLS WORK:**
 
-1. Clone repo: `git clone https://github.com/KathHv/geosoftware2_ct.git`
-2. `cd geosoftware2_ct`
-3. `pip install -r requirements.txt`
-4. `cd CLITools`
-5. Install GDAL: [https://www.gdal.org](https://www.gdal.org)
-6. type `python3 extract_metadata.py -h` to get all the command that are supported in our CLI-tool
+1. Write the following Code Block in your terminal:
+>`git clone https://github.com/KathHv/geosoftware2_ct.git`
+>`cd geosoftware2_ct`
+>`pip install -r requirements.txt`
+>`cd CLITools`
+2. Install GDAL: [https://www.gdal.org](https://www.gdal.org)
+    - Download: http at download.osgeo.org
+    - Choose CURRENT/
+    - Choose gdal-2.4.0.tar.gz
+    - Open Terminal and write
+    - `./connect`
+    - `make` (may take a while)
+    - `sudo make install`
+3. `python3 extract_metadata.py -h` to get all the command that are supported in our CLI-tool
 
 ### **Make the CLI-tools work with one command:**
 (assuming [GDAL](https://www.gdal.org) is installed):
