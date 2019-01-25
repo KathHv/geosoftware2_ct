@@ -103,41 +103,40 @@ def extractMetadataFromFile(filePath, whatMetadata):
             threading.Thread.__init__(self) 
             self.thread_ID = thread_ID
         def run(self):
-            if valid:
-                metadata["format"] = usedModule.DATATYPE
-                print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
-                #metadata[self.thread_ID] = self.thread_ID
-                if self.thread_ID == 100:
-                    try:
-                        metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
-                    except Exception as e:
-                        print("Warning for " + filePath + ": " + str(e)) 
-                elif self.thread_ID == 101:
-                    try:
-                        metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
-                    except Exception as e:
-                        print("Warning for " + filePath + ": " + str(e))
-                elif self.thread_ID == 102:
-                    try:
-                        metadata["vector_rep"] = computeVectorRepresentationInWGS84(usedModule, filePath)
-                    except Exception as e:
-                        print("Warning for " + filePath + ": " + str(e))
-                
-                elif self.thread_ID == 200:
+            metadata["format"] = usedModule.DATATYPE
+            print("Thread with Thread_ID " +  str(self.thread_ID) + " now running...")
+            #metadata[self.thread_ID] = self.thread_ID
+            if self.thread_ID == 100:
+                try:
                     metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
-                elif self.thread_ID == 201:
+                except Exception as e:
+                    print("Warning for " + filePath + ": " + str(e)) 
+            elif self.thread_ID == 101:
+                try:
                     metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
-                elif self.thread_ID == 202:
+                except Exception as e:
+                    print("Warning for " + filePath + ": " + str(e))
+            elif self.thread_ID == 102:
+                try:
                     metadata["vector_rep"] = computeVectorRepresentationInWGS84(usedModule, filePath)
-                
-                elif self.thread_ID == 103:
-                    try:
-                        # the CRS is not neccessarily required
-                        if hasattr(usedModule, 'getCRS'):
-                            metadata["crs"] = usedModule.getCRS(filePath)
-                        else: print ("Warning: The CRS cannot be extracted from the file")
-                    except Exception as e:
-                        print("Warning for " + filePath + ": " + str(e))      
+                except Exception as e:
+                    print("Warning for " + filePath + ": " + str(e))
+            
+            elif self.thread_ID == 200:
+                metadata["bbox"] = computeBboxInWGS84(usedModule, filePath)
+            elif self.thread_ID == 201:
+                metadata["temporal_extent"] = usedModule.getTemporalExtent(filePath)
+            elif self.thread_ID == 202:
+                metadata["vector_rep"] = computeVectorRepresentationInWGS84(usedModule, filePath)
+            
+            elif self.thread_ID == 103:
+                try:
+                    # the CRS is not neccessarily required
+                    if hasattr(usedModule, 'getCRS'):
+                        metadata["crs"] = usedModule.getCRS(filePath)
+                    else: print ("Warning: The CRS cannot be extracted from the file")
+                except Exception as e:
+                    print("Warning for " + filePath + ": " + str(e))      
             try:
                 barrier.wait()
             except Exception as e:
@@ -154,38 +153,41 @@ def extractMetadataFromFile(filePath, whatMetadata):
     thread_temp = thread(201) 
     thread_vector = thread(202) 
     
-    if whatMetadata == "e":
-        # none of the metadata field is required 
-        # so the system does not crash even if it does not find anything
-        barrier = threading.Barrier(5)
-        thread_bbox_except.start() 
-        thread_temp_except.start() 
-        thread_vector_except.start() 
-        thread_crs_except.start()
-        barrier.wait() 
-        barrier.reset() 
-        barrier.abort() 
-        
-    if whatMetadata == "s":
-        # only spatial extent is required
-        # if one of the metadata field could not be extrated, the system crashes
-        barrier = threading.Barrier(4)
-        thread_bbox.start()
-        thread_vector.start()
-        thread_crs_except.start()
-        barrier.wait()
-        barrier.reset() 
-        barrier.abort() 
+    if valid:
+        if whatMetadata == "e":
+            # none of the metadata field is required 
+            # so the system does not crash even if it does not find anything
+            barrier = threading.Barrier(5)
+            thread_bbox_except.start() 
+            thread_temp_except.start() 
+            thread_vector_except.start() 
+            thread_crs_except.start()
+            barrier.wait() 
+            barrier.reset() 
+            barrier.abort() 
+            
+        if whatMetadata == "s":
+            # only spatial extent is required
+            # if one of the metadata field could not be extrated, the system crashes
+            barrier = threading.Barrier(4)
+            thread_bbox.start()
+            thread_vector.start()
+            thread_crs_except.start()
+            barrier.wait()
+            barrier.reset() 
+            barrier.abort() 
 
-    if whatMetadata == "t":
-        # only temporal extent is required
-        # if one of the metadata field could not be extracted, the system crashes
-        barrier = threading.Barrier(2)
-        thread_temp.start()
-        barrier.wait()
-        barrier.reset() 
-        barrier.abort() 
-    
+        if whatMetadata == "t":
+            # only temporal extent is required
+            # if one of the metadata field could not be extracted, the system crashes
+            barrier = threading.Barrier(2)
+            thread_temp.start()
+            barrier.wait()
+            barrier.reset() 
+            barrier.abort() 
+    else:
+                raise Exception("The file " + str(filePath) + " could not be validated")
+        
     return metadata
 
 
@@ -223,7 +225,6 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
                     i += 1
             else:
                 i += 1
-        print(files_in_folder)
         metadataElements = []
         fullPaths = []
 
@@ -238,18 +239,21 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         # handle each of the files in the folder seperately
         # get metadata fields 'bbox', 'vector_rep', 'temporal_extent' of all supported files
         for x in fullPaths:
-            metadataOfFile = extractMetadataFromFile(x, "e")
-            if metadataOfFile is not None:
-                metadataElements.append(metadataOfFile)
-                if 'bbox' in metadataOfFile:
-                    if metadataOfFile["bbox"] is not None:
-                        bboxes.append(metadataOfFile["bbox"])
-                if 'vector_rep' in metadataOfFile:
-                    if metadataOfFile["vector_rep"] is not None:
-                        vector_reps.append(len(metadataOfFile["vector_rep"])) # TO DO: here all the coors should be appended later
-                if 'temporal_extent' in metadataOfFile:
-                    if metadataOfFile["temporal_extent"] is not None:
-                        temporal_extents.append(metadataOfFile["temporal_extent"]) 
+            try:
+                metadataOfFile = extractMetadataFromFile(x, "e")
+                if metadataOfFile is not None:
+                    metadataElements.append(metadataOfFile)
+                    if 'bbox' in metadataOfFile:
+                        if metadataOfFile["bbox"] is not None:
+                            bboxes.append(metadataOfFile["bbox"])
+                    if 'vector_rep' in metadataOfFile:
+                        if metadataOfFile["vector_rep"] is not None:
+                            vector_reps.append(len(metadataOfFile["vector_rep"])) # TO DO: here all the coors should be appended later
+                    if 'temporal_extent' in metadataOfFile:
+                        if metadataOfFile["temporal_extent"] is not None:
+                            temporal_extents.append(metadataOfFile["temporal_extent"]) 
+            except Exception as e:
+                print("Warning for " + str(x) + ": "+ str(e))
             else:
                 # fileformat is not supported
                 filesSkiped += 1
