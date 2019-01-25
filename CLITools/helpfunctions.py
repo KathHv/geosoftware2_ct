@@ -5,9 +5,9 @@ from netCDF4 import Dataset as NCDataset
 import netCDF4
 import getopt
 from os import walk
-#from osgeo import ogr
-#from osgeo import osr
-#from pyproj import Proj, transform
+from osgeo import ogr
+from osgeo import osr
+from pyproj import Proj, transform
 import convex_hull
 
 WGS84_EPSG_ID = 4326
