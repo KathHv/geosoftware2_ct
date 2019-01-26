@@ -17,12 +17,13 @@ def createXmlTree(metadata, uuid):
     for key, value in metadata.items():
         if value:
             if key == "temporal_extent":
-                tempextent = '''<csw:RecordProperty>
-                                    <csw:Name>apiso:Time_begin</csw:Name>
+                if len(metadata["temporal_extent"])>1:
+                    tempextent = '''<csw:RecordProperty>
+                                    <csw:Name>apiso:TempExtent_begin</csw:Name>
                                     <csw:Value>''' + metadata["temporal_extent"][0] + '''</csw:Value>
                                 </csw:RecordProperty>
                                 <csw:RecordProperty>
-                                    <csw:Name>apiso:Time_end</csw:Name>
+                                    <csw:Name>apiso:TempExtent_end</csw:Name>
                                     <csw:Value>''' + metadata["temporal_extent"][1] + '''</csw:Value>
                                 </csw:RecordProperty>'''
             
@@ -37,7 +38,7 @@ def createXmlTree(metadata, uuid):
                 wktVecRep = wkbPolyVecRep.ExportToWkt()
 
                 vectorrep = '''<csw:RecordProperty>
-                                    <csw:Name>apiso:Vector_rep</csw:Name>
+                                    <csw:Name>apiso:VectorRepresentation</csw:Name>
                                     <csw:Value>''' + wktVecRep + '''</csw:Value>
                                 </csw:RecordProperty>'''
 

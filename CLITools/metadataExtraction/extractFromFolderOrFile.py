@@ -248,7 +248,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
                             bboxes.append(metadataOfFile["bbox"])
                     if 'vector_rep' in metadataOfFile:
                         if metadataOfFile["vector_rep"] is not None:
-                            vector_reps.append(len(metadataOfFile["vector_rep"])) # TO DO: here all the coors should be appended later
+                            vector_reps.append(metadataOfFile["vector_rep"]) # TO DO: here all the coors should be appended later
                     if 'temporal_extent' in metadataOfFile:
                         if metadataOfFile["temporal_extent"] is not None:
                             temporal_extents.append(metadataOfFile["temporal_extent"]) 
@@ -297,6 +297,14 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         return None
 
     bbox = getBboxFromFolder(bboxes)
+    if(type(vector_reps) == list):
+        if type(vector_reps[0] == list):
+            if type(vector_reps[0][0] == list):
+                vector_reps_help = []
+                for elem1 in vector_reps:
+                    for elem2 in elem1:
+                        vector_reps_help.append(elem2)
+                vector_reps = vector_reps_help
     vector_rep = getVectorRepFromFolder(vector_reps)
     temp_ext = getTemporalExtentFromFolder(temporal_extents)
 
@@ -310,7 +318,6 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         
         if temp_ext is not None:
             metadata["temporal_extent"] = temp_ext
-    
 
     
     if whatMetadata == "s":
