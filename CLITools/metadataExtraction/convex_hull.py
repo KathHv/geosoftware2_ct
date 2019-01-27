@@ -1,4 +1,8 @@
 import math
+'''
+@author: Carolin Wortmann
+@see: Introduction To Algorithms, Cormen et al, MIT Press
+'''
 
 def graham_scan(points):
     ''' Graham Scan 
