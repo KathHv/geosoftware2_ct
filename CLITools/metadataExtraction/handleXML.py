@@ -2,6 +2,7 @@
 @author: Niklas Aßelmann
 '''
 
+
 import xml.etree.ElementTree as ET  
 import helpfunctions as hf
 import ogr2ogr
@@ -10,8 +11,10 @@ from osgeo import gdal, ogr
 import convex_hull
 
 
+DATATYPE = "application/xml"
+
 def isValid(filePath):
-    '''Checks whether it is valid xml or not. \n
+    '''Checks whether it is valid XML or not. \n
     input "path": type string, path to file which shall be extracted \n
     output true if file is valid, false if not
     '''
@@ -159,8 +162,8 @@ def getCRS(filePath):
                 crs = x.find('crs').text
                 coordinatesystem.append(crs)
         if coordinatesystem is None:
-            raise Exception('The xml file from ' + filePath + ' has no CRS')
+            raise Exception('The XML file from ' + filePath + ' has no CRS')
         if hf.searchForParameters(["crs","srsID"],coordinatesystem) == "WGS84" or "4326":
             return "4326"
         else:
-            raise Exception('The xml file from ' + filePath + ' has no WGS84 CRS')
+            raise Exception('The XML file from ' + filePath + ' has no WGS84 CRS')

@@ -11,6 +11,8 @@ import sys, os
 from osgeo import gdal, ogr
 import convex_hull
 
+DATATYPE = "application/gml"
+
 def isValid(filePath):
     '''
     Checks whether it is valid gml or not. \n

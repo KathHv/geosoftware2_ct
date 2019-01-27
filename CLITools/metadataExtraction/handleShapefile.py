@@ -9,6 +9,8 @@ from osgeo import ogr
 import sys
 import convex_hull
 
+DATATYPE = "application/shp"
+
 def isValid(path):
     '''Checks whether it is valid shapefile or not. \n
     input "path": type string, path to file which shall be extracted \n
@@ -38,7 +40,7 @@ def getCRS(path):
                 if 'init' in datasetFiona.crs:
                     initField = datasetFiona.crs["init"]
                     crs = initField[initField.rfind(":") + 1 : ]
-                    return int(crs)
+                    return int(crs)                
     except Exception as e:
         pathWithoutEnding = path[:len(path)-4]
         if not (hf.exists(pathWithoutEnding + ".dbf") and hf.exists(pathWithoutEnding + ".shp") and \

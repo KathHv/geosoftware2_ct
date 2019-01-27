@@ -1,7 +1,6 @@
 '''
-@author: Niklas Aßelmann,Katharina Hovestadt,Benjamin Dietz,Ilka Pleiser
+@author: Benjamin Dietz, Niklas Aßelmann, Katharina Hovestadt, Ilka Pleiser
 '''
-
 
 import sys, os, platform, datetime, math, shapefile, fiona 
 from datetime import datetime as dtime
@@ -82,12 +81,12 @@ def computeTempExtentOfMultiple(temporal_extents):
     Output: array tempExtent (if startingpoint and endpoint follow given rules), None (if they don't)
     '''
     if len(temporal_extents) > 0:
-        startPoint = dtime.strptime(temporal_extents[0][0] ,'%Y-%m-%d %H:%M:%S')
-        endPoint = dtime.strptime(temporal_extents[0][1] ,'%Y-%m-%d %H:%M:%S')
+        startPoint = dtime.strptime(temporal_extents[0][0] ,'%Y-%m-%dT%H:%M:%SZ')
+        endPoint = dtime.strptime(temporal_extents[0][1] ,'%Y-%m-%dT%H:%M:%SZ')
         tempExtent = [startPoint, endPoint]
         for x in temporal_extents:
-            startPoint = dtime.strptime(x[0] ,'%Y-%m-%d %H:%M:%S')
-            endPoint = dtime.strptime(x[1] ,'%Y-%m-%d %H:%M:%S')
+            startPoint = dtime.strptime(x[0] ,'%Y-%m-%dT%H:%M:%SZ')
+            endPoint = dtime.strptime(x[1] ,'%Y-%m-%dT%H:%M:%SZ')
             if  startPoint < tempExtent[0]:
                 tempExtent = [ startPoint, tempExtent[1] ]
             if endPoint > tempExtent[1]:

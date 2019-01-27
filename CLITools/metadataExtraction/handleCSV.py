@@ -2,12 +2,13 @@
 @author: Niklas Aßelmann
 '''
 
+
 import csv
 import helpfunctions as hf
 import convex_hull
 
 def isValid(filePath):
-    '''Checks whether it is valid csv or not. \n
+    '''Checks whether it is valid CSV or not. \n
     input "path": type string, path to file which shall be extracted \n
     output true if file is valid, false if not
     '''
@@ -20,6 +21,8 @@ def isValid(filePath):
                 return True
     except:
         raise Exception('The csv file from ' + filePath + ' has no valid csv Attributes')
+        
+DATATYPE = "text/csv"
 
 def getBoundingBox(filePath):
     '''
