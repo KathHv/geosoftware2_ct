@@ -29,12 +29,10 @@ def usage():
     """Provide usage instructions"""
     return '''
         NAME
-            cli.py 
+            updateEntry.py 
 
         SYNOPSIS
-            cli.py -i <string or int>
-            cli.py -s </absoulte/path/to/record>|</absoulte/path/to/directory>
-            cli.py -p <url to server>
+            updateEntry.py -i <string or int> -s </absoulte/path/to/record>|</absoulte/path/to/directory> -p <url to server>
 '''
 
 

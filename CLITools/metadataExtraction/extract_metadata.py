@@ -24,12 +24,12 @@ def usage():
     """Provide usage instructions"""
     return '''
         NAME
-            cli.py 
+            extract_metadata.py 
 
         SYNOPSIS
-            cli.py -e </absoulte/path/to/record>|</absoulte/path/to/directory>
-            cli.py -s </absoulte/path/to/record>|</absoulte/path/to/directory>
-            cli.py -t </absoulte/path/to/record>|</absoulte/path/to/directory>
+            extract_metadata.py -e </absoulte/path/to/record>|</absoulte/path/to/directory>
+            extract_metadata.py -s </absoulte/path/to/record>|</absoulte/path/to/directory>
+            extract_metadata.py -t </absoulte/path/to/record>|</absoulte/path/to/directory>
 
             Supported formats:
 
