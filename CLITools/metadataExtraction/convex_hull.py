@@ -1,8 +1,4 @@
 import math
-'''
-@author: Carolin Wortmann
-@see: Introduction To Algorithms, Cormen et al, MIT Press
-'''
 
 def graham_scan(points):
     ''' Graham Scan 
@@ -23,18 +19,22 @@ def graham_scan(points):
     #The algorithm (as programmed) only works for positive X and Y values, therefore the coordinates might have to be moved altogether
     minX=min(points, key=lambda x: x[0])
     j=0
-    if minX[0]<0:
+    minXval = minX[0]
+    if minXval<0:
         changedX=True
         while j < len(points):
-            points[j][0]=points[j][0]-minX[0]
+            points[j][0]=points[j][0]-minXval
+            j=j+1
 
     
     minY=min(points, key=lambda x: x[1])
     j=0
-    if minY[1]<0:
+    minYval = minY[1]
+    if minYval<0:
         changedY=True
         while j < len(points):
-            points[j][1]=points[j][1]-minY[1]
+            points[j][1]=points[j][1]-minYval
+            j=j+1
 
 
 
@@ -127,15 +127,16 @@ def graham_scan(points):
     #Re-move the coordinates back to their original    
     if changedX:
         i=0
-        while i>len(points):
-            points[i][0]=points[i][0]+minX
+        while i<len(points):
+            points[i][0]=points[i][0]+minXval
+            i=i+1
 
     if changedY:
         i=0
-        while i>len(points):
-            points[i][1]=points[i][1]+minY
+        while i<len(points):
+            points[i][1]=points[i][1]+minYval
+            i=i+1
 
     if not points:
         raise Exception("The vector representation could not be build.")
     return points
-    
