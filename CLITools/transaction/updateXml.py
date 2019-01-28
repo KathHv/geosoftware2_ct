@@ -2,6 +2,7 @@
 @author: Katharina Hovestadt
 '''
 from osgeo import ogr
+from datetime import datetime as dtime
 
 def createXmlTree(metadata, uuid):
     '''
@@ -18,44 +19,52 @@ def createXmlTree(metadata, uuid):
         if value:
             if key == "temporal_extent":
                 if len(metadata["temporal_extent"])>1:
-                    tempextent = '''<csw:RecordProperty>
-                                    <csw:Name>apiso:TempExtent_begin</csw:Name>
-                                    <csw:Value>''' + metadata["temporal_extent"][0] + '''</csw:Value>
-                                </csw:RecordProperty>
-                                <csw:RecordProperty>
-                                    <csw:Name>apiso:TempExtent_end</csw:Name>
-                                    <csw:Value>''' + metadata["temporal_extent"][1] + '''</csw:Value>
-                                </csw:RecordProperty>'''
-            
+                    try:
+
+                        startPoint = dtime.strptime(metadata["temporal_extent"][0] ,'%Y-%m-%dT%H:%M:%SZ')
+                        endPoint = dtime.strptime(metadata["temporal_extent"][1] ,'%Y-%m-%dT%H:%M:%SZ')
+                    
+                        tempextent = '''<csw:RecordProperty>
+                                        <csw:Name>apiso:TempExtent_begin</csw:Name>
+                                        <csw:Value>''' + startPoint + '''</csw:Value>
+                                    </csw:RecordProperty>
+                                    <csw:RecordProperty>
+                                        <csw:Name>apiso:TempExtent_end</csw:Name>
+                                        <csw:Value>''' + endPoint + '''</csw:Value>
+                                    </csw:RecordProperty>'''
+                    except:
+                        tempextent = ""
             if key == "vector_rep":
-                wkbLineVecRep = ogr.Geometry(ogr.wkbLinearRing)
-                for elem in metadata["vector_rep"]:
-                    wkbLineVecRep.AddPoint(elem[0], elem[1])
-                
-                wkbPolyVecRep = ogr.Geometry(ogr.wkbPolygon)
-                wkbPolyVecRep.AddGeometry(wkbLineVecRep)
+                if metadata["vector_rep"]:
+                    wkbLineVecRep = ogr.Geometry(ogr.wkbLinearRing)
+                    for elem in metadata["vector_rep"]:
+                        wkbLineVecRep.AddPoint(elem[0], elem[1])
+                    
+                    wkbPolyVecRep = ogr.Geometry(ogr.wkbPolygon)
+                    wkbPolyVecRep.AddGeometry(wkbLineVecRep)
 
-                wktVecRep = wkbPolyVecRep.ExportToWkt()
+                    wktVecRep = wkbPolyVecRep.ExportToWkt()
 
-                vectorrep = '''<csw:RecordProperty>
-                                    <csw:Name>apiso:VectorRepresentation</csw:Name>
-                                    <csw:Value>''' + wktVecRep + '''</csw:Value>
-                                </csw:RecordProperty>'''
+                    vectorrep = '''<csw:RecordProperty>
+                                        <csw:Name>apiso:Vector_rep</csw:Name>
+                                        <csw:Value>''' + wktVecRep + '''</csw:Value>
+                                    </csw:RecordProperty>'''
 
             if key == "bbox":
-                wkbLineBbox = ogr.Geometry(ogr.wkbLinearRing)
-                wkbLineBbox.AddPoint(metadata["bbox"][0],metadata["bbox"][1])
-                wkbLineBbox.AddPoint(metadata["bbox"][2],metadata["bbox"][3])
-                
-                wkbPolyBbox = ogr.Geometry(ogr.wkbPolygon)
-                wkbPolyBbox.AddGeometry(wkbLineBbox)
+                if metadata["bbox"]:
+                    wkbLineBbox = ogr.Geometry(ogr.wkbLinearRing)
+                    wkbLineBbox.AddPoint(metadata["bbox"][0],metadata["bbox"][1])
+                    wkbLineBbox.AddPoint(metadata["bbox"][2],metadata["bbox"][3])
+                    
+                    wkbPolyBbox = ogr.Geometry(ogr.wkbPolygon)
+                    wkbPolyBbox.AddGeometry(wkbLineBbox)
 
-                wktBbox = wkbPolyBbox.ExportToWkt()
+                    wktBbox = wkbPolyBbox.ExportToWkt()
 
-                bbox = '''<csw:RecordProperty>
-                            <csw:Name>apiso:BoundingBox</csw:Name>
-                            <csw:Value>''' + wktBbox + '''</csw:Value>
-                        </csw:RecordProperty>'''
+                    bbox = '''<csw:RecordProperty>
+                                <csw:Name>apiso:BoundingBox</csw:Name>
+                                <csw:Value>''' + wktBbox + '''</csw:Value>
+                            </csw:RecordProperty>'''
 
     # if there is nothing to update                   
     if tempextent == "" and vectorrep == "" and bbox == "":

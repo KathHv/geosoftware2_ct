@@ -47,18 +47,9 @@ def usage():
 
             Available options:
 
-            -e    Extract all metadata of a geospatial file
-            -s    Extract all spatial metadata of a geospatial file
-            -t    Extract all temporal metadata of a geospatial file
-  
-            
-            Available temporal metadata:
-            
-                [starting point, endpoint]
-            
-            Available spatial metadata:
-
-                bbox
+            -e    Extract all metadata of a geospatial file (crs, vector representation, bounding box, temporal extent)
+            -s    Extract all spatial metadata of a geospatial file (crs, vector representation, bounding box)
+            -t    Extract all temporal metadata of a geospatial file (temporal extent)
 '''
 
 def errorFunction():

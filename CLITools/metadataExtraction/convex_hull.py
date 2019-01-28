@@ -27,6 +27,7 @@ def graham_scan(points):
         changedX=True
         while j < len(points):
             points[j][0]=points[j][0]-minX[0]
+            j=j+1
 
     
     minY=min(points, key=lambda x: x[1])
@@ -35,6 +36,7 @@ def graham_scan(points):
         changedY=True
         while j < len(points):
             points[j][1]=points[j][1]-minY[1]
+            j=j+1
 
 
 
@@ -134,6 +136,7 @@ def graham_scan(points):
         i=0
         while i>len(points):
             points[i][1]=points[i][1]+minY
+            i=i+1
 
     if not points:
         raise Exception("The vector representation could not be build.")
