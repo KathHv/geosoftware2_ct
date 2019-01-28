@@ -47,6 +47,8 @@ The [insert_Entry.py-file](https://github.com/KathHv/geosoftware2_ct/blob/master
 The [update_Entry.py-file](https://github.com/KathHv/geosoftware2_ct/blob/master/CLITools/transaction/updateEntry.py) updates an Entry, identified by its id, with bounding box, vector representation and temporal extent, if available.
    
 `git clone https://github.com/KathHv/geosoftware2_ct.git && cd geosoftware2_ct && pip3 install -r requirements.txt && cd CLITools/transaction && python3 updateEntry.py -h`
+
+### Tests:
 Tests can be found in the folder [Tests](https://github.com/bennidietz/geosoftware2_ct/tree/master/Tests) and can be executed with pytest.
 
 
