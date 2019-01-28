@@ -1,3 +1,6 @@
+'''
+@author: Katahrina Hovestadt
+'''
 import lxml.etree as etree
 from owslib.util import http_post
 import requests
@@ -28,12 +31,10 @@ def usage():
     """Provide usage instructions"""
     return '''
         NAME
-            cli.py 
+            insertEntry.py 
 
         SYNOPSIS
-            cli.py -m </absoulte/path/to/record>|</absoulte/path/to/directory>
-            cli.py -s </absoulte/path/to/record>|</absoulte/path/to/directory>
-            cli.py -p <url to server>
+            insertEntry.py -m </absoulte/path/to/record>|</absoulte/path/to/directory> -s </absoulte/path/to/record>|</absoulte/path/to/directory> -p <url to server>
 '''
 
 
@@ -96,26 +97,18 @@ if not insertXml:
 
 
 
-#it is a url
-try:
-    xmlContent = urlopen(insertXml).read()
-#it is a local path
-except ValueError:
-    xmlContent = open(insertXml)
-
-
+xmlContent = open(insertXml)
 tree = etree.parse(xmlContent)
 root = tree.getroot()
-
 #insert with typename "md:MD_Metadata"
 if(root.tag == "{http://www.opengis.net/cat/csw/2.0.2}Transaction"):
     uuid = root[0][0][0][0].text
-    try:
+    #try:
         # sends transaction-insert request as xml to pycsw server
-        insert = requests.post(port, data = xmlContent)
-        print(insert.content)
-    except Exception as e:
-        print("Error while inserting db entry. "+ str(e))
+    insert = requests.post(port, data = open(insertXml))
+    print(insert.content)
+    #except Exception as e:
+    #    print("Error while inserting db entry. "+ str(e))
 
 #insert Record with typename csw:Record
 else:
