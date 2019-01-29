@@ -34,7 +34,7 @@ def usage():
             insertEntry.py 
 
         SYNOPSIS
-            insertEntry.py -m </absoulte/path/to/record>|</absoulte/path/to/directory> -s </absoulte/path/to/record>|</absoulte/path/to/directory> -p <url to server>
+            insertEntry.py -m </absoulte/path/to/metadataxml/of/record(s)> -s </absoulte/path/to/record>|</absoulte/path/to/directory/of/records> -p <url to server>
 '''
 
 
