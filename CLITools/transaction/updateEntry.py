@@ -32,7 +32,7 @@ def usage():
             updateEntry.py 
 
         SYNOPSIS
-            updateEntry.py -i <string or int> -s </absoulte/path/to/record>|</absoulte/path/to/directory> -p <url to server>
+            updateEntry.py -i <string or int for id> -s </absoulte/path/to/record>|</absoulte/path/to/directory/with/records> -p <url to server>
 '''
 
 

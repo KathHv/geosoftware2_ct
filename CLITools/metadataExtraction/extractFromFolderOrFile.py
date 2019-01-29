@@ -13,7 +13,6 @@ def computeBboxInWGS84(module, path):
     input "path": type string, path to file \n
     returns a bounding box, type list, length = 4 , type = float, schema = [min(longs), min(lats), max(longs), max(lats)], the boudning box has either its original crs or WGS84 (transformed).
     '''
-    
     bbox_in_orig_crs = module.getBoundingBox(path)
     try:
         crs = module.getCRS(path)
@@ -30,7 +29,6 @@ def computeVectorRepresentationInWGS84(module, path):
     input "path": type string, path to file \n
     returns a vector representation, type list, schema = [[lon1, lon2], [lon2, lon2], ...], that is in its original crs.
     '''
-    
     vector_rep_in_orig_crs = module.getVectorRepresentation(path)
     try:
         crs = module.getCRS(path)
@@ -295,14 +293,15 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         return None
 
     bbox = getBboxFromFolder(bboxes)
-    if(vector_reps and type(vector_reps) == list):
-        if type(vector_reps[0] == list):
-            if type(vector_reps[0][0] == list):
-                vector_reps_help = []
-                for elem1 in vector_reps:
-                    for elem2 in elem1:
-                        vector_reps_help.append(elem2)
-                vector_reps = vector_reps_help
+    if(type(vector_reps) == list):
+        if(len(vector_reps) is not 0):    
+            if type(vector_reps[0] == list):
+                if type(vector_reps[0][0] == list):
+                    vector_reps_help = []
+                    for elem1 in vector_reps:
+                        for elem2 in elem1:
+                            vector_reps_help.append(elem2)
+                    vector_reps = vector_reps_help
     vector_rep = getVectorRepFromFolder(vector_reps)
     temp_ext = getTemporalExtentFromFolder(temporal_extents)
 
