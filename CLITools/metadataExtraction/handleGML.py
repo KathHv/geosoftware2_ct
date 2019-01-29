@@ -84,7 +84,7 @@ def getVectorRepresentation(filePath):
     if properties is None:
         raise Exception('The gml file from ' + filePath + ' has no VectorRepresentation')
     else:
-        properties= convex_hull.graham_scan(int(properties)
+        properties= convex_hull.graham_scan(properties)
         return properties
 
 
@@ -95,7 +95,7 @@ def getCRS(filePath):
     extracts coordinatesystem from gml File \n
     input "filepath": type string, file path to gml file \n
     returns epsg code of used coordinate reference system: type list
-    '''
+
     coordinatesystem= []
     ogr2ogr.main(["","-f", "GeoJSON", "outputCRS.json", filePath])
     myGeojson = pygeoj.load(filepath="outputCRS.json")
@@ -112,5 +112,7 @@ def getCRS(filePath):
         return "4326"
     else:
         raise Exception('The gml file from ' + filePath + ' has no WGS84 CRS')
+    return "4326"
+    '''
     return "4326"
 

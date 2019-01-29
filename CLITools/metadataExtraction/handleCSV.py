@@ -113,13 +113,13 @@ def getVectorRepresentation(filePath):
                 counter=0
                 for x in spatialLatExtent:
                     singleArray=[]
-                    singleArray.append(spatialLonExtent[counter])
-                    singleArray.append(spatialLatExtent[counter])
+                    singleArray.append(float(spatialLonExtent[counter]))
+                    singleArray.append(float(spatialLatExtent[counter]))
                     vectorArray.append(singleArray)
                     counter=counter+1
                 if not vectorArray:
                     raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
-                vectorArray = convex_hull.graham_scan(int(vectorArray))
+                vectorArray = convex_hull.graham_scan(vectorArray)
                 return vectorArray
 
 
