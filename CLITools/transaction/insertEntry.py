@@ -36,6 +36,8 @@ def usage():
 
         SYNOPSIS
             insertEntry.py -m </absoulte/path/to/metadataxml/of/record(s)> -s </absoulte/path/to/record>|</absoulte/path/to/directory/of/records> -p <url to server>
+
+            p is optional - if it is not defined in the command, then the default value in the cunfiguration file (default_url.cfg) is taken as the url
 '''
 
 
@@ -48,7 +50,7 @@ if len(sys.argv) == 1:
     sys.exit(1)
 
 try:
-    OPTS, ARGS = getopt.getopt(sys.argv[1:], 's:m:p:ho:')
+    OPTS, ARGS = getopt.getopt(sys.argv[1:], 's:m:p:h:ho:')
 except getopt.GetoptError as err:
     print('\nERROR: %s' % err)
     print(usage())
@@ -87,6 +89,8 @@ for o, a in OPTS:
     elif o == '-p':
         port = a
         print(port)
+    elif o == '-h':
+        print(usage())
     else: raise Exception("The argument " + o + " is not known. Please use -s \"[sourceOfFolderOrFile]\" and-m \"[sourceOfInsertXMLFile]\" and and -r \"[portOfServer]\".")
 
 if not source:

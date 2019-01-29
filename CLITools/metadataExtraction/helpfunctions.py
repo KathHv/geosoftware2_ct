@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# coding: utf8
 '''
 @author: Benjamin Dietz, Niklas Aßelmann, Katharina Hovestadt, Ilka Pleiser
 '''
@@ -190,10 +192,12 @@ def transformingArrayIntoWGS84(crs, pointArray):
     Output: array array
     '''
     array = []
+    ##vector_rep
     if type(pointArray[0]) == list:
         for x in pointArray:
             array.append(transformingIntoWGS84(crs, x))
         return array
+    #bbox
     elif len(pointArray) == 4:
         bbox = [[pointArray[0], pointArray[1]],[pointArray[2], pointArray[3]]]
         transf_bbox = transformingArrayIntoWGS84(crs, bbox)
