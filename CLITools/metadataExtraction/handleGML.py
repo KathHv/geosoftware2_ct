@@ -15,7 +15,7 @@ DATATYPE = "application/gml"
 
 def isValid(filePath):
     '''
-    Checks whether it is valid GML or not. \n
+    Checks whether it is valid gml or not. \n
     input "path": type string, path to file which shall be extracted \n
     output true if file is valid, false if not
     '''
@@ -94,7 +94,7 @@ def getCRS(filePath):
     extracts coordinatesystem from gml File \n
     input "filepath": type string, file path to gml file \n
     returns epsg code of used coordinate reference system: type list
-    
+    '''
     coordinatesystem= []
     ogr2ogr.main(["","-f", "GeoJSON", "outputCRS.json", filePath])
     myGeojson = pygeoj.load(filepath="outputCRS.json")
@@ -111,6 +111,5 @@ def getCRS(filePath):
         return "4326"
     else:
         raise Exception('The gml file from ' + filePath + ' has no WGS84 CRS')
-        '''
     return "4326"
 
