@@ -84,6 +84,7 @@ def getVectorRepresentation(filePath):
     if properties is None:
         raise Exception('The gml file from ' + filePath + ' has no VectorRepresentation')
     else:
+        properties= convex_hull.graham_scan(int(properties)
         return properties
 
 

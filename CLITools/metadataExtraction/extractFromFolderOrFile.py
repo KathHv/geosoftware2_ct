@@ -252,13 +252,11 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
                     if 'temporal_extent' in metadataOfFile:
                         if metadataOfFile["temporal_extent"] is not None:
                             temporal_extents.append(metadataOfFile["temporal_extent"]) 
+                else:
+                    # fileformat is not supported
+                    filesSkiped = filesSkiped + 1            
             except Exception as e:
                 print("Warning for " + str(x) + ": "+ str(e))
-            else:
-                # fileformat is not supported
-                filesSkiped += 1
-
-
     def getTemporalExtentFromFolder(mult_temp_extents):
         ''' computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents' (uses helpfunction) \n
         input "mult_temp_extents": type list, list of list with temporal extent with length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1] \n
@@ -297,7 +295,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         return None
 
     bbox = getBboxFromFolder(bboxes)
-    if(type(vector_reps) == list):
+    if(vector_reps and type(vector_reps) == list):
         if type(vector_reps[0] == list):
             if type(vector_reps[0][0] == list):
                 vector_reps_help = []

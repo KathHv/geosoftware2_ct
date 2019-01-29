@@ -1,6 +1,6 @@
 # CLI Tool to extract metadata
 This CLI Tool is to extract metadata from different file formats. The supported file formats are:
-      .dbf .shp  .csv  .nc  .geojson .json .gpkg  .geotiff .tif .gml
+      .dbf .shp  .csv  .nc  .geojson .json .gpkg  .geotiff .tif .gml .xml
 
 The CLI Tool extracts the bounding box, the temporal extent, the vector representation and CRS of a file or of many files.
 It transforms the bounding box and the vector representation to WGS84.
