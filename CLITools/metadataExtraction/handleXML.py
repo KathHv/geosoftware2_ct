@@ -142,6 +142,7 @@ def getVectorRepresentation(filePath):
                     singleArray.append(lat[counter])
                     vectorArray.append(singleArray)
                     counter=counter+1
+            vectorArray= convex_hull.graham_scan(int(vectorArray)
             return vectorArray
 
 

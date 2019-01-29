@@ -119,6 +119,7 @@ def getVectorRepresentation(filePath):
                     counter=counter+1
                 if not vectorArray:
                     raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
+                vectorArray = convex_hull.graham_scan(int(vectorArray))
                 return vectorArray
 
 
