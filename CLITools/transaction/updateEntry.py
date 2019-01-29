@@ -87,7 +87,13 @@ for o, a in OPTS:
 if not source:
     raise Exception("The argument -s is missing. Please give a source path of the used file or folder. Format: -s \"[sourceOfFileOrFolder]\"")
 if not port:
-    raise Exception("The argument -p is missing. Please give a url to the server. Format: -p \"[urlOfServer]\"")
+    try:
+        configParser = configparser.RawConfigParser()
+        configFilePath = 'default_url.cfg'
+        configParser.read(configFilePath)
+        port = configParser.get('server', 'url')
+    except:
+        raise Exception("The argument -p is missing. Please give a url to the server. Format: -p \"[urlOfServer]\"")
 if not uuid:
     raise Exception("The argument -i is missing. Please give a uuid for the database entry that should be updated. Format: -i \"[uuid]\" ")
 
