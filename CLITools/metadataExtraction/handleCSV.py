@@ -7,7 +7,7 @@ import helpfunctions as hf
 import convex_hull
 
 def isValid(filePath):
-    '''Checks whether it is valid csv or not. \n
+    '''Checks whether it is valid CSV or not. \n
     input "path": type string, path to file which shall be extracted \n
     output true if file is valid, false if not
     '''
@@ -112,12 +112,13 @@ def getVectorRepresentation(filePath):
                 counter=0
                 for x in spatialLatExtent:
                     singleArray=[]
-                    singleArray.append(spatialLonExtent[counter])
-                    singleArray.append(spatialLatExtent[counter])
+                    singleArray.append(float(spatialLonExtent[counter]))
+                    singleArray.append(float(spatialLatExtent[counter]))
                     vectorArray.append(singleArray)
                     counter=counter+1
                 if not vectorArray:
                     raise Exception('The csv file from ' + filePath + ' has no VectorRepresentation')
+                vectorArray = convex_hull.graham_scan(vectorArray)
                 return vectorArray
 
 
