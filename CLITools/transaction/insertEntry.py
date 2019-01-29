@@ -1,5 +1,5 @@
 '''
-@author: Katahrina Hovestadt
+@author: Katharina Hovestadt
 '''
 import lxml.etree as etree
 from owslib.util import http_post
@@ -110,12 +110,12 @@ root = tree.getroot()
 #insert with typename "md:MD_Metadata"
 if(root.tag == "{http://www.opengis.net/cat/csw/2.0.2}Transaction"):
     uuid = root[0][0][0][0].text
-    #try:
-        # sends transaction-insert request as xml to pycsw server
-    insert = requests.post(port, data = open(insertXml))
-    print(insert.content)
-    #except Exception as e:
-    #    print("Error while inserting db entry. "+ str(e))
+    try:
+        #sends transaction-insert request as xml to pycsw server
+        insert = requests.post(port, data = open(insertXml))
+        print(insert.content)
+    except Exception as e:
+        print("Error while inserting db entry. "+ str(e))
 
 #insert Record with typename csw:Record
 else:
@@ -123,17 +123,14 @@ else:
     try:
         # sends transaction-insert request as xml to pycsw server
         csw = CatalogueServiceWeb(port)
-
-        #print(urlopen(insertXml))
-        #print(urlopen(insertXml).read())
         csw.transaction(ttype='insert', typename='csw:Record', record = xmlContent)
-        #insert = requests.post(port, data = open(insertXml))
-        #print(insert.content)
+        insert = requests.post(port, data = open(insertXml))
+        print(insert.content)
     except Exception as e:
         print("Error while inserting db entry. "+ str(e))
 
 try:
-    # sends transaciton-update request as xml to pycsw server 
+    # sends transaction-update request as xml to pycsw server 
     update = requests.post(port, data = updateXml.createXmlTree(metadata, uuid))
     print(update.content)
 except Exception as e:
