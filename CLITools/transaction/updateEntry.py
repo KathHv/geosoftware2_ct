@@ -75,9 +75,13 @@ for o, a in OPTS:
                 metadata = extract.extractMetadataFromFile(a, 'e')
                 if metadata is None:
                     raise Exception("This file format is not supported")
+            else:
+                # handle it as a folder
+                metadata = extract.extractMetadataFromFolder(a, 'e')
         else:
             # handle it as a folder
             metadata = extract.extractMetadataFromFolder(a, 'e')
+            
     elif o == '-i':
         uuid = a
     elif o == '-p':
