@@ -285,7 +285,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         input "mult_vec_rep": type list, all vector representations from the files in the folder \n
         returns the vector representation of the files in the folder: type list, one vector representation of the files from folder
         '''
-        print(str(len(mult_vec_rep)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
+        print("There are " + str(len(mult_vec_rep)) + " extracted coordinate pairs out of " + str(len(fullPaths)-filesSkiped) + " file(s).")
         if type(mult_vec_rep) == list:
             if len(mult_vec_rep) > 0:
                 return convex_hull.graham_scan(mult_vec_rep)
