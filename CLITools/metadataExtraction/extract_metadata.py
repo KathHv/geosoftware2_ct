@@ -34,15 +34,16 @@ def usage():
             Supported formats:
 
                     .dbf     |
-                    .shp     | temporal extent is not available
+                    .shp     | 
                     .csv     |
                     .nc      |
                     .geojson |
                     .json    |
-                    .gpkg    | temporal extent is not vaialable
+                    .gpkg    |
                     .geotiff |
                     .tif     |
                     .gml     |
+                    .xml     |
 
 
             Available options:

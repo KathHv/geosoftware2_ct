@@ -14,7 +14,7 @@ Python can be installed via command line with these [instructions](http://ubuntu
 
 >`cd geosoftware2_ct`
 
->`pip install -r requirements.txt`
+>`pip3 install -r requirements.txt`
 
 >`cd CLITools`
 2. Install GDAL: [https://www.gdal.org](https://www.gdal.org)
@@ -35,18 +35,18 @@ All CLITool impelementations can be found in the subfolders of the folder [CLITo
 ##### extract Metadata:
 The [extract_metadata.py-file](https://github.com/KathHv/geosoftware2_ct/blob/master/CLITools/metadataExtraction/extract_metadata.py) is just for extracting the bounding box, vector representation and temporal extent. The results will be printed.
     
-`git clone https://github.com/KathHv/geosoftware2_ct.git && cd geosoftware2_ct && pip3 install -r requirements.txt && cd CLITools/metadataExtraction && python3 extract_metadata.py -h`
+`cd CLITools/metadataExtraction && python3 extract_metadata.py -h`
     
 ##### insert Entry:
 The [insert_Entry.py-file](https://github.com/KathHv/geosoftware2_ct/blob/master/CLITools/transaction/insertEntry.py) inserts a given xml file with metadata to a given server. The entry will then be updated by extracting metadata form the given source file of the metadata.
    
-`git clone https://github.com/KathHv/geosoftware2_ct.git && cd geosoftware2_ct && pip3 install -r requirements.txt && cd CLITools/transaction && python3 insertEntry.py -h`
+`cd CLITools/transaction && python3 insertEntry.py -h`
 
 
 ##### update Entry:
 The [update_Entry.py-file](https://github.com/KathHv/geosoftware2_ct/blob/master/CLITools/transaction/updateEntry.py) updates an Entry, identified by its id, with bounding box, vector representation and temporal extent, if available.
    
-`git clone https://github.com/KathHv/geosoftware2_ct.git && cd geosoftware2_ct && pip3 install -r requirements.txt && cd CLITools/transaction && python3 updateEntry.py -h`
+`cd CLITools/transaction && python3 updateEntry.py -h`
 
 ### Tests:
 Tests can be found in the folder [Tests](https://github.com/bennidietz/geosoftware2_ct/tree/master/Tests) and can be executed with pytest.

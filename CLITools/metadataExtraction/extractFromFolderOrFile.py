@@ -29,11 +29,13 @@ def computeVectorRepresentationInWGS84(module, path):
     input "path": type string, path to file \n
     returns a vector representation, type list, schema = [[lon1, lon2], [lon2, lon2], ...], that is in its original crs.
     '''
+    crs = None
     vector_rep_in_orig_crs = module.getVectorRepresentation(path)
     try:
         crs = module.getCRS(path)
     except Exception as e:
         print("Exception in module.getCRS(path) in computeVectorRepresentationInWGS84(%s, %s): %s" % (module, path, e))
+
     if crs and vector_rep_in_orig_crs:
         vector_rep_transformed = hf.transformingArrayIntoWGS84(crs, vector_rep_in_orig_crs)
         return vector_rep_transformed
@@ -250,13 +252,11 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
                     if 'temporal_extent' in metadataOfFile:
                         if metadataOfFile["temporal_extent"] is not None:
                             temporal_extents.append(metadataOfFile["temporal_extent"]) 
+                else:
+                    # fileformat is not supported
+                    filesSkiped = filesSkiped + 1            
             except Exception as e:
                 print("Warning for " + str(x) + ": "+ str(e))
-            else:
-                # fileformat is not supported
-                filesSkiped += 1
-
-
     def getTemporalExtentFromFolder(mult_temp_extents):
         ''' computes temporal extent from multiple temporal extents stored in the array 'mult_temp_extents' (uses helpfunction) \n
         input "mult_temp_extents": type list, list of list with temporal extent with length = 2, both entries have the type dateTime, temporalExtent[0] <= temporalExtent[1] \n
@@ -287,7 +287,7 @@ def extractMetadataFromFolder(folderPath, whatMetadata):
         input "mult_vec_rep": type list, all vector representations from the files in the folder \n
         returns the vector representation of the files in the folder: type list, one vector representation of the files from folder
         '''
-        print(str(len(mult_vec_rep)) + " of " + str(len(fullPaths)-filesSkiped) + " supported Files have a vector representation.")
+        print("There are " + str(len(mult_vec_rep)) + " extracted coordinate pairs out of " + str(len(fullPaths)-filesSkiped) + " file(s).")
         if type(mult_vec_rep) == list:
             if len(mult_vec_rep) > 0:
                 return convex_hull.graham_scan(mult_vec_rep)

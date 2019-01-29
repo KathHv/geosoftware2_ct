@@ -36,10 +36,12 @@ def createXmlTree(metadata, uuid):
                         tempextent = ""
             if key == "vector_rep":
                 if metadata["vector_rep"]:
+                    #create wkt polygon by parsing coordinates to wkb 
                     wkbLineVecRep = ogr.Geometry(ogr.wkbLinearRing)
                     for elem in metadata["vector_rep"]:
                         wkbLineVecRep.AddPoint(elem[0], elem[1])
-                    
+                    wkbLineVecRep.AddPoint(metadata["vector_rep"][0][0], metadata["vector_rep"][0][1])
+
                     wkbPolyVecRep = ogr.Geometry(ogr.wkbPolygon)
                     wkbPolyVecRep.AddGeometry(wkbLineVecRep)
 
