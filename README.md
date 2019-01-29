@@ -14,7 +14,7 @@ Python can be installed via command line with these [instructions](http://ubuntu
 
 >`cd geosoftware2_ct`
 
->`pip install -r requirements.txt`
+>`pip3 install -r requirements.txt`
 
 >`cd CLITools`
 2. Install GDAL: [https://www.gdal.org](https://www.gdal.org)
