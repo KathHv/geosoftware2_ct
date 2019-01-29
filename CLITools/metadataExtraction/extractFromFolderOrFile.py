@@ -29,11 +29,13 @@ def computeVectorRepresentationInWGS84(module, path):
     input "path": type string, path to file \n
     returns a vector representation, type list, schema = [[lon1, lon2], [lon2, lon2], ...], that is in its original crs.
     '''
+    crs = None
     vector_rep_in_orig_crs = module.getVectorRepresentation(path)
     try:
         crs = module.getCRS(path)
     except Exception as e:
         print("Exception in module.getCRS(path) in computeVectorRepresentationInWGS84(%s, %s): %s" % (module, path, e))
+
     if crs and vector_rep_in_orig_crs:
         vector_rep_transformed = hf.transformingArrayIntoWGS84(crs, vector_rep_in_orig_crs)
         return vector_rep_transformed
