@@ -12,6 +12,7 @@ import os
 import updateXml
 sys.path.insert(1, os.path.join(sys.path[0], '..')+"/metadataExtraction") 
 import extractFromFolderOrFile as extract
+import configparser
 
 COMMAND = None
 XML_DIRPATH = None
