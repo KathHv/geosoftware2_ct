@@ -7,6 +7,11 @@ Pip3 can be installed via the command line:
 `sudo apt-get install python3-pip`.
 Python can be installed via command line with these [instructions](http://ubuntuhandbook.org/index.php/2017/07/install-python-3-6-1-in-ubuntu-16-04-lts/)
 
+### **INTALL THE CLI_TOOL WITH PIP:**
+>`pip install cercatrova`
+[pip-module cercatrova](https://pypi.org/project/cercatrova/0.3/)
+
+
 ### **HOW TO MAKE THE CLI-TOOLS WORK:**
 
 1. Write the following Code Block in your terminal:
